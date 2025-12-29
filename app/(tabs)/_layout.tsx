@@ -1,35 +1,42 @@
-import { Tabs } from 'expo-router';
 import React from 'react';
 
-import { HapticTab } from '@/components/haptic-tab';
-import { IconSymbol } from '@/components/ui/icon-symbol';
-import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import {MaterialBottomTabs as Tabs} from '@/components/material-bottom-tabs';
+
+import {IconSymbol} from '@/components/ui/icon-symbol';
+import {useTheme} from "react-native-paper";
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
+    const theme = useTheme();
 
-  return (
-    <Tabs
-      screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false,
-        tabBarButton: HapticTab,
-      }}>
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: 'Home',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="explore"
-        options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
-        }}
-      />
-    </Tabs>
-  );
+    return (
+        <Tabs
+            activeIndicatorStyle={{backgroundColor: theme.colors.primaryContainer}}
+            barStyle={{
+                alignContent: "center",
+                backgroundColor: theme.colors.surface,
+                elevation: 2,
+                zIndex: 2,
+            }}
+            compact
+            shifting
+            sceneAnimationEnabled={false}
+            activeColor={theme.colors.primary}
+            inactiveColor={theme.colors.onSurface}
+        >
+            <Tabs.Screen
+                name="index"
+                options={{
+                    title: 'Home',
+                    tabBarIcon: ({color}) => <IconSymbol size={28} name="house.fill" color={color}/>,
+                }}
+            />
+            <Tabs.Screen
+                name="shows"
+                options={{
+                    title: 'Shows',
+                    tabBarIcon: ({color}) => <IconSymbol size={28} name="theatermasks.fill" color={color}/>,
+                }}
+            />
+        </Tabs>
+    );
 }
