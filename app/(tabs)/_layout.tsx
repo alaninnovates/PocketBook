@@ -24,17 +24,17 @@ export default function TabLayout() {
             inactiveColor={theme.colors.onSurface}
         >
             <Tabs.Screen
-                name="index"
-                options={{
-                    title: 'Home',
-                    tabBarIcon: ({color}) => <IconSymbol size={28} name="house.fill" color={color}/>,
-                }}
-            />
-            <Tabs.Screen
                 name="shows"
                 options={{
                     title: 'Shows',
                     tabBarIcon: ({color}) => <IconSymbol size={28} name="theatermasks.fill" color={color}/>,
+                }}
+            />
+            <Tabs.Screen
+                name="profile"
+                options={{
+                    title: 'Profile',
+                    tabBarIcon: ({color}) => <IconSymbol size={28} name="person.fill" color={color}/>,
                 }}
             />
         </Tabs>
