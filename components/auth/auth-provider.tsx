@@ -1,9 +1,9 @@
-import { AuthContext } from '@/lib/hooks/use-auth-context'
-import { supabase } from '@/lib/supabase'
-import type { Session } from '@supabase/supabase-js'
-import { PropsWithChildren, useEffect, useState } from 'react'
+import {AuthContext} from '@/lib/hooks/use-auth-context'
+import {supabase} from '@/lib/supabase'
+import type {Session} from '@supabase/supabase-js'
+import {PropsWithChildren, useEffect, useState} from 'react'
 
-export default function AuthProvider({ children }: PropsWithChildren) {
+export default function AuthProvider({children}: PropsWithChildren) {
     const [session, setSession] = useState<Session | undefined | null>()
     const [profile, setProfile] = useState<any>()
     const [isLoading, setIsLoading] = useState<boolean>(true)
@@ -13,7 +13,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
             setIsLoading(true)
 
             const {
-                data: { session },
+                data: {session},
                 error,
             } = await supabase.auth.getSession()
 
@@ -28,9 +28,9 @@ export default function AuthProvider({ children }: PropsWithChildren) {
         fetchSession()
 
         const {
-            data: { subscription },
+            data: {subscription},
         } = supabase.auth.onAuthStateChange((_event, session) => {
-            console.log('Auth state changed:', { event: _event, session })
+            console.log('Auth state changed:', {event: _event, session})
             setSession(session)
         })
 
@@ -44,7 +44,7 @@ export default function AuthProvider({ children }: PropsWithChildren) {
             setIsLoading(true)
 
             if (session) {
-                const { data } = await supabase
+                const {data} = await supabase
                     .from('profiles')
                     .select('*')
                     .eq('id', session.user.id)

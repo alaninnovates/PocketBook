@@ -6,7 +6,7 @@ import {useAuthContext} from "@/lib/hooks/use-auth-context";
 import {useState} from "react";
 
 export default function ProfileScreen() {
-    const {session} = useAuthContext();
+    const {profile} = useAuthContext();
     const theme = useTheme();
     const [ensembles, setEnsembles] = useState<string[]>([]);
 
@@ -23,8 +23,8 @@ export default function ProfileScreen() {
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{gap: 16, paddingBottom: 16}}>
                 <View style={{backgroundColor: theme.colors.primaryContainer, borderRadius: 12, padding: 16, gap: 12}}>
                     <Text variant="headlineMedium">Profile</Text>
-                    <Text>{session?.user.user_metadata.name}</Text>
-                    <Text>Email: {session?.user.user_metadata.email}</Text>
+                    <Text>{profile.name}</Text>
+                    <Text>Email: {profile.email}</Text>
                     <Button mode="contained" onPress={async () => {
                         const {error} = await supabase.auth.signOut();
 
