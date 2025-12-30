@@ -6,16 +6,14 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {View} from "react-native";
 
 export default function LoginScreen() {
-    const theme = useTheme();
     return (
         <SafeAreaView
             style={{
-                backgroundColor: theme.colors.background,
                 flex: 1,
                 justifyContent: 'center', alignItems: 'center'
             }}>
             <Text variant="headlineMedium">Login</Text>
-            <EmailPassword />
+            <EmailPassword/>
             <View style={{display: 'flex', flexDirection: 'row', gap: 16, marginTop: 16}}>
                 <GoogleButton/>
                 <DiscordButton/>

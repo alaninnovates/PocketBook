@@ -1,4 +1,4 @@
-import {DarkTheme, DefaultTheme, ThemeProvider} from '@react-navigation/native';
+import {ThemeProvider} from '@react-navigation/native';
 import {Stack} from 'expo-router';
 import {StatusBar} from 'expo-status-bar';
 import 'react-native-reanimated';
@@ -7,6 +7,7 @@ import {PaperProvider} from "react-native-paper";
 import {useColorScheme} from "react-native";
 import {useAuthContext} from "@/lib/hooks/use-auth-context";
 import AuthProvider from "@/components/auth/auth-provider";
+import {CombinedDarkTheme, CombinedLightTheme} from "@/lib/theme";
 
 export const unstable_settings = {
     anchor: '(tabs)',
@@ -33,8 +34,8 @@ export default function RootLayout() {
     const colorScheme = useColorScheme();
 
     return (
-        <PaperProvider>
-            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <PaperProvider  theme={colorScheme === 'dark' ? CombinedDarkTheme : CombinedLightTheme}>
+            <ThemeProvider value={colorScheme === 'dark' ? CombinedDarkTheme : CombinedLightTheme}>
                 <AuthProvider>
                     <RootNavigator/>
                     <StatusBar style="auto"/>
