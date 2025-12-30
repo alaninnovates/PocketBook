@@ -29,14 +29,12 @@ export default function ShowsScreen() {
             <Text variant="headlineLarge" style={{marginBottom: 16}}>Shows</Text>
             <ScrollView contentContainerStyle={{display: 'flex', flexDirection: 'column', gap: 16, height: '100%'}}>
                 {templateShows.map((show) => (
-                    <View key={show.id} style={{padding: 16, backgroundColor: theme.colors.surface, borderRadius: theme.roundness}}
-                          onTouchEnd={() => router.push(`/shows/${show.id}`)}
-                          >
+                    <View key={show.id} style={{padding: 16, backgroundColor: theme.colors.surface, borderRadius: theme.roundness}}>
                         <Text variant="headlineMedium" style={{marginBottom: 8}}>{show.title}</Text>
                         <Text>Date: {show.date.toDateString()}</Text>
                         <Text>Pages: {show.pages}</Text>
                         <Button mode="contained" style={{marginTop: 8}}
-                                onPress={() => console.log(`Viewing show ${show.id}`)}
+                                onPress={() => router.push(`/shows/${show.id}`)}
                                 buttonColor={show.downloaded ? theme.colors.primary : theme.colors.secondary}
                         >
                             {show.downloaded ? 'Open' : 'Download'}
