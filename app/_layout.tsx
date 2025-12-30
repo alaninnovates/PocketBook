@@ -19,10 +19,10 @@ function RootNavigator() {
         <Stack>
             <Stack.Protected guard={isLoggedIn}>
                 <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
-                <Stack.Screen name="modal" options={{presentation: 'modal', title: 'Modal'}}/>
+                <Stack.Screen name="(modals)" options={{presentation: 'modal', headerShown: false}}/>
             </Stack.Protected>
             <Stack.Protected guard={!isLoggedIn}>
-                <Stack.Screen name="login" options={{headerShown: false}}/>
+                <Stack.Screen name="index" options={{headerShown: false}}/>
             </Stack.Protected>
             <Stack.Screen name="+not-found"/>
         </Stack>

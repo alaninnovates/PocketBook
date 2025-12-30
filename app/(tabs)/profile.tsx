@@ -4,19 +4,45 @@ import {supabase} from "@/lib/supabase";
 import {ScrollView, View} from "react-native";
 import {useAuthContext} from "@/lib/hooks/use-auth-context";
 import {useState} from "react";
+import {useFocusEffect, useRouter} from "expo-router";
 
 export default function ProfileScreen() {
     const {profile} = useAuthContext();
     const theme = useTheme();
-    const [ensembles, setEnsembles] = useState<string[]>([]);
+    const router = useRouter();
+    const [ensembles, setEnsembles] = useState<{
+        ensembles: { id: number; name: string };
+        role: 'awaiting_approval' | 'member' | 'admin';
+        requested_at: string;
+        approved_at: string
+    }[]>([]);
 
-    const addEnsemble = () => {
-        setEnsembles([...ensembles, `Ensemble ${ensembles.length + 1}`]);
-    };
+    useFocusEffect(() => {
+        const fetchEnsembles = async () => {
+            const {data, error} = await supabase
+                .from('ensemble_memberships')
+                .select('ensembles(id,name), role, requested_at, approved_at')
+                .eq('user_id', profile.id);
 
-    const deleteEnsemble = (index: number) => {
-        setEnsembles(ensembles.filter((_, i) => i !== index));
-    };
+            console.log(data);
+
+            if (error) {
+                console.error('err fetching user ensembles:', error);
+            } else {
+                data?.sort((a, b) => {
+                    if (a.role === 'awaiting_approval' && b.role !== 'awaiting_approval') {
+                        return -1;
+                    }
+                    if (a.role !== 'awaiting_approval' && b.role === 'awaiting_approval') {
+                        return 1;
+                    }
+                    return new Date(b.approved_at).getTime() - new Date(a.approved_at).getTime();
+                });
+                setEnsembles(data || []);
+            }
+        }
+        fetchEnsembles();
+    });
 
     return (
         <SafeAreaView style={{padding: 16, flex: 1}}>
@@ -44,16 +70,32 @@ export default function ProfileScreen() {
                             ensembles.map((ensemble, index) => (
                                 <List.Item
                                     key={index}
-                                    title={ensemble}
-                                    description="Joined 1 Jan 2025"
+                                    title={ensemble.ensembles.name}
+                                    description={
+                                        ensemble.role === 'awaiting_approval'
+                                            ? `Awaiting Approval since ${new Date(ensemble.requested_at).toLocaleDateString()}`
+                                            : `${ensemble.role === 'member' ? 'Member' : 'Admin'} since ${new Date(ensemble.approved_at).toLocaleDateString()}`
+                                    }
                                     right={() => (
-                                        <IconButton icon="delete" iconColor={theme.colors.error} onPress={() => deleteEnsemble(index)} />
+                                        <IconButton
+                                            icon="delete" iconColor={theme.colors.error}
+                                            onPress={async () => {
+                                                await supabase
+                                                    .from('ensemble_memberships')
+                                                    .delete()
+                                                    .eq('user_id', profile.id)
+                                                    .eq('ensemble_id', ensemble.ensembles.id);
+                                                setEnsembles(prev => prev.filter(e => e.ensembles.name !== ensemble.ensembles.name));
+                                            }}
+                                        />
                                     )}
                                 />
                             ))
                         )}
                     </List.Section>
-                    <Button mode="outlined" icon="plus" onPress={addEnsemble}>
+                    <Button mode="outlined" icon="plus" onPress={() => {
+                        router.push('/(modals)/profile');
+                    }}>
                         Join
                     </Button>
                 </View>

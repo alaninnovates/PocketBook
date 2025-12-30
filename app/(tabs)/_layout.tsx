@@ -4,6 +4,7 @@ import {MaterialBottomTabs as Tabs} from '@/components/material-bottom-tabs';
 
 import {IconSymbol} from '@/components/ui/icon-symbol';
 import {useTheme} from "react-native-paper";
+import {Stack} from "expo-router";
 
 export default function TabLayout() {
     const theme = useTheme();
