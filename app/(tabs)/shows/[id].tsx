@@ -5,7 +5,8 @@ import {useEffect, useState} from "react";
 import {View} from "react-native";
 import {DotData, TempoData} from "@/lib/types";
 import {supabase} from "@/lib/supabase";
-import {Text} from "react-native-paper";
+import {IconButton, Text} from "react-native-paper";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 export default function ShowScreen() {
     const {id} = useLocalSearchParams();
@@ -17,6 +18,8 @@ export default function ShowScreen() {
         tempo_data: TempoData;
         created_at: string;
     } | null>(null);
+    const [currentIndex, setCurrentIndex] = useState(0);
+    const {top, left, bottom, right} = useSafeAreaInsets();
 
     useEffect(() => {
         const fetchShowData = async () => {
@@ -52,8 +55,28 @@ export default function ShowScreen() {
                     setZoom(event.zoomLevel);
                 }}
             >
-                <FieldCanvas zoom={zoom} dotData={showData?.dot_data} tempoData={showData?.tempo_data}/>
+                <FieldCanvas zoom={zoom} dotData={showData?.dot_data} tempoData={showData?.tempo_data}
+                             currentIndex={currentIndex}
+                />
             </ReactNativeZoomableView>
+            <View style={{position: "absolute", bottom: bottom, right: right, flexDirection: 'row'}}>
+                <IconButton
+                    icon="arrow-left"
+                    mode="contained"
+                    size={32}
+                    onPress={() => {
+                        setCurrentIndex((prev) => Math.max(prev - 1, 0));
+                    }}
+                />
+                <IconButton
+                    icon="arrow-right"
+                    mode="contained"
+                    size={32}
+                    onPress={() => {
+                        setCurrentIndex((prev) => prev + 1);
+                    }}
+                />
+            </View>
         </View>
     );
 }
