@@ -36,13 +36,13 @@ export const FIELD_FRONT_HASH_STEPS = -28;
 export const FIELD_BACK_HASH_STEPS = -56;
 export const FIELD_BACK_SIDE_LINE_STEPS = -FIELD_HEIGHT_STEPS;
 
-export const HOME_LABEL_BOTTOM_STEPS = -feetToSteps(11.2);
-export const HOME_LABEL_TOP_STEPS = -feetToSteps(14.4);
-export const AWAY_LABEL_BOTTOM_STEPS = FIELD_BACK_SIDE_LINE_STEPS + feetToSteps(11.2);
-export const AWAY_LABEL_TOP_STEPS = FIELD_BACK_SIDE_LINE_STEPS + feetToSteps(14.4);
+export const HOME_LABEL_BOTTOM_STEPS = -11.2;
+export const HOME_LABEL_TOP_STEPS = -14.4;
+export const AWAY_LABEL_BOTTOM_STEPS = FIELD_BACK_SIDE_LINE_STEPS + 11.2;
+export const AWAY_LABEL_TOP_STEPS = FIELD_BACK_SIDE_LINE_STEPS + 14.4;
 
 export const YARD_NUMBER_HEIGHT_STEPS = feetToSteps(6);
-export const YARD_NUMBER_WIDTH_STEPS = feetToSteps(4);
+export const YARD_NUMBER_WIDTH_STEPS = feetToSteps(10);
 
 export const CENTER_FRONT_POINT_STEPS = {
     x: FIELD_WIDTH_STEPS / 2,
