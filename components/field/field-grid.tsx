@@ -138,6 +138,15 @@ export const FieldGrid = ({theme, showGrid}: { theme: MD3Theme, showGrid: boolea
                 style="stroke"
                 strokeWidth={4}
             />
+            {/*FIFTY*/}
+            <Line
+                p1={vec(stepsToPixels(CENTER_FRONT_POINT_STEPS.x), 0)}
+                p2={vec(stepsToPixels(CENTER_FRONT_POINT_STEPS.x), stepsToPixels(FIELD_HEIGHT_STEPS))}
+                color={theme.dark ? 'white' : 'grey'}
+                opacity={0.85}
+                style="stroke"
+                strokeWidth={4}
+            />
             {/*FRONT/BACK/LEFT/RIGHT SIDELINE*/}
             <Line
                 p1={vec(0, 0)}
