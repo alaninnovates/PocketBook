@@ -27,6 +27,7 @@ export const INCHES_PER_STEP = 22.5;
 export const feetToSteps = (feet: number) => (feet * 12) / INCHES_PER_STEP;
 export const yardsToSteps = (yards: number) => feetToSteps(yards * 3);
 export const stepsToPixels = (steps: number) => steps * INCHES_PER_STEP * PIXELS_PER_INCH;
+export const stepsToYards = (steps: number) => (steps * INCHES_PER_STEP) / 36;
 
 export const FIELD_WIDTH_STEPS = yardsToSteps(100);
 export const FIELD_HEIGHT_STEPS = yardsToSteps(53 + 1 / 3);
