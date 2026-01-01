@@ -1,4 +1,4 @@
-import {useLocalSearchParams} from "expo-router";
+import {useLocalSearchParams, useRouter} from "expo-router";
 import {FieldCanvas} from "@/components/field/field-canvas";
 import {ReactNativeZoomableView} from "@openspacelabs/react-native-zoomable-view";
 import {useEffect, useMemo, useState} from "react";
@@ -14,9 +14,11 @@ import {
     dotToFieldCoordinateSteps,
     fieldCoordinateToDot
 } from "@/components/field/parser";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function ShowScreen() {
     const {id} = useLocalSearchParams();
+    const router = useRouter();
     const theme = useTheme();
     const [zoom, setZoom] = useState(0);
     const [showData, setShowData] = useState<{
@@ -38,7 +40,16 @@ export default function ShowScreen() {
                 .single();
 
             if (error) {
-                console.error('Error fetching show data:', error);
+                console.error('err fetching show data:', error);
+                if (error.message === 'TypeError: Network request failed') {
+                    const storedShow = await AsyncStorage.getItem(`show_${id}`);
+                    if (storedShow) {
+                        const showData = JSON.parse(storedShow);
+                        setShowData(showData);
+                    } else {
+                        router.push('/shows');
+                    }
+                }
             } else {
                 setShowData(data);
             }
@@ -118,8 +129,8 @@ export default function ShowScreen() {
                     padding: 8
                 }}>
                 <View style={{
-                    top,
-                    left,
+                    paddingTop: top,
+                    paddingLeft: left,
                     display: "flex",
                     flexDirection: 'row',
                     justifyContent: 'space-between',

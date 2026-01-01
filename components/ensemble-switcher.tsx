@@ -3,6 +3,7 @@ import {supabase} from "@/lib/supabase";
 import {useState} from "react";
 import Dropdown from "@/components/dropdown";
 import {useFocusEffect} from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export function EnsembleSwitcher({selectedEnsemble, setSelectedEnsemble}: {
     selectedEnsemble: number | null;
@@ -24,10 +25,18 @@ export function EnsembleSwitcher({selectedEnsemble, setSelectedEnsemble}: {
 
             console.log(data);
             if (error) {
-                console.error('err fetching user ensembles:', error);
+                console.error('err fetching user ensembles:', error.message);
+                if (error.message === 'TypeError: Network request failed') {
+                    const storedEnsembles = await AsyncStorage.getItem('user_ensembles');
+                    if (storedEnsembles) {
+                        const ensemblesData = JSON.parse(storedEnsembles);
+                        setEnsembles(ensemblesData);
+                    }
+                }
             } else {
                 const ensemblesData = data?.map(item => item.ensembles) || [];
                 setEnsembles(ensemblesData);
+                await AsyncStorage.setItem('user_ensembles', JSON.stringify(ensemblesData));
                 if (ensemblesData.length > 0 && !selectedEnsemble) {
                     setSelectedEnsemble(ensemblesData[0].id);
                 }
