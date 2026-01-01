@@ -1,11 +1,11 @@
-import {Circle, matchFont, Rect, Text, vec} from "@shopify/react-native-skia";
+import {Circle, Line, matchFont, Rect, Text, vec} from "@shopify/react-native-skia";
 import {CENTER_FRONT_POINT_STEPS, stepsToPixels} from "@/components/field/dimensions";
 import {instrumentToColor} from "@/components/field/color";
 import React from "react";
 import {useTheme} from "react-native-paper";
 import {clampMax} from "@/lib/utils";
-import {DotData} from "@/lib/types";
-import {dotToFieldCoordinateSteps} from "@/components/field/parser";
+import {DotbookEntry, DotData} from "@/lib/types";
+import {calculateMidset, dotToFieldCoordinateSteps} from "@/components/field/parser";
 import {Platform} from "react-native";
 
 const fontFamily = Platform.select({ios: "Arial", default: "arial"});
@@ -38,7 +38,7 @@ const CurrentPageDisplay = ({
                 cx={cx}
                 cy={cy}
                 r={r}
-                color={instrumentToColor(performer)}
+                color="red"
                 opacity={1}
             />
             <Rect
@@ -64,15 +64,93 @@ const CurrentPageDisplay = ({
     );
 };
 
+const AdditionalPagesDisplay = ({
+                                    pages,
+                                    currentIndex,
+                                    additionalDots,
+                                    direction,
+                                }: {
+    pages: DotbookEntry[];
+    currentIndex: number;
+    additionalDots: DotbookEntry[];
+    direction: number;
+}) => {
+    return (
+        <>
+            {additionalDots.map((dot, index) => {
+                const currentCoord = dotToFieldCoordinateSteps(dot);
+                const nextCoord = dotToFieldCoordinateSteps(
+                    additionalDots[index + 1] || pages[currentIndex],
+                );
+                const midCoord = calculateMidset(currentCoord, nextCoord);
+
+                return (
+                    <React.Fragment key={index}>
+                        <Circle
+                            cx={stepsToPixels(CENTER_FRONT_POINT_STEPS.x - currentCoord.x)}
+                            cy={stepsToPixels(CENTER_FRONT_POINT_STEPS.y + currentCoord.y)}
+                            r={4}
+                            color="red"
+                        />
+                        <Line
+                            p1={vec(stepsToPixels(CENTER_FRONT_POINT_STEPS.x - currentCoord.x), stepsToPixels(CENTER_FRONT_POINT_STEPS.y + currentCoord.y))}
+                            p2={vec(stepsToPixels(CENTER_FRONT_POINT_STEPS.x - nextCoord.x), stepsToPixels(CENTER_FRONT_POINT_STEPS.y + nextCoord.y))}
+                            color={direction === -1 ? 'blue' : 'green'}
+                            strokeWidth={2}
+                        />
+                        {(currentCoord.x !== nextCoord.x ||
+                            currentCoord.y !== nextCoord.y) && (
+                            <Circle
+                                cx={stepsToPixels(CENTER_FRONT_POINT_STEPS.x - midCoord[0])}
+                                cy={stepsToPixels(CENTER_FRONT_POINT_STEPS.y + midCoord[1])}
+                                r={2}
+                                color={direction === -1 ? 'blue' : 'green'}
+                            />
+                        )}
+                    </React.Fragment>
+                );
+            })}
+        </>
+    );
+};
+
 export const ActivePerformer = ({dotData, currentIndex, zoom, performer}: {
     dotData: DotData;
     currentIndex: number;
     zoom: number;
     performer: string;
 }) => {
+    let minusQuantity = 1, plusQuantity = 1;
     const dots = dotData[performer].dots;
+    const minusDots = minusQuantity
+        ? dots.slice(
+            Math.max(0, currentIndex - minusQuantity),
+            currentIndex,
+        )
+        : [];
+    const plusDots = plusQuantity
+        ? dots.slice(
+            currentIndex + 1,
+            Math.min(
+                dots.length,
+                currentIndex + 1 + plusQuantity,
+            ),
+        )
+        : [];
     return (
         <>
+            <AdditionalPagesDisplay
+                pages={dots}
+                currentIndex={currentIndex}
+                additionalDots={minusDots}
+                direction={-1}
+            />
+            <AdditionalPagesDisplay
+                pages={dots}
+                currentIndex={currentIndex}
+                additionalDots={plusDots}
+                direction={1}
+            />
             <CurrentPageDisplay
                 coord={dotToFieldCoordinateSteps(dots[currentIndex])}
                 zoom={zoom}
