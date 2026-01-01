@@ -5,6 +5,7 @@ import {
     AWAY_LABEL_BOTTOM_STEPS
 } from "@/components/field/dimensions";
 import {MD3Theme} from "react-native-paper";
+import React from "react";
 
 export const FieldGrid = ({theme, showGrid}: { theme: MD3Theme, showGrid: boolean }) => {
     const font = useFont(require('@/assets/fonts/cmunrm.ttf'), 54);
@@ -24,7 +25,7 @@ export const FieldGrid = ({theme, showGrid}: { theme: MD3Theme, showGrid: boolea
                 const bottomX = (stepPosition + (font.measureText(text).width / 2));
                 const bottomY = stepsToPixels(CENTER_FRONT_POINT_STEPS.y + AWAY_LABEL_BOTTOM_STEPS);
                 return (
-                    <>
+                    <React.Fragment key={`yard-number-fragment-${index}`}>
                         <Text
                             key={`yard-number-top-${index}`}
                             x={stepPosition - (font.measureText(text).width / 2)}
@@ -43,7 +44,7 @@ export const FieldGrid = ({theme, showGrid}: { theme: MD3Theme, showGrid: boolea
                             color={theme.colors.onBackground}
                             text={text}
                         />
-                    </>
+                    </React.Fragment>
                 )
             })}
             {showGrid && (

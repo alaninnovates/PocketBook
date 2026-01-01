@@ -8,6 +8,7 @@ import {useColorScheme} from "react-native";
 import {useAuthContext} from "@/lib/hooks/use-auth-context";
 import AuthProvider from "@/components/auth/auth-provider";
 import {CombinedDarkTheme, CombinedLightTheme} from "@/lib/theme";
+import ShowProvider from "@/lib/show-provider";
 
 export const unstable_settings = {
     anchor: '(tabs)',
@@ -34,11 +35,13 @@ export default function RootLayout() {
     const colorScheme = useColorScheme();
 
     return (
-        <PaperProvider  theme={colorScheme === 'dark' ? CombinedDarkTheme : CombinedLightTheme}>
+        <PaperProvider theme={colorScheme === 'dark' ? CombinedDarkTheme : CombinedLightTheme}>
             <ThemeProvider value={colorScheme === 'dark' ? CombinedDarkTheme : CombinedLightTheme}>
                 <AuthProvider>
-                    <RootNavigator/>
-                    <StatusBar style="auto"/>
+                    <ShowProvider>
+                        <RootNavigator/>
+                        <StatusBar style="auto"/>
+                    </ShowProvider>
                 </AuthProvider>
             </ThemeProvider>
         </PaperProvider>

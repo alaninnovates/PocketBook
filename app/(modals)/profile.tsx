@@ -4,7 +4,7 @@ import {useState, useEffect} from "react";
 import {supabase} from "@/lib/supabase";
 import {useRouter} from "expo-router";
 
-export default function ModalScreen() {
+export default function ProfileModalScreen() {
     const router = useRouter();
     const theme = useTheme();
 

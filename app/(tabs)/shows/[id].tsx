@@ -3,8 +3,6 @@ import {FieldCanvas} from "@/components/field/field-canvas";
 import {ReactNativeZoomableView} from "@openspacelabs/react-native-zoomable-view";
 import {useEffect, useMemo, useState} from "react";
 import {View} from "react-native";
-import {DotData, TempoData} from "@/lib/types";
-import {supabase} from "@/lib/supabase";
 import {IconButton, Text, useTheme} from "react-native-paper";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {
@@ -15,49 +13,31 @@ import {
     fieldCoordinateToDot
 } from "@/components/field/parser";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {useShowData} from "@/lib/hooks/use-show-data";
+import {useShowContext} from "@/lib/hooks/use-show-context";
 
 export default function ShowScreen() {
     const {id} = useLocalSearchParams();
     const router = useRouter();
     const theme = useTheme();
     const [zoom, setZoom] = useState(0);
-    const [showData, setShowData] = useState<{
-        id: string;
-        name: string;
-        dot_data: DotData;
-        tempo_data: TempoData;
-        created_at: string;
-    } | null>(null);
-    const [currentIndex, setCurrentIndex] = useState(0);
     const {top, left, bottom, right} = useSafeAreaInsets();
+    const {showData, loading} = useShowData(id);
+    const [loadingInstrument, setLoadingInstrument] = useState(true);
+    const {currentIndex, setCurrentIndex, selectedInstrument, setSelectedInstrument} = useShowContext();
 
     useEffect(() => {
-        const fetchShowData = async () => {
-            const {data, error} = await supabase
-                .from('shows')
-                .select('*')
-                .eq('id', id)
-                .single();
-
-            if (error) {
-                console.error('err fetching show data:', error);
-                if (error.message === 'TypeError: Network request failed') {
-                    const storedShow = await AsyncStorage.getItem(`show_${id}`);
-                    if (storedShow) {
-                        const showData = JSON.parse(storedShow);
-                        setShowData(showData);
-                    } else {
-                        router.push('/shows');
-                    }
-                }
-            } else {
-                setShowData(data);
+        const fetchSelectedInstrument = async () => {
+            const storedInstrument = await AsyncStorage.getItem(`show_${id}_selected_instrument`);
+            if (storedInstrument) {
+                console.log('fetched stored instrument:', storedInstrument);
+                setSelectedInstrument(storedInstrument);
             }
+            setLoadingInstrument(false);
         }
-        fetchShowData();
+        fetchSelectedInstrument();
     }, [id]);
 
-    const dots = showData?.dot_data["C2"].dots;
     const isHold = useMemo(() => {
         if (!dots) return false;
         if (dots.length === 0) return false;
@@ -77,13 +57,20 @@ export default function ShowScreen() {
             previousDot.frontToBack.stepOffsetDirection &&
             currentDot.frontToBack.line === previousDot.frontToBack.line
         );
-    }, [currentIndex, dots]);
+    }, [currentIndex]);
 
-    if (!showData) {
+    if (loading || !showData) {
         return <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
             <Text>Loading...</Text>
         </View>
     }
+
+    if (!selectedInstrument) {
+        if (!loadingInstrument) router.push(`/(modals)/shows/${id}/select-instrument`);
+        return null;
+    }
+
+    const dots = showData.dot_data[selectedInstrument].dots;
 
     const midset =
         currentIndex > 0 && !dotCoordinatesEqual(dots[currentIndex - 1], dots[currentIndex])
