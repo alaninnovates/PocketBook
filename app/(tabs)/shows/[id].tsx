@@ -104,6 +104,7 @@ export default function ShowScreen() {
             >
                 <FieldCanvas zoom={zoom} dotData={showData.dot_data} tempoData={showData.tempo_data}
                              currentIndex={currentIndex}
+                             performer={selectedInstrument}
                 />
             </ReactNativeZoomableView>
             <View

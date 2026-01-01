@@ -6,10 +6,7 @@ import {dotToFieldCoordinateSteps} from "@/components/field/parser";
 import {CENTER_FRONT_POINT_STEPS, stepsToPixels} from "@/components/field/dimensions";
 import {useTheme} from "react-native-paper";
 import {Platform} from "react-native";
-
-const clampMax = (value: number, max: number) => {
-    return value > max ? max : value;
-}
+import {clampMax} from "@/lib/utils";
 
 const fontFamily = Platform.select({ ios: "Arial", default: "arial" });
 

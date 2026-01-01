@@ -4,12 +4,14 @@ import {FieldGrid} from "./field-grid";
 import {OtherPerformers} from "./other-performers";
 import {useTheme} from "react-native-paper";
 import {DotData, TempoData} from "@/lib/types";
+import {ActivePerformer} from "@/components/field/active-performer";
 
-export const FieldCanvas = ({zoom, dotData, tempoData, currentIndex}: {
+export const FieldCanvas = ({zoom, dotData, tempoData, currentIndex, performer}: {
     zoom: number;
     dotData: DotData;
     tempoData: TempoData;
     currentIndex: number;
+    performer: string;
 }) => {
     const theme = useTheme();
 
@@ -21,6 +23,7 @@ export const FieldCanvas = ({zoom, dotData, tempoData, currentIndex}: {
         }}>
             <FieldGrid theme={theme} showGrid={zoom > 0.9}/>
             <OtherPerformers dotData={dotData} currentIndex={currentIndex} zoom={zoom}/>
+            <ActivePerformer dotData={dotData} currentIndex={currentIndex} zoom={zoom} performer={performer} />
         </Canvas>
     )
 }
