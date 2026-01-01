@@ -5,11 +5,16 @@ import {MaterialBottomTabs as Tabs} from '@/components/material-bottom-tabs';
 import {IconSymbol} from '@/components/ui/icon-symbol';
 import {useTheme} from "react-native-paper";
 import {usePathname} from "expo-router";
+import {useEnsembles} from "@/lib/hooks/use-ensembles";
 
 export default function TabLayout() {
     const theme = useTheme();
     const pathname = usePathname();
     const hideTabBar = pathname.startsWith("/shows/") && pathname !== "/shows";
+
+    const {ensembles} = useEnsembles();
+    const showManageTab = ensembles.some(e => e.role === 'admin');
+    console.log('showManageTab:', showManageTab);
 
     return (
         <Tabs
@@ -26,12 +31,20 @@ export default function TabLayout() {
             sceneAnimationEnabled={false}
             activeColor={theme.colors.primary}
             inactiveColor={theme.colors.onSurface}
+            showManageTab={showManageTab}
         >
             <Tabs.Screen
                 name="shows"
                 options={{
                     title: 'Shows',
                     tabBarIcon: ({color}) => <IconSymbol size={28} name="theatermasks.fill" color={color}/>,
+                }}
+            />
+            <Tabs.Screen
+                name="manage"
+                options={{
+                    title: 'Manage Members',
+                    tabBarIcon: ({color}) => <IconSymbol size={28} name="person.3.fill" color={color}/>,
                 }}
             />
             <Tabs.Screen

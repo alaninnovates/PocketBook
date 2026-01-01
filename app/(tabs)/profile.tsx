@@ -3,46 +3,14 @@ import {SafeAreaView} from "react-native-safe-area-context";
 import {supabase} from "@/lib/supabase";
 import {ScrollView, View} from "react-native";
 import {useAuthContext} from "@/lib/hooks/use-auth-context";
-import {useState} from "react";
-import {useFocusEffect, useRouter} from "expo-router";
+import {useRouter} from "expo-router";
+import {useEnsembles} from "@/lib/hooks/use-ensembles";
 
 export default function ProfileScreen() {
     const {profile} = useAuthContext();
     const theme = useTheme();
     const router = useRouter();
-    const [ensembles, setEnsembles] = useState<{
-        ensembles: { id: number; name: string };
-        role: 'awaiting_approval' | 'member' | 'admin';
-        requested_at: string;
-        approved_at: string
-    }[]>([]);
-
-    useFocusEffect(() => {
-        const fetchEnsembles = async () => {
-            const {data, error} = await supabase
-                .from('ensemble_memberships')
-                .select('ensembles(id,name), role, requested_at, approved_at')
-                .eq('user_id', profile.id);
-
-            console.log(data);
-
-            if (error) {
-                console.error('err fetching user ensembles:', error);
-            } else {
-                data?.sort((a, b) => {
-                    if (a.role === 'awaiting_approval' && b.role !== 'awaiting_approval') {
-                        return -1;
-                    }
-                    if (a.role !== 'awaiting_approval' && b.role === 'awaiting_approval') {
-                        return 1;
-                    }
-                    return new Date(b.approved_at).getTime() - new Date(a.approved_at).getTime();
-                });
-                setEnsembles(data || []);
-            }
-        }
-        fetchEnsembles();
-    });
+    const {ensembles, setEnsembles} = useEnsembles();
 
     return (
         <SafeAreaView style={{padding: 16, flex: 1}}>

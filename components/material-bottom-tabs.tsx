@@ -17,18 +17,26 @@ export type MaterialBottomTabsProps = PropsWithChildren<
 >;
 
 export function MaterialBottomTabs({
+    showManageTab,
                                        children,
                                        ...props
-                                   }: MaterialBottomTabsProps) {
+                                   }: MaterialBottomTabsProps & { showManageTab?: boolean }) {
     return (
         <Tabs
             screenOptions={{
                 headerShown: false,
             }}
-            tabBar={({ navigation, state, descriptors, insets }) => (
+            tabBar={({ navigation, state, descriptors, insets }) => {
+                const newState = {
+                    ...state,
+                    routeNames: state.routeNames.filter(route => route !== 'manage'),
+                    routes: state.routes.filter(route => route.name !== 'manage'),
+                    index: state.index > 1 ? state.index - 1 : state.index,
+                };
+                return (
                 <BottomNavigation.Bar
                     {...props}
-                    navigationState={state}
+                    navigationState={ showManageTab ? state : newState }
                     safeAreaInsets={insets}
                     onTabPress={({ route, preventDefault }) => {
                         const event = navigation.emit({
@@ -68,7 +76,7 @@ export function MaterialBottomTabs({
                         return String(label);
                     }}
                 />
-            )}
+            )}}
         >
             {children}
         </Tabs>
