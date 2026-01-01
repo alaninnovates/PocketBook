@@ -1,7 +1,8 @@
 import {useAuthContext} from "@/lib/hooks/use-auth-context";
 import {supabase} from "@/lib/supabase";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import Dropdown from "@/components/dropdown";
+import {useFocusEffect} from "expo-router";
 
 export function EnsembleSwitcher({selectedEnsemble, setSelectedEnsemble}: {
     selectedEnsemble: number | null;
@@ -12,7 +13,7 @@ export function EnsembleSwitcher({selectedEnsemble, setSelectedEnsemble}: {
         id: number; name: string;
     }[]>([]);
 
-    useEffect(() => {
+    useFocusEffect(() => {
         if (!profile) return;
         const fetchEnsembles = async () => {
             const {data, error} = await supabase
@@ -33,7 +34,7 @@ export function EnsembleSwitcher({selectedEnsemble, setSelectedEnsemble}: {
             }
         }
         fetchEnsembles();
-    }, [profile]);
+    });
 
     return (
         <Dropdown
