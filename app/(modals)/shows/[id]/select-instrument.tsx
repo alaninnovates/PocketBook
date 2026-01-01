@@ -10,7 +10,7 @@ import {useShowContext} from "@/lib/hooks/use-show-context";
 export default function SelectInstrumentModalScreen() {
     const {id} = useLocalSearchParams();
     const router = useRouter();
-    const {showData, loading} = useShowData(id);
+    const {showData, loading} = useShowData(id as string);
     const {selectedInstrument, setSelectedInstrument} = useShowContext();
 
     useEffect(() => {

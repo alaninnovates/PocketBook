@@ -3,7 +3,7 @@ import {FieldCanvas} from "@/components/field/field-canvas";
 import {ReactNativeZoomableView} from "@openspacelabs/react-native-zoomable-view";
 import {useEffect, useMemo, useState} from "react";
 import {View} from "react-native";
-import {IconButton, Text, useTheme} from "react-native-paper";
+import {IconButton, Text, TouchableRipple, useTheme} from "react-native-paper";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {
     calculateMidset,
@@ -22,7 +22,7 @@ export default function ShowScreen() {
     const theme = useTheme();
     const [zoom, setZoom] = useState(0);
     const {top, left, bottom, right} = useSafeAreaInsets();
-    const {showData, loading} = useShowData(id);
+    const {showData, loading} = useShowData(id as string);
     const [loadingInstrument, setLoadingInstrument] = useState(true);
     const {currentIndex, setCurrentIndex, selectedInstrument, setSelectedInstrument} = useShowContext();
 
@@ -162,23 +162,25 @@ export default function ShowScreen() {
                             <Text variant="bodyLarge">-</Text>
                         )}
                     </View>
-                    <View>
-                        <Text variant="bodyLarge">
-                            Side {dots[currentIndex].side}:{' '}
-                            {dots[currentIndex].sideToSide.stepOffset}{' '}
-                            {dots[currentIndex].sideToSide.stepOffsetDirection}{' '}
-                            {dots[currentIndex].sideToSide.yardline} yd ln
-                        </Text>
-                        <Text variant="bodyLarge">
-                            {dots[currentIndex].frontToBack.stepOffset}{' '}
-                            {dots[currentIndex].frontToBack.stepOffsetDirection}{' '}
-                            {dots[currentIndex].frontToBack.line}
-                        </Text>
-                        <Text variant="bodyLarge">
-                            {isHold ? 'Hold' : 'Move'}:{' '}
-                            {dots[currentIndex].counts}
-                        </Text>
-                    </View>
+                    <TouchableRipple onPress={() => router.push(`/(modals)/shows/${id}/select-set`)}>
+                        <View>
+                            <Text variant="bodyLarge">
+                                Side {dots[currentIndex].side}:{' '}
+                                {dots[currentIndex].sideToSide.stepOffset}{' '}
+                                {dots[currentIndex].sideToSide.stepOffsetDirection}{' '}
+                                {dots[currentIndex].sideToSide.yardline} yd ln
+                            </Text>
+                            <Text variant="bodyLarge">
+                                {dots[currentIndex].frontToBack.stepOffset}{' '}
+                                {dots[currentIndex].frontToBack.stepOffsetDirection}{' '}
+                                {dots[currentIndex].frontToBack.line}
+                            </Text>
+                            <Text variant="bodyLarge">
+                                {isHold ? 'Hold' : 'Move'}:{' '}
+                                {dots[currentIndex].counts}
+                            </Text>
+                        </View>
+                    </TouchableRipple>
                 </View>
             </View>
             <View style={{position: "absolute", bottom: bottom, right: right, flexDirection: 'row'}}>

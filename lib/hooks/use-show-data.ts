@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useRouter} from "expo-router";
 import {DotData, TempoData} from "@/lib/types";
 
-export const useShowData = (id) => {
+export const useShowData = (id: string, useCached = false) => {
     const router = useRouter();
     const [showData, setShowData] = useState<{
         id: string;
@@ -16,6 +16,17 @@ export const useShowData = (id) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const fetchDataFromAsyncStorage = async () => {
+            const storedShow = await AsyncStorage.getItem(`show_${id}`);
+            if (storedShow) {
+                const showData = JSON.parse(storedShow);
+                setShowData(showData);
+                return true;
+            } else {
+                return false;
+            }
+        }
+
         const fetchShowData = async () => {
             const {data, error} = await supabase
                 .from('shows')
@@ -26,11 +37,7 @@ export const useShowData = (id) => {
             if (error) {
                 console.error('err fetching show data:', error);
                 if (error.message === 'TypeError: Network request failed') {
-                    const storedShow = await AsyncStorage.getItem(`show_${id}`);
-                    if (storedShow) {
-                        const showData = JSON.parse(storedShow);
-                        setShowData(showData);
-                    } else {
+                    if (!(await fetchDataFromAsyncStorage())) {
                         router.push('/shows');
                     }
                 }
@@ -39,7 +46,12 @@ export const useShowData = (id) => {
             }
             setLoading(false);
         }
-        fetchShowData();
+        if (useCached) {
+            fetchDataFromAsyncStorage();
+            setLoading(false);
+        } else {
+            fetchShowData();
+        }
     }, [id]);
 
     return {showData, loading};
