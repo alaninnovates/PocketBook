@@ -6,12 +6,13 @@ import {useTheme} from "react-native-paper";
 import {DotData, TempoData} from "@/lib/types";
 import {ActivePerformer} from "@/components/field/active-performer";
 
-export const FieldCanvas = ({zoom, dotData, tempoData, currentIndex, performer}: {
+export const FieldCanvas = ({zoom, dotData, tempoData, currentIndex, performer, animationProgress}: {
     zoom: number;
     dotData: DotData;
     tempoData: TempoData;
     currentIndex: number;
     performer: string;
+    animationProgress: number;
 }) => {
     const theme = useTheme();
 
@@ -22,8 +23,8 @@ export const FieldCanvas = ({zoom, dotData, tempoData, currentIndex, performer}:
             transform: [{rotate: '180deg'}],
         }}>
             <FieldGrid theme={theme} showGrid={zoom > 0.9}/>
-            <OtherPerformers dotData={dotData} currentIndex={currentIndex} zoom={zoom}/>
-            <ActivePerformer dotData={dotData} currentIndex={currentIndex} zoom={zoom} performer={performer} />
+            <OtherPerformers dotData={dotData} currentIndex={currentIndex} zoom={zoom} animationProgress={animationProgress} />
+            <ActivePerformer dotData={dotData} currentIndex={currentIndex} zoom={zoom} performer={performer} animationProgress={animationProgress} />
         </Canvas>
     )
 }

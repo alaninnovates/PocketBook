@@ -7,6 +7,7 @@ import {clampMax} from "@/lib/utils";
 import {DotbookEntry, DotData} from "@/lib/types";
 import {calculateMidset, dotToFieldCoordinateSteps} from "@/components/field/parser";
 import {Platform} from "react-native";
+import {interpolatePosition} from "@/components/field/playback";
 
 const fontFamily = Platform.select({ios: "Arial", default: "arial"});
 
@@ -114,11 +115,12 @@ const AdditionalPagesDisplay = ({
     );
 };
 
-export const ActivePerformer = ({dotData, currentIndex, zoom, performer}: {
+export const ActivePerformer = ({dotData, currentIndex, zoom, performer, animationProgress}: {
     dotData: DotData;
     currentIndex: number;
     zoom: number;
     performer: string;
+    animationProgress: number;
 }) => {
     let minusQuantity = 1, plusQuantity = 1;
     const dots = dotData[performer].dots;
@@ -152,7 +154,13 @@ export const ActivePerformer = ({dotData, currentIndex, zoom, performer}: {
                 direction={1}
             />
             <CurrentPageDisplay
-                coord={dotToFieldCoordinateSteps(dots[currentIndex])}
+                coord={dots[currentIndex + 1] && animationProgress > 0
+                    ? interpolatePosition(
+                        dotToFieldCoordinateSteps(dots[currentIndex]),
+                        dotToFieldCoordinateSteps(dots[currentIndex + 1]),
+                        animationProgress,
+                    )
+                    : dotToFieldCoordinateSteps(dots[currentIndex])}
                 zoom={zoom}
                 performer={performer}
             />

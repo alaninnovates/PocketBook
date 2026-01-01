@@ -1,7 +1,7 @@
 import {useLocalSearchParams, useRouter} from "expo-router";
 import {FieldCanvas} from "@/components/field/field-canvas";
 import {ReactNativeZoomableView} from "@openspacelabs/react-native-zoomable-view";
-import {useEffect, useMemo, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {View} from "react-native";
 import {IconButton, Text, TouchableRipple, useTheme} from "react-native-paper";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
@@ -25,6 +25,72 @@ export default function ShowScreen() {
     const {showData, loading} = useShowData(id as string);
     const [loadingInstrument, setLoadingInstrument] = useState(true);
     const {currentIndex, setCurrentIndex, selectedInstrument, setSelectedInstrument} = useShowContext();
+
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [animationProgress, setAnimationProgress] = useState(0);
+    const animationFrameRef = useRef<number | null>(null);
+    const startTimeRef = useRef<number | null>(null);
+    const currentAnimationStepRef = useRef(currentIndex);
+
+    useMemo(() => {
+        currentAnimationStepRef.current = currentIndex;
+    }, [currentIndex]);
+
+    const dotsLength = useMemo(() => {
+        if (!showData || !selectedInstrument) return 0;
+        return showData.dot_data[selectedInstrument].dots.length;
+    }, [showData, selectedInstrument]);
+
+    const animate = useCallback(
+        (timestamp: number) => {
+            if (!showData) return null;
+            if (startTimeRef.current === null) startTimeRef.current = timestamp;
+            const elapsed = timestamp - startTimeRef.current;
+
+            const currentDot = dots[currentAnimationStepRef.current];
+            const tempo = (showData.tempo_data?.[currentDot.movement]?.[currentDot.set]) ?? 120;
+            const durationPerCount = 60000 / tempo;
+            const totalDuration =
+                currentAnimationStepRef.current < dotsLength - 1
+                    ? dots[currentAnimationStepRef.current + 1].counts *
+                    durationPerCount
+                    : 0;
+
+            if (totalDuration > 0) {
+                const progress = Math.min(elapsed / totalDuration, 1);
+                setAnimationProgress(progress);
+
+                if (progress >= 1) {
+                    const nextStep = currentAnimationStepRef.current + 1;
+                    if (nextStep >= dotsLength) {
+                        setIsPlaying(false);
+                        setAnimationProgress(0);
+                        animationFrameRef.current = null;
+                        startTimeRef.current = null;
+                        return;
+                    }
+                    setCurrentIndex(nextStep);
+                    setAnimationProgress(0);
+                    startTimeRef.current = null;
+                }
+            } else {
+                const nextStep = currentAnimationStepRef.current + 1;
+                if (nextStep >= dotsLength) {
+                    setIsPlaying(false);
+                    setAnimationProgress(0);
+                    animationFrameRef.current = null;
+                    startTimeRef.current = null;
+                    return;
+                }
+                setCurrentIndex(nextStep);
+                setAnimationProgress(0);
+                startTimeRef.current = null;
+            }
+
+            animationFrameRef.current = requestAnimationFrame(animate);
+        },
+        [isPlaying, dotsLength, showData]
+    );
 
     useEffect(() => {
         const fetchSelectedInstrument = async () => {
@@ -105,6 +171,7 @@ export default function ShowScreen() {
                 <FieldCanvas zoom={zoom} dotData={showData.dot_data} tempoData={showData.tempo_data}
                              currentIndex={currentIndex}
                              performer={selectedInstrument}
+                                animationProgress={animationProgress}
                 />
             </ReactNativeZoomableView>
             <View
@@ -182,6 +249,28 @@ export default function ShowScreen() {
                         </View>
                     </TouchableRipple>
                 </View>
+            </View>
+            <View style={{position: "absolute", right: right, top: '45%'}}>
+                <IconButton
+                    icon={isPlaying ? "pause" : "play"}
+                    mode="contained"
+                    size={32}
+                    onPress={() => {
+                        if (isPlaying) {
+                            if (animationFrameRef.current) {
+                                cancelAnimationFrame(animationFrameRef.current);
+                                animationFrameRef.current = null;
+                            }
+                            setIsPlaying(false);
+                            setAnimationProgress(0);
+                            startTimeRef.current = null;
+                            return;
+                        }
+                        setIsPlaying(true);
+                        animationFrameRef.current =
+                            requestAnimationFrame(animate);
+                    }}
+                />
             </View>
             <View style={{position: "absolute", bottom: bottom, right: right, flexDirection: 'row'}}>
                 <IconButton

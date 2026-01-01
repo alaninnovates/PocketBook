@@ -7,18 +7,20 @@ import {CENTER_FRONT_POINT_STEPS, stepsToPixels} from "@/components/field/dimens
 import {useTheme} from "react-native-paper";
 import {Platform} from "react-native";
 import {clampMax} from "@/lib/utils";
+import {interpolatePosition} from "@/components/field/playback";
 
-const fontFamily = Platform.select({ ios: "Arial", default: "arial" });
+const fontFamily = Platform.select({ios: "Arial", default: "arial"});
 
-export const OtherPerformers = ({dotData, currentIndex, zoom}: {
+export const OtherPerformers = ({dotData, currentIndex, zoom, animationProgress}: {
     dotData: DotData;
     currentIndex: number;
     zoom: number;
+    animationProgress: number;
 }) => {
     const theme = useTheme();
     const font = matchFont({
         fontFamily,
-        fontSize: clampMax(6 * 6/(zoom), 10),
+        fontSize: clampMax(6 * 6 / (zoom), 10),
     });
 
     return Object.values(dotData).map(({performer, label, dots}) => {
@@ -31,19 +33,19 @@ export const OtherPerformers = ({dotData, currentIndex, zoom}: {
 
         let coord = dotToFieldCoordinateSteps(dots[currentIndex]);
         // console.log('performer coord:', performer, label, coord);
-        // if (animationProgress > 0 && dots[currentIndex + 1] != null) {
-        //     const nextCoord = dotToFieldCoordinate(
-        //         dots[currentIndex + 1],
-        //     );
-        //     coord = interpolatePosition(
-        //         coord,
-        //         nextCoord,
-        //         animationProgress,
-        //     );
-        // }
+        if (animationProgress > 0 && dots[currentIndex + 1] != null) {
+            const nextCoord = dotToFieldCoordinateSteps(
+                dots[currentIndex + 1],
+            );
+            coord = interpolatePosition(
+                coord,
+                nextCoord,
+                animationProgress,
+            );
+        }
 
         const textX = stepsToPixels(CENTER_FRONT_POINT_STEPS.x - coord.x) + font.getTextWidth(label) / 2;
-        const textY  = stepsToPixels(CENTER_FRONT_POINT_STEPS.y + coord.y) - font.measureText(label).height / 2 + 1.5;
+        const textY = stepsToPixels(CENTER_FRONT_POINT_STEPS.y + coord.y) - font.measureText(label).height / 2 + 1.5;
 
         return (
             <React.Fragment key={label}>
@@ -51,7 +53,7 @@ export const OtherPerformers = ({dotData, currentIndex, zoom}: {
                     key={label}
                     cx={stepsToPixels(CENTER_FRONT_POINT_STEPS.x - coord.x)}
                     cy={stepsToPixels(CENTER_FRONT_POINT_STEPS.y + coord.y)}
-                    r={clampMax(4 * 6/(zoom), 6)}
+                    r={clampMax(4 * 6 / (zoom), 6)}
                     color={instrumentToColor(performer)}
                     opacity={1}
                 />
