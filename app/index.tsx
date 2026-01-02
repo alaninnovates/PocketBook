@@ -13,7 +13,7 @@ export default function LoginScreen() {
                 justifyContent: 'center', alignItems: 'center'
             }}>
             <Text variant="headlineMedium">Login</Text>
-            <EmailPassword/>
+            {/*<EmailPassword/>*/}
             <View style={{display: 'flex', flexDirection: 'row', gap: 16, marginTop: 16}}>
                 <GoogleButton/>
                 <DiscordButton/>
