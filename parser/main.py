@@ -16,6 +16,6 @@ if __name__ == "__main__":
         data = f.read()
         out_dict['instruments'] = parse_instruments(data)
         out_dict['sets'] = parse_sets(data)
-        out_dict['pages'] = parse_pages(data, len(out_dict['instruments'])-1, out_dict['sets'])
+        out_dict['pages'] = parse_pages(data, out_dict['instruments'], out_dict['sets'])
     with open(f"{output_file}.json", 'w') as out_f:
         json.dump(out_dict, out_f, indent=4)

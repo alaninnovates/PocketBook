@@ -1,17 +1,66 @@
 from utils import bc, find_index_of
 
-def parse_pages(data, last_instrument_index, sets):
+"""
+export type FrontBack =
+    | 'Front Side Line'
+    | 'Front Hash (HS)'
+    | 'Back Hash (HS)'
+    | 'Back Side Line';
+
+export type DotbookEntry = {
+    movement: number;
+    set: string;
+    counts: number;
+    side: number;
+    sideToSide: {
+        yardline: number;
+        stepOffset: number;
+        stepOffsetDirection: 'Inside' | 'Outside';
+    };
+    frontToBack: {
+        line: FrontBack;
+        stepOffset: number;
+        stepOffsetDirection: 'In Front Of' | 'Behind';
+    };
+    note?: string;
+};
+
+export type DotData = {
+    [key: string]: {
+        performer: string;
+        symbol: string;
+        label: string;
+        dots: DotbookEntry[];
+    };
+};
+"""
+
+un_to_step = 625
+
+def sets_to_coordinates(instruments, sets):
+    dot_data = {}
+    for set in sets:
+        print(set)
+    return dot_data
+
+def counts_to_sets(pages, sets):
+    # print(sets, len(pages))
+    # total_counts = sum([s['counts'] for s in sets.values()])
+    # print("total_counts:", total_counts)
+    return pages
+
+def parse_pages(data, instruments, sets):
     """
 
     :param data:
-    :param last_instrument_index:
+    :param instruments:
     :param sets:
     :return:
     """
-    print("last_instrument_index:", last_instrument_index)
+    # print("last_instrument_index:", last_instrument_index)
     start_read = find_index_of(data, 'PAGE', return_end=True)
     start_read += bc(9)
-    pages = {}
+    counts = {}
     """ ex data after start_read
 blue = performer index
 cyan = case 00 00 -> side 2; case FF FF -> side 1
@@ -34,7 +83,7 @@ idx side offset dir  offset ???  ?? label
     """
     while True:
         performer_index = int.from_bytes(data[start_read:start_read + bc(1)], byteorder='big')
-        print("performer_index:", performer_index)
+        # print("performer_index:", performer_index)
         # print("side", data[start_read + bc(1):start_read + bc(3)])
         side = 'Side 2' if data[start_read + bc(1):start_read + bc(3)] == b'\xFF\xFF' else 'Side 1'
         offset_from_50 = int.from_bytes(data[start_read + bc(3):start_read + bc(5)], byteorder='big', signed=True)
@@ -44,11 +93,11 @@ idx side offset dir  offset ???  ?? label
         # print(data[start_read + bc(7):start_read + bc(9)])
         # print("offset_from_center:", offset_from_center)
         unknown_value = int.from_bytes(data[start_read + bc(9):start_read + bc(12)], byteorder='big')
-        print(data[start_read + bc(9):start_read + bc(12)])
+        # print(data[start_read + bc(9):start_read + bc(12)])
         performer_label = (data[start_read + bc(12):start_read + bc(13)]).decode('ascii').strip()
         # print("performer_label:", performer_label)
 
-        pages[performer_index] = {
+        counts[performer_index] = {
             'x': {
                 'side': side,
                 'distance_from_50': offset_from_50,
@@ -62,7 +111,9 @@ idx side offset dir  offset ???  ?? label
         }
 
         start_read += bc(14)
-        if performer_index == last_instrument_index + 1:
+        if performer_index == len(instruments):
             break
 
-    return pages
+    set_data = counts_to_sets(counts, sets)
+    coords = sets_to_coordinates(instruments, set_data)
+    return coords
