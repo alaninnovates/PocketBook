@@ -1,16 +1,19 @@
-import {Button, IconButton, List, Text, useTheme} from "react-native-paper";
+import {Button, Dialog, IconButton, List, Portal, Text, useTheme} from "react-native-paper";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {supabase} from "@/lib/supabase";
 import {ScrollView, View} from "react-native";
 import {useAuthContext} from "@/lib/hooks/use-auth-context";
 import {useRouter} from "expo-router";
 import {useEnsembles} from "@/lib/hooks/use-ensembles";
+import {useState} from "react";
 
 export default function ProfileScreen() {
     const {profile} = useAuthContext();
     const theme = useTheme();
     const router = useRouter();
     const {ensembles, setEnsembles} = useEnsembles();
+    const [confirmModalVisible, setConfirmModalVisible] = useState(false);
+    const [confirmDeleteEnsemble, setConfirmDeleteEnsemble] = useState<{ id: number; name: string } | null>(null);
 
     return (
         <SafeAreaView style={{padding: 16, flex: 1}}>
@@ -48,12 +51,8 @@ export default function ProfileScreen() {
                                         <IconButton
                                             icon="delete" iconColor={theme.colors.error}
                                             onPress={async () => {
-                                                await supabase
-                                                    .from('ensemble_memberships')
-                                                    .delete()
-                                                    .eq('user_id', profile.id)
-                                                    .eq('ensemble_id', ensemble.ensembles.id);
-                                                setEnsembles(prev => prev.filter(e => e.ensembles.name !== ensemble.ensembles.name));
+                                                setConfirmDeleteEnsemble({id: ensemble.ensembles.id, name: ensemble.ensembles.name});
+                                                setConfirmModalVisible(true);
                                             }}
                                         />
                                     )}
@@ -68,6 +67,29 @@ export default function ProfileScreen() {
                     </Button>
                 </View>
             </ScrollView>
+            <Portal>
+                <Dialog visible={confirmModalVisible} onDismiss={() => setConfirmModalVisible(false)}>
+                    <Dialog.Title>Leave Ensemble</Dialog.Title>
+                    <Dialog.Content>
+                        <Text variant="bodyMedium">Are you sure you want to leave {confirmDeleteEnsemble?.name}? This action cannot be undone.</Text>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button onPress={() => setConfirmModalVisible(false)}>Cancel</Button>
+                        <Button onPress={async () => {
+                            if (!confirmDeleteEnsemble) return;
+                            await supabase
+                                .from('ensemble_memberships')
+                                .delete()
+                                .eq('user_id', profile.id)
+                                .eq('ensemble_id', confirmDeleteEnsemble.id);
+                            setEnsembles(prev => prev.filter(e => e.ensembles.name !== confirmDeleteEnsemble.name));
+                            setConfirmModalVisible(false);
+                        }}>
+                            Confirm
+                        </Button>
+                    </Dialog.Actions>
+                </Dialog>
+            </Portal>
         </SafeAreaView>
     );
 }
