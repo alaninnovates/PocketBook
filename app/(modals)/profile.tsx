@@ -13,6 +13,7 @@ export default function ProfileModalScreen() {
     const [ensembleNameInFocus, setEnsembleNameInFocus] = useState(false);
     const [filteredEnsembles, setFilteredEnsembles] = useState<string[]>([]);
     const [buttonLoading, setButtonLoading] = useState(false);
+    const [sampleButtonLoading, setSampleButtonLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -42,6 +43,22 @@ export default function ProfileModalScreen() {
     const handleSelectEnsemble = (ensemble: string) => {
         setEnsembleName(ensemble);
     };
+
+    const requestJoin = async (ensembleName: string, code: string) => {
+        const {data, error} = await supabase
+            .rpc('attempt_join_ensemble', {
+                p_name: ensembleName,
+                p_code: code,
+            });
+        if (error) {
+            console.error('err requesting to join ensemble:', error);
+            setError(error.message);
+        }
+        if (data) {
+            console.log('successfully joined:', ensembleName);
+            router.back();
+        }
+    }
 
     return (
         <View style={{padding: 16, flex: 1}}>
@@ -93,25 +110,26 @@ export default function ProfileModalScreen() {
                 style={{marginTop: 24}}
                 onPress={async () => {
                     setButtonLoading(true);
-                    const {data, error} = await supabase
-                        .rpc('attempt_join_ensemble', {
-                            p_name: ensembleName,
-                            p_code: code,
-                        });
-                    if (error) {
-                        console.error('err requesting to join ensemble:', error);
-                        setError(error.message);
-                    }
-                    if (data) {
-                        console.log('successfully joined:', ensembleName);
-                        router.back();
-                    }
+                    await requestJoin(ensembleName, code);
                     setButtonLoading(false);
                 }}
                 loading={buttonLoading}
                 disabled={buttonLoading}
             >
                 Request to Join
+            </Button>
+            <View style={{height: 16}}/>
+            <Button
+                mode="outlined"
+                onPress={async () => {
+                    setSampleButtonLoading(true);
+                    await requestJoin('Sample Ensemble', 'sample');
+                    setSampleButtonLoading(false);
+                }}
+                loading={sampleButtonLoading}
+                disabled={sampleButtonLoading}
+            >
+                Or, join sample ensemble
             </Button>
         </View>
     );
