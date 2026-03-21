@@ -22,7 +22,7 @@ width of yard numbers = 4 ft = 48in = 2.1333 steps
 pixels per inch = 0.5
  */
 
-export const PIXELS_PER_INCH = 0.5;
+export const PIXELS_PER_INCH = 0.7;
 export const INCHES_PER_STEP = 22.5;
 export const feetToSteps = (feet: number) => (feet * 12) / INCHES_PER_STEP;
 export const yardsToSteps = (yards: number) => feetToSteps(yards * 3);

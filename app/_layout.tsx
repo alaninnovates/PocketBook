@@ -15,12 +15,16 @@ export const unstable_settings = {
 };
 
 function RootNavigator() {
-    const {isLoggedIn} = useAuthContext();
+    const {profile, isLoggedIn} = useAuthContext();
+    const isOnboarding = profile?.onboarding_step !== 3;
     return (
         <Stack>
-            <Stack.Protected guard={isLoggedIn}>
+            <Stack.Protected guard={isLoggedIn && !isOnboarding}>
                 <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
                 <Stack.Screen name="(modals)" options={{presentation: 'modal', headerShown: false}}/>
+            </Stack.Protected>
+            <Stack.Protected guard={isLoggedIn && isOnboarding}>
+                <Stack.Screen name="(onboarding)" options={{headerShown: false}}/>
             </Stack.Protected>
             <Stack.Protected guard={!isLoggedIn}>
                 <Stack.Screen name="index" options={{headerShown: false}}/>
