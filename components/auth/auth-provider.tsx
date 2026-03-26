@@ -1,7 +1,7 @@
-import {AuthContext} from '@/lib/hooks/use-auth-context'
+import {AuthContext, OnboardingStep, Profile} from '@/lib/hooks/use-auth-context'
 import {supabase} from '@/lib/supabase'
 import type {Session} from '@supabase/supabase-js'
-import {PropsWithChildren, useEffect, useState} from 'react'
+import {PropsWithChildren, useCallback, useEffect, useState} from 'react'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function AuthProvider({children}: PropsWithChildren) {
@@ -75,6 +75,26 @@ export default function AuthProvider({children}: PropsWithChildren) {
         fetchProfile()
     }, [session])
 
+
+    const updateOnboardingStep = useCallback(async (newStep: OnboardingStep) => {
+        const {data, error} = await supabase
+            .from('profiles')
+            .update({onboarding_step: newStep})
+            .eq('id', profile.id)
+            .select('*')
+            .single();
+
+        if (error) {
+            console.error('Error updating onboarding step:', error);
+        }
+
+        if (data) {
+            setProfile(data);
+            await AsyncStorage.setItem('user_profile', JSON.stringify(data));
+            console.log('Updated onboarding step to:', newStep, "(new profile data: ", data, ")");
+        }
+    }, [profile]);
+
     return (
         <AuthContext.Provider
             value={{
@@ -82,6 +102,7 @@ export default function AuthProvider({children}: PropsWithChildren) {
                 isLoading,
                 profile,
                 isLoggedIn: session != undefined,
+                updateOnboardingStep,
             }}
         >
             {children}

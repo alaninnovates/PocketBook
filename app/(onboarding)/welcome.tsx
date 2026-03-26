@@ -1,18 +1,17 @@
-import {useAuthContext} from "@/lib/hooks/use-auth-context";
+import {OnboardingStep, useAuthContext} from "@/lib/hooks/use-auth-context";
 import {Button, Text, useTheme} from "react-native-paper";
 import {useRouter} from "expo-router";
+import {View} from "react-native";
 
 export default function OnboardingWelcomeScreen() {
-    const {profile} = useAuthContext();
+    const {profile, updateOnboardingStep} = useAuthContext();
     const theme = useTheme();
     const router = useRouter();
 
     return (
-        <div style={{
+        <View style={{
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
             gap: 16,
             padding: 32,
         }}>
@@ -23,11 +22,14 @@ export default function OnboardingWelcomeScreen() {
                 PocketBook is the ultimate app for ...
             </Text>
             <Text variant="bodyMedium" style={{color: theme.colors.onSurfaceVariant}}>
-                First, let's get you set up with your profile information.
+                First, let&#39;s get you set up with your profile information.
             </Text>
-            <Button onClick={() => router.push('/(onboarding)/profile-info')}>
+            <Button mode="contained" onPress={async () => {
+                await updateOnboardingStep?.(OnboardingStep.ProfileInfo);
+                router.push('/(onboarding)/profile-info')
+            }}>
                 Get Started
             </Button>
-        </div>
+        </View>
     )
 }

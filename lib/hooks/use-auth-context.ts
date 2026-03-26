@@ -1,13 +1,20 @@
 import {Session} from '@supabase/supabase-js'
 import {createContext, useContext} from 'react'
 
+export enum OnboardingStep {
+    Welcome = 0,
+    ProfileInfo = 1,
+    JoinEnsemble = 2,
+    Completed = 3,
+}
+
 export interface Profile {
     id: string;
     email: string;
     created_at: string;
     avatar_url: string;
     name: string;
-    onboarding_step: number;
+    onboarding_step: OnboardingStep;
 }
 
 export type AuthData = {
@@ -15,6 +22,7 @@ export type AuthData = {
     profile?: Profile | null
     isLoading: boolean
     isLoggedIn: boolean
+    updateOnboardingStep?: (newStep: OnboardingStep) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthData>({
@@ -22,6 +30,7 @@ export const AuthContext = createContext<AuthData>({
     profile: undefined,
     isLoading: true,
     isLoggedIn: false,
+    updateOnboardingStep: undefined,
 })
 
 export const useAuthContext = () => useContext(AuthContext)

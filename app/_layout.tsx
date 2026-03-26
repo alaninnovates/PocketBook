@@ -5,7 +5,7 @@ import 'react-native-reanimated';
 
 import {PaperProvider} from "react-native-paper";
 import {useColorScheme} from "react-native";
-import {useAuthContext} from "@/lib/hooks/use-auth-context";
+import {OnboardingStep, useAuthContext} from "@/lib/hooks/use-auth-context";
 import AuthProvider from "@/components/auth/auth-provider";
 import {CombinedDarkTheme, CombinedLightTheme} from "@/lib/theme";
 import ShowProvider from "@/lib/show-provider";
@@ -16,7 +16,7 @@ export const unstable_settings = {
 
 function RootNavigator() {
     const {profile, isLoggedIn} = useAuthContext();
-    const isOnboarding = profile?.onboarding_step !== 3;
+    const isOnboarding = profile?.onboarding_step !== OnboardingStep.Completed;
     return (
         <Stack>
             <Stack.Protected guard={isLoggedIn && !isOnboarding}>
