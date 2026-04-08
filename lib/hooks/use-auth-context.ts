@@ -14,6 +14,8 @@ export interface Profile {
     created_at: string;
     avatar_url: string;
     name: string;
+    first_name: string;
+    last_name: string;
     onboarding_step: OnboardingStep;
 }
 
@@ -23,6 +25,7 @@ export type AuthData = {
     isLoading: boolean
     isLoggedIn: boolean
     updateOnboardingStep?: (newStep: OnboardingStep) => Promise<void>;
+    updateProfileName?: (firstName: string, lastName: string) => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthData>({
@@ -31,6 +34,7 @@ export const AuthContext = createContext<AuthData>({
     isLoading: true,
     isLoggedIn: false,
     updateOnboardingStep: undefined,
+    updateProfileName: undefined,
 })
 
 export const useAuthContext = () => useContext(AuthContext)

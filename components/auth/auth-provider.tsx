@@ -95,14 +95,34 @@ export default function AuthProvider({children}: PropsWithChildren) {
         }
     }, [profile]);
 
+    const updateProfileName = useCallback(async (firstName: string, lastName: string) => {
+        const {data, error} = await supabase
+            .from('profiles')
+            .update({first_name: firstName, last_name: lastName})
+            .eq('id', profile.id)
+            .select('*')
+            .single();
+
+        if (error) {
+            console.error('Error updating profile name:', error);
+        }
+
+        if (data) {
+            setProfile(data);
+            await AsyncStorage.setItem('user_profile', JSON.stringify(data));
+            console.log('Updated profile name to:', firstName, lastName, "(new profile data: ", data, ")");
+        }
+    }, [profile]);
+
     return (
         <AuthContext.Provider
             value={{
                 session,
                 isLoading,
                 profile,
-                isLoggedIn: session != undefined,
+                isLoggedIn: session !== undefined,
                 updateOnboardingStep,
+                updateProfileName
             }}
         >
             {children}
