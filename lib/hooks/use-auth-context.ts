@@ -26,6 +26,7 @@ export type AuthData = {
     isLoggedIn: boolean
     updateOnboardingStep?: (newStep: OnboardingStep) => Promise<void>;
     updateProfileName?: (firstName: string, lastName: string) => Promise<void>;
+    signOut?: () => Promise<void>;
 }
 
 export const AuthContext = createContext<AuthData>({
@@ -35,6 +36,7 @@ export const AuthContext = createContext<AuthData>({
     isLoggedIn: false,
     updateOnboardingStep: undefined,
     updateProfileName: undefined,
+    signOut: undefined,
 })
 
 export const useAuthContext = () => useContext(AuthContext)

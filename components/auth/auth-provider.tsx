@@ -114,15 +114,25 @@ export default function AuthProvider({children}: PropsWithChildren) {
         }
     }, [profile]);
 
+    const signOut = useCallback(async () => {
+        const {error} = await supabase.auth.signOut();
+        await AsyncStorage.removeItem('user_profile');
+        setProfile(null);
+        if (error) {
+            console.error('Error signing out:', error)
+        }
+    }, []);
+
     return (
         <AuthContext.Provider
             value={{
                 session,
                 isLoading,
                 profile,
-                isLoggedIn: session !== undefined,
+                isLoggedIn: session != undefined,
                 updateOnboardingStep,
-                updateProfileName
+                updateProfileName,
+                signOut,
             }}
         >
             {children}

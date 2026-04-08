@@ -8,7 +8,7 @@ import {useEnsembles} from "@/lib/hooks/use-ensembles";
 import {useState} from "react";
 
 export default function ProfileScreen() {
-    const {profile} = useAuthContext();
+    const {profile, signOut} = useAuthContext();
     const theme = useTheme();
     const router = useRouter();
     const {ensembles, setEnsembles} = useEnsembles();
@@ -23,11 +23,7 @@ export default function ProfileScreen() {
                     <Text>{profile.name}</Text>
                     <Text>Email: {profile.email}</Text>
                     <Button mode="contained" onPress={async () => {
-                        const {error} = await supabase.auth.signOut();
-
-                        if (error) {
-                            console.error('Error signing out:', error);
-                        }
+                        await signOut?.();
                     }}>
                         Sign out
                     </Button>
