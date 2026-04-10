@@ -1,8 +1,9 @@
 import {Button, Text, useTheme} from "react-native-paper";
 import {useEffect, useState} from "react";
-import {View} from "react-native";
+import {ScrollView, View} from "react-native";
 import {FieldView, SettingsManager, SettingsProperty} from "@/lib/settings-manager";
 import Slider from '@react-native-community/slider';
+import {SafeAreaView} from "react-native-safe-area-context";
 
 export default function SettingsScreen() {
     const theme = useTheme();
@@ -32,55 +33,57 @@ export default function SettingsScreen() {
     }
 
     return (
-        <View style={{flex: 1, marginHorizontal: 16}}>
-            <View style={{padding: 16, display: 'flex', flexDirection: 'column', gap: 16}}>
-                <Text variant="headlineMedium" style={{color: theme.colors.primary}}>
-                    Field View
-                </Text>
-                <View style={{flexDirection: "row", gap: 12}}>
-                    <Button
-                        mode={fieldView === FieldView.Director ? "contained" : "outlined"}
-                        onPress={() => updateFieldView(FieldView.Director)}
-                        disabled={loading}
-                    >
-                        Director
-                    </Button>
-                    <Button
-                        mode={fieldView === FieldView.Performer ? "contained" : "outlined"}
-                        onPress={() => updateFieldView(FieldView.Performer)}
-                        disabled={loading}
-                    >
-                        Performer
-                    </Button>
+        <SafeAreaView style={{flex: 1, marginHorizontal: 16}} edges={['bottom', 'left', 'right']}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{gap: 16, paddingBottom: 16}}>
+                <View style={{padding: 16, display: 'flex', flexDirection: 'column', gap: 16}}>
+                    <Text variant="headlineMedium" style={{color: theme.colors.primary}}>
+                        Field View
+                    </Text>
+                    <View style={{flexDirection: "row", gap: 12}}>
+                        <Button
+                            mode={fieldView === FieldView.Director ? "contained" : "outlined"}
+                            onPress={() => updateFieldView(FieldView.Director)}
+                            disabled={loading}
+                        >
+                            Director
+                        </Button>
+                        <Button
+                            mode={fieldView === FieldView.Performer ? "contained" : "outlined"}
+                            onPress={() => updateFieldView(FieldView.Performer)}
+                            disabled={loading}
+                        >
+                            Performer
+                        </Button>
+                    </View>
+                    <Text>
+                        {fieldView === FieldView.Performer ? (
+                            "View the field from the perspective of a performer, with the front sideline at the top of the screen."
+                        ) : (
+                            "View the field from the perspective of a director, with the front sideline at the bottom of the screen."
+                        )}
+                    </Text>
                 </View>
-                <Text>
-                    {fieldView === FieldView.Performer ? (
-                        "View the field from the perspective of a performer, with the front sideline at the top of the screen."
-                    ) : (
-                        "View the field from the perspective of a director, with the front sideline at the bottom of the screen."
-                    )}
-                </Text>
-            </View>
-            <View style={{padding: 16, display: 'flex', flexDirection: 'column', gap: 16}}>
-                <Text variant="headlineMedium" style={{color: theme.colors.primary}}>
-                    Dot Scale
-                </Text>
-                <View style={{flexDirection: "row", gap: 12}}>
-                    <Slider
-                        style={{flex: 1}}
-                        minimumValue={0.5}
-                        maximumValue={2}
-                        step={0.5}
-                        value={dotScale}
-                        onValueChange={updateDotScale}
-                        minimumTrackTintColor={theme.colors.primary}
-                        renderStepNumber
-                    />
+                <View style={{padding: 16, display: 'flex', flexDirection: 'column', gap: 16}}>
+                    <Text variant="headlineMedium" style={{color: theme.colors.primary}}>
+                        Dot Scale
+                    </Text>
+                    <View style={{flexDirection: "row", gap: 12}}>
+                        <Slider
+                            style={{flex: 1}}
+                            minimumValue={0.5}
+                            maximumValue={2}
+                            step={0.5}
+                            value={dotScale}
+                            onValueChange={updateDotScale}
+                            minimumTrackTintColor={theme.colors.primary}
+                            renderStepNumber
+                        />
+                    </View>
+                    <Text>
+                        Configure how big performer dots and movements appear on the field.
+                    </Text>
                 </View>
-                <Text>
-                    Configure how big performer dots and movements appear on the field.
-                </Text>
-            </View>
-        </View>
+            </ScrollView>
+        </SafeAreaView>
     )
 }

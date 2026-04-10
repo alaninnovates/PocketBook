@@ -33,7 +33,7 @@ export default function ManageScreen() {
         <SafeAreaView style={{padding: 16, flex: 1}}>
             <EnsembleSwitcher selectedEnsemble={selectedEnsemble} setSelectedEnsemble={setSelectedEnsemble}
                               filterAdmin={true}/>
-            <ScrollView contentContainerStyle={{display: 'flex', flexDirection: 'column', gap: 16, height: '100%'}}>
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{display: 'flex', flexDirection: 'column', gap: 16}}>
                 {members.length === 0 && (
                     <Text variant="bodyMedium" style={{marginTop: 32, textAlign: 'center'}}>No members available for
                         this
