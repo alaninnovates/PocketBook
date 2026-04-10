@@ -15,6 +15,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useShowData} from "@/lib/hooks/use-show-data";
 import {useShowContext} from "@/lib/hooks/use-show-context";
+import * as ScreenOrientation from 'expo-screen-orientation';
 
 export default function ShowScreen() {
     const {id} = useLocalSearchParams();
@@ -31,6 +32,12 @@ export default function ShowScreen() {
     const animationFrameRef = useRef<number | null>(null);
     const startTimeRef = useRef<number | null>(null);
     const currentAnimationStepRef = useRef(currentIndex);
+
+    useEffect(() => {
+        (async () => {
+            await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT);
+        })();
+    }, []);
 
     useMemo(() => {
         currentAnimationStepRef.current = currentIndex;
