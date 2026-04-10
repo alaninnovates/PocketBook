@@ -1,6 +1,7 @@
 import {ThemeProvider} from '@react-navigation/native';
 import {Stack} from 'expo-router';
 import {StatusBar} from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
 import 'react-native-reanimated';
 
 import {PaperProvider} from "react-native-paper";
@@ -9,24 +10,40 @@ import {OnboardingStep, useAuthContext} from "@/lib/hooks/use-auth-context";
 import AuthProvider from "@/components/auth/auth-provider";
 import {CombinedDarkTheme, CombinedLightTheme} from "@/lib/theme";
 import ShowProvider from "@/lib/show-provider";
+import {useEffect} from "react";
 
 export const unstable_settings = {
     anchor: '(tabs)',
 };
 
+SplashScreen.preventAutoHideAsync();
+SplashScreen.setOptions({
+    duration: 1000,
+    fade: true,
+});
+
 function RootNavigator() {
     const {profile, isLoggedIn} = useAuthContext();
     const isOnboarding = profile?.onboarding_step !== OnboardingStep.Completed;
+
+    useEffect(() => {
+        if (profile) {
+            setTimeout(() => {
+                SplashScreen.hideAsync();
+            }, 1000);
+        }
+    }, [profile]);
+
     return (
         <Stack>
-            <Stack.Protected guard={!profile || (isLoggedIn && !isOnboarding)}>
+            <Stack.Protected guard={(isLoggedIn && !isOnboarding)}>
                 <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
                 <Stack.Screen name="(modals)" options={{presentation: 'modal', headerShown: false}}/>
             </Stack.Protected>
-            <Stack.Protected guard={!profile || (isLoggedIn && isOnboarding)}>
+            <Stack.Protected guard={(isLoggedIn && isOnboarding)}>
                 <Stack.Screen name="(onboarding)" options={{headerShown: false}}/>
             </Stack.Protected>
-            <Stack.Protected guard={!isLoggedIn || !profile}>
+            <Stack.Protected guard={!isLoggedIn}>
                 <Stack.Screen name="index" options={{headerShown: false}}/>
             </Stack.Protected>
             <Stack.Screen name="+not-found"/>
