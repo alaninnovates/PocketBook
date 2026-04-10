@@ -1,10 +1,11 @@
 import {Stack, useLocalSearchParams, useRouter} from "expo-router";
 import {useShowData} from "@/lib/hooks/use-show-data";
 import {ScrollView, View} from "react-native";
-import {DataTable, Text} from "react-native-paper";
+import {DataTable, IconButton, Text, useTheme} from "react-native-paper";
 import {useShowContext} from "@/lib/hooks/use-show-context";
 
 export default function SelectInstrumentModalScreen() {
+    const theme = useTheme();
     const {id} = useLocalSearchParams();
     const router = useRouter();
     const {showData, loading} = useShowData(id as string, true);
@@ -29,7 +30,9 @@ export default function SelectInstrumentModalScreen() {
 
     return (
         <>
-            <Stack.Screen options={{title: 'Select Set'}}/>
+            <Stack.Screen options={{title: 'Select Set', headerRight: () => (
+                <IconButton icon="close" onPress={() => router.back()} iconColor={theme.colors.onSurfaceVariant} />
+            )}}/>
             <ScrollView
                 style={{padding: 16}}
                 contentContainerStyle={{display: 'flex', flexDirection: 'column', gap: 12, padding: 16}}
