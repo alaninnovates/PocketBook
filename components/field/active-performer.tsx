@@ -1,6 +1,5 @@
 import {Circle, Line, matchFont, Rect, Text, vec} from "@shopify/react-native-skia";
 import {CENTER_FRONT_POINT_STEPS, stepsToPixels} from "@/components/field/dimensions";
-import {instrumentToColor} from "@/components/field/color";
 import React from "react";
 import {useTheme} from "react-native-paper";
 import {clampMax} from "@/lib/utils";
@@ -8,6 +7,7 @@ import {DotbookEntry, DotData} from "@/lib/types";
 import {calculateMidset, dotToFieldCoordinateSteps} from "@/components/field/parser";
 import {Platform} from "react-native";
 import {interpolatePosition} from "@/components/field/playback";
+import {SettingsProperty, useProperty} from "@/lib/settings-manager";
 
 const fontFamily = Platform.select({ios: "Arial", default: "arial"});
 
@@ -76,6 +76,7 @@ const AdditionalPagesDisplay = ({
     additionalDots: DotbookEntry[];
     direction: number;
 }) => {
+    const [dotScale] = useProperty<number>(SettingsProperty.DotScale, 1);
     return (
         <>
             {additionalDots.map((dot, index) => {
@@ -90,21 +91,21 @@ const AdditionalPagesDisplay = ({
                         <Circle
                             cx={stepsToPixels(CENTER_FRONT_POINT_STEPS.x - currentCoord.x)}
                             cy={stepsToPixels(CENTER_FRONT_POINT_STEPS.y + currentCoord.y)}
-                            r={4}
+                            r={4 * dotScale}
                             color="red"
                         />
                         <Line
                             p1={vec(stepsToPixels(CENTER_FRONT_POINT_STEPS.x - currentCoord.x), stepsToPixels(CENTER_FRONT_POINT_STEPS.y + currentCoord.y))}
                             p2={vec(stepsToPixels(CENTER_FRONT_POINT_STEPS.x - nextCoord.x), stepsToPixels(CENTER_FRONT_POINT_STEPS.y + nextCoord.y))}
                             color={direction === -1 ? 'blue' : 'green'}
-                            strokeWidth={2}
+                            strokeWidth={2 * dotScale}
                         />
                         {(currentCoord.x !== nextCoord.x ||
                             currentCoord.y !== nextCoord.y) && (
                             <Circle
                                 cx={stepsToPixels(CENTER_FRONT_POINT_STEPS.x - midCoord[0])}
                                 cy={stepsToPixels(CENTER_FRONT_POINT_STEPS.y + midCoord[1])}
-                                r={2}
+                                r={2 * dotScale}
                                 color={direction === -1 ? 'blue' : 'green'}
                             />
                         )}

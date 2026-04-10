@@ -15,11 +15,18 @@ export default function ProfileScreen() {
     const [confirmModalVisible, setConfirmModalVisible] = useState(false);
     const [confirmDeleteEnsemble, setConfirmDeleteEnsemble] = useState<{ id: number; name: string } | null>(null);
 
+    if (!profile) {
+        return null;
+    }
+
     return (
         <SafeAreaView style={{padding: 16, flex: 1}}>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{gap: 16, paddingBottom: 16}}>
                 <View style={{backgroundColor: theme.colors.primaryContainer, borderRadius: 12, padding: 16, gap: 12}}>
-                    <Text variant="headlineMedium">Profile</Text>
+                    <View style={{display: "flex", flexDirection: 'row', justifyContent: "space-between", alignItems: 'center'}}>
+                        <Text variant="headlineMedium">Profile</Text>
+                        <IconButton icon="cog" onPress={() => router.push('/(tabs)/profile/settings')} />
+                    </View>
                     <Text>{profile.name}</Text>
                     <Text>Email: {profile.email}</Text>
                     <Button mode="contained" onPress={async () => {

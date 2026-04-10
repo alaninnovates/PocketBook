@@ -106,6 +106,7 @@ export default function ShowScreen() {
 
     useEffect(() => {
         const fetchSelectedInstrument = async () => {
+            AsyncStorage.removeItem(`show_${id}_selected_instrument`)
             const storedInstrument = await AsyncStorage.getItem(`show_${id}_selected_instrument`);
             if (storedInstrument) {
                 console.log('fetched stored instrument:', storedInstrument);
