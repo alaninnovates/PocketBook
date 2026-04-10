@@ -27,7 +27,7 @@ function RootNavigator() {
     const isOnboarding = profile?.onboarding_step !== OnboardingStep.Completed;
 
     useEffect(() => {
-        if (profile) {
+        if ((isLoggedIn && !profile) || !isLoggedIn) {
             setTimeout(() => {
                 SplashScreen.hideAsync();
             }, 1000);
