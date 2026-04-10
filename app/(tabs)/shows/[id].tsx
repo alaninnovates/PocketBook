@@ -37,6 +37,11 @@ export default function ShowScreen() {
         (async () => {
             await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT);
         })();
+        return () => {
+            (async () => {
+                await ScreenOrientation.unlockAsync();
+            })();
+        }
     }, []);
 
     useMemo(() => {
