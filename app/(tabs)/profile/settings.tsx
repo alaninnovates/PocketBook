@@ -6,7 +6,7 @@ import Slider from '@react-native-community/slider';
 
 export default function SettingsScreen() {
     const theme = useTheme();
-    const [fieldView, setFieldView] = useState<FieldView>(FieldView.Director);
+    const [fieldView, setFieldView] = useState<FieldView>(FieldView.Performer);
     const [dotScale, setDotScale] = useState<number>(1);
     const [loading, setLoading] = useState(true);
 
@@ -14,7 +14,7 @@ export default function SettingsScreen() {
         (async () => {
             const savedFieldView = await SettingsManager.getProperty<FieldView>(
                 SettingsProperty.FieldView,
-                FieldView.Director
+                FieldView.Performer
             );
             setFieldView(savedFieldView);
             setLoading(false);

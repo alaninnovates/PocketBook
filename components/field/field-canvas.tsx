@@ -5,6 +5,7 @@ import {OtherPerformers} from "./other-performers";
 import {useTheme} from "react-native-paper";
 import {DotData, TempoData} from "@/lib/types";
 import {ActivePerformer} from "@/components/field/active-performer";
+import {FieldView, SettingsProperty, useProperty} from "@/lib/settings-manager";
 
 export const FieldCanvas = ({zoom, dotData, tempoData, currentIndex, performer, animationProgress}: {
     zoom: number;
@@ -15,12 +16,13 @@ export const FieldCanvas = ({zoom, dotData, tempoData, currentIndex, performer, 
     animationProgress: number;
 }) => {
     const theme = useTheme();
+    const [fieldView] = useProperty<FieldView>(SettingsProperty.FieldView, FieldView.Performer);
 
     return (
         <Canvas style={{
             width: stepsToPixels(FIELD_WIDTH_STEPS),
             height: stepsToPixels(FIELD_HEIGHT_STEPS),
-            transform: [{rotate: '180deg'}],
+            transform: [{rotate: fieldView === FieldView.Performer ? '180deg' : '0deg'}],
         }}>
             <FieldGrid theme={theme} showGrid={zoom > 0.9}/>
             <OtherPerformers dotData={dotData} currentIndex={currentIndex} zoom={zoom} animationProgress={animationProgress} />

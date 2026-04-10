@@ -8,6 +8,7 @@ import {useTheme} from "react-native-paper";
 import {Platform} from "react-native";
 import {clampMax} from "@/lib/utils";
 import {interpolatePosition} from "@/components/field/playback";
+import {FieldView, SettingsProperty, useProperty} from "@/lib/settings-manager";
 
 const fontFamily = Platform.select({ios: "Arial", default: "arial"});
 
@@ -18,6 +19,7 @@ export const OtherPerformers = ({dotData, currentIndex, zoom, animationProgress}
     animationProgress: number;
 }) => {
     const theme = useTheme();
+    const [fieldView] = useProperty<FieldView>(SettingsProperty.FieldView, FieldView.Performer);
     const font = matchFont({
         fontFamily,
         fontSize: clampMax(6 * 6 / (zoom), 10),
@@ -44,8 +46,10 @@ export const OtherPerformers = ({dotData, currentIndex, zoom, animationProgress}
             );
         }
 
-        const textX = stepsToPixels(CENTER_FRONT_POINT_STEPS.x - coord.x) + font.getTextWidth(label) / 2;
-        const textY = stepsToPixels(CENTER_FRONT_POINT_STEPS.y + coord.y) - font.measureText(label).height / 2 + 1.5;
+        const multiplier = fieldView === FieldView.Performer ? 1 : -1;
+
+        const textX = stepsToPixels(CENTER_FRONT_POINT_STEPS.x - coord.x) + (font.getTextWidth(label) / 2) * multiplier;
+        const textY = stepsToPixels(CENTER_FRONT_POINT_STEPS.y + coord.y) + (-font.measureText(label).height / 2 + 1.5) * multiplier;
 
         return (
             <React.Fragment key={label}>
@@ -54,14 +58,14 @@ export const OtherPerformers = ({dotData, currentIndex, zoom, animationProgress}
                     cx={stepsToPixels(CENTER_FRONT_POINT_STEPS.x - coord.x)}
                     cy={stepsToPixels(CENTER_FRONT_POINT_STEPS.y + coord.y)}
                     r={clampMax(4 * 6 / (zoom), 6)}
-                    color={instrumentToColor(performer)}
+                    color={instrumentToColor(performer, theme.dark)}
                     opacity={1}
                 />
                 <Text
                     key={`text-${label}`}
                     x={textX}
                     y={textY}
-                    transform={[{rotate: Math.PI}]}
+                    transform={[{rotate: fieldView === FieldView.Performer ? Math.PI : 0}]}
                     origin={vec(textX, textY)}
                     color={theme.colors.background}
                     font={font}

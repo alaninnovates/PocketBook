@@ -7,7 +7,7 @@ import {DotbookEntry, DotData} from "@/lib/types";
 import {calculateMidset, dotToFieldCoordinateSteps} from "@/components/field/parser";
 import {Platform} from "react-native";
 import {interpolatePosition} from "@/components/field/playback";
-import {SettingsProperty, useProperty} from "@/lib/settings-manager";
+import {FieldView, SettingsProperty, useProperty} from "@/lib/settings-manager";
 
 const fontFamily = Platform.select({ios: "Arial", default: "arial"});
 
@@ -20,6 +20,7 @@ const CurrentPageDisplay = ({
     zoom: number;
     performer: string;
 }) => {
+    const [fieldView] = useProperty<FieldView>(SettingsProperty.FieldView, FieldView.Performer);
     const font = matchFont({
         fontFamily,
         fontSize: clampMax(6 * 6 / (zoom), 10),
@@ -30,8 +31,9 @@ const CurrentPageDisplay = ({
     const cy = stepsToPixels(CENTER_FRONT_POINT_STEPS.y + coord.y);
     const r = clampMax(4 * 6 / (zoom), 6);
 
-    const textX = stepsToPixels(CENTER_FRONT_POINT_STEPS.x - coord.x) + font.getTextWidth(performer) / 2;
-    const textY = stepsToPixels(CENTER_FRONT_POINT_STEPS.y + coord.y) - font.measureText(performer).height / 2 + 1.5;
+    const multiplier = fieldView === FieldView.Performer ? 1 : -1;
+    const textX = stepsToPixels(CENTER_FRONT_POINT_STEPS.x - coord.x) + (font.getTextWidth(performer) / 2) * multiplier;
+    const textY = stepsToPixels(CENTER_FRONT_POINT_STEPS.y + coord.y) + (- font.measureText(performer).height / 2 + 1.5) * multiplier;
     return (
         <>
             <Circle
@@ -55,7 +57,7 @@ const CurrentPageDisplay = ({
                 key={`text-${performer}`}
                 x={textX}
                 y={textY}
-                transform={[{rotate: Math.PI}]}
+                transform={[{rotate: fieldView === FieldView.Performer ? Math.PI : 0}]}
                 origin={vec(textX, textY)}
                 color={theme.colors.background}
                 font={font}
