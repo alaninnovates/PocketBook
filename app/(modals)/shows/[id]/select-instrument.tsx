@@ -1,5 +1,5 @@
 import {Stack, useLocalSearchParams, useRouter} from "expo-router";
-import {Button, Text} from "react-native-paper";
+import {Button, Text, useTheme} from "react-native-paper";
 import {useShowData} from "@/lib/hooks/use-show-data";
 import {useEffect} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -8,6 +8,7 @@ import {instrumentToColor} from "@/components/field/color";
 import {useShowContext} from "@/lib/hooks/use-show-context";
 
 export default function SelectInstrumentModalScreen() {
+    const theme = useTheme();
     const {id} = useLocalSearchParams();
     const router = useRouter();
     const {showData, loading} = useShowData(id as string);
@@ -46,7 +47,7 @@ export default function SelectInstrumentModalScreen() {
                                 setSelectedInstrument(label);
                                 router.back();
                             }}
-                            buttonColor={instrumentToColor(performer)}
+                            buttonColor={instrumentToColor(performer, theme.dark)}
                         >
                             {performer} {label}
                         </Button>
