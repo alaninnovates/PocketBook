@@ -283,6 +283,20 @@ export default function ShowScreen() {
                             requestAnimationFrame(animate);
                     }}
                 />
+                <IconButton
+                    icon={"format-list-bulleted"}
+                    mode="contained"
+                    size={32}
+                    onPress={() => router.push(`/(modals)/shows/${id}/select-set`)}
+                />
+            </View>
+            <View style={{position: "absolute", bottom: bottom, left: left, flexDirection: 'row'}}>
+                <IconButton
+                    icon="close"
+                    mode="contained"
+                    size={32}
+                    onPress={() => router.back()}
+                />
             </View>
             <View style={{position: "absolute", bottom: bottom, right: right, flexDirection: 'row'}}>
                 <IconButton
