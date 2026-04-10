@@ -19,14 +19,14 @@ function RootNavigator() {
     const isOnboarding = profile?.onboarding_step !== OnboardingStep.Completed;
     return (
         <Stack>
-            <Stack.Protected guard={isLoggedIn && !isOnboarding}>
+            <Stack.Protected guard={!profile || (isLoggedIn && !isOnboarding)}>
                 <Stack.Screen name="(tabs)" options={{headerShown: false}}/>
                 <Stack.Screen name="(modals)" options={{presentation: 'modal', headerShown: false}}/>
             </Stack.Protected>
-            <Stack.Protected guard={isLoggedIn && isOnboarding}>
+            <Stack.Protected guard={!profile || (isLoggedIn && isOnboarding)}>
                 <Stack.Screen name="(onboarding)" options={{headerShown: false}}/>
             </Stack.Protected>
-            <Stack.Protected guard={!isLoggedIn}>
+            <Stack.Protected guard={!isLoggedIn || !profile}>
                 <Stack.Screen name="index" options={{headerShown: false}}/>
             </Stack.Protected>
             <Stack.Screen name="+not-found"/>
