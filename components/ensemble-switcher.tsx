@@ -1,5 +1,6 @@
 import Dropdown from "@/components/dropdown";
 import {useEnsembles} from "@/lib/hooks/use-ensembles";
+import {useEffect} from "react";
 
 export function EnsembleSwitcher({selectedEnsemble, setSelectedEnsemble, filterAdmin = false}: {
     selectedEnsemble: number | null;
@@ -7,6 +8,12 @@ export function EnsembleSwitcher({selectedEnsemble, setSelectedEnsemble, filterA
     filterAdmin?: boolean;
 }) {
     const {ensembles} = useEnsembles();
+
+    useEffect(() => {
+        if (ensembles.length !== 0) {
+            setSelectedEnsemble(ensembles[0].ensembles.id);
+        }
+    }, [ensembles]);
 
     return (
         <Dropdown
