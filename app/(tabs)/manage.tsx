@@ -73,7 +73,7 @@ export default function ManageScreen() {
                             buttons={[
                                 {
                                     value: 'awaiting_approval',
-                                    label: 'Awaiting Approval',
+                                    label: 'Rejected',
                                 },
                                 {
                                     value: 'member',

@@ -40,6 +40,7 @@ export default function JoinEnsemble({onSuccess}: { onSuccess: () => void }) {
 
     const handleSelectEnsemble = (ensemble: string) => {
         setEnsembleName(ensemble);
+        setEnsembleNameInFocus(false);
     };
 
     const requestJoin = async (ensembleName: string, code: string) => {
@@ -70,7 +71,6 @@ export default function JoinEnsemble({onSuccess}: { onSuccess: () => void }) {
                     onChangeText={setEnsembleName}
                     style={{width: '100%'}}
                     onFocus={() => setEnsembleNameInFocus(true)}
-                    onBlur={() => setEnsembleNameInFocus(false)}
                 />
                 {ensembleName.length > 0 && filteredEnsembles.length > 0 && ensembleNameInFocus && (
                     <ScrollView

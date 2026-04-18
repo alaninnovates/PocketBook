@@ -14,10 +14,10 @@ export default function OnboardingJoinEnsembleScreen() {
             display: 'flex',
             flexDirection: 'column',
             gap: 16,
-            padding: 32,
+            padding: 16,
             height: '100%',
         }}>
-            <Text variant="headlineMedium" style={{color: theme.colors.primary}}>
+            <Text variant="headlineMedium" style={{color: theme.colors.primary, paddingTop: 16, paddingHorizontal: 16}}>
                 Join Ensemble
             </Text>
             <JoinEnsemble onSuccess={async () => {
