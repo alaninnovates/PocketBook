@@ -3,7 +3,7 @@ import {Button, Text, useTheme} from "react-native-paper";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useRouter} from "expo-router";
 import {EnsembleSwitcher} from "@/components/ensemble-switcher";
-import {useEffect, useState} from "react";
+import {useEffect, useMemo, useState} from "react";
 import {supabase} from "@/lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
@@ -18,6 +18,7 @@ export default function ShowsScreen() {
         created_at: string;
         // not database property, added later
         downloaded: boolean;
+        pages?: number;
     }[]>([]);
     const [downloadingShowIds, setDownloadingShowIds] = useState<number[]>([]);
 
@@ -48,7 +49,19 @@ export default function ShowsScreen() {
             console.log('fetched shows:', data);
             const showsData = await Promise.all(data?.map(async show => ({
                 ...show,
-                downloaded: await AsyncStorage.getItem(`show_${show.id}`) !== null
+                downloaded: await AsyncStorage.getItem(`show_${show.id}`) !== null,
+                pages: await (async () => {
+                    const storedInstrument = await AsyncStorage.getItem(`show_${show.id}_selected_instrument`);
+                    if (storedInstrument) {
+                        const showDataString = await AsyncStorage.getItem(`show_${show.id}`);
+                        if (showDataString) {
+                            const showData = JSON.parse(showDataString);
+                            const dotData = showData.dot_data;
+                            return dotData[storedInstrument].dots.length;
+                        }
+                    }
+                    return undefined;
+                })()
             })) || []);
             setShows(showsData);
             await AsyncStorage.setItem(`shows_ensemble_${selectedEnsemble}`, JSON.stringify(showsData));
@@ -70,7 +83,7 @@ export default function ShowsScreen() {
                           style={{padding: 16, backgroundColor: theme.colors.surface, borderRadius: theme.roundness}}>
                         <Text variant="headlineMedium" style={{marginBottom: 8}}>{show.name}</Text>
                         <Text>Date: {new Date(show.created_at).toDateString()}</Text>
-                        <Text>Pages: -</Text>
+                        <Text>Pages: {show.pages !== undefined ? show.pages : '-'}</Text>
                         <Button mode="contained" style={{marginTop: 8}}
                                 onPress={async () => {
                                     if (show.downloaded) {
