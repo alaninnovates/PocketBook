@@ -183,7 +183,7 @@ export default function ShowScreen() {
                 <FieldCanvas zoom={zoom} dotData={showData.dot_data} tempoData={showData.tempo_data}
                              currentIndex={currentIndex}
                              performer={selectedInstrument}
-                                animationProgress={animationProgress}
+                             animationProgress={animationProgress}
                 />
             </ReactNativeZoomableView>
             <View
@@ -241,25 +241,23 @@ export default function ShowScreen() {
                             <Text variant="bodyLarge">-</Text>
                         )}
                     </View>
-                    <TouchableRipple onPress={() => router.push(`/(modals)/shows/${id}/select-set`)}>
-                        <View>
-                            <Text variant="bodyLarge">
-                                Side {dots[currentIndex].side}:{' '}
-                                {dots[currentIndex].sideToSide.stepOffset}{' '}
-                                {dots[currentIndex].sideToSide.stepOffsetDirection}{' '}
-                                {dots[currentIndex].sideToSide.yardline} yd ln
-                            </Text>
-                            <Text variant="bodyLarge">
-                                {dots[currentIndex].frontToBack.stepOffset}{' '}
-                                {dots[currentIndex].frontToBack.stepOffsetDirection}{' '}
-                                {dots[currentIndex].frontToBack.line}
-                            </Text>
-                            <Text variant="bodyLarge">
-                                {isHold ? 'Hold' : 'Move'}:{' '}
-                                {dots[currentIndex].counts}
-                            </Text>
-                        </View>
-                    </TouchableRipple>
+                    <View>
+                        <Text variant="bodyLarge">
+                            Side {dots[currentIndex].side}:{' '}
+                            {dots[currentIndex].sideToSide.stepOffset}{' '}
+                            {dots[currentIndex].sideToSide.stepOffsetDirection}{' '}
+                            {dots[currentIndex].sideToSide.yardline} yd ln
+                        </Text>
+                        <Text variant="bodyLarge">
+                            {dots[currentIndex].frontToBack.stepOffset}{' '}
+                            {dots[currentIndex].frontToBack.stepOffsetDirection}{' '}
+                            {dots[currentIndex].frontToBack.line}
+                        </Text>
+                        <Text variant="bodyLarge">
+                            {isHold ? 'Hold' : 'Move'}:{' '}
+                            {dots[currentIndex].counts}
+                        </Text>
+                    </View>
                 </View>
             </View>
             <View style={{position: "absolute", right: right, top: '45%'}}>
