@@ -27,7 +27,7 @@ export default function ProfileScreen() {
                         <Text variant="headlineMedium">Profile</Text>
                         <IconButton icon="cog" onPress={() => router.push('/(tabs)/profile/settings')} />
                     </View>
-                    <Text>{profile.name}</Text>
+                    <Text>{profile.first_name} {profile.last_name}</Text>
                     <Text>Email: {profile.email}</Text>
                     <Button mode="contained" onPress={async () => {
                         await signOut?.();

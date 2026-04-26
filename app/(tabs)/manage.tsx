@@ -17,7 +17,7 @@ export default function ManageScreen() {
         }
         const fetchMembers = async () => {
             const {data, error} = await supabase.from('ensemble_memberships')
-                .select('profiles(id, email, name), role, requested_at, approved_at')
+                .select('profiles(id, email, name, first_name, last_name), role, requested_at, approved_at')
                 .eq('ensemble_id', selectedEnsemble);
             if (error) {
                 console.error('err fetching ensemble members:', error);
@@ -42,7 +42,7 @@ export default function ManageScreen() {
                 {members.map((member: any) => (
                     <View key={member.profiles.id}
                           style={{padding: 16, backgroundColor: theme.colors.surface, borderRadius: theme.roundness, gap: 8}}>
-                        <Text variant="titleMedium">{member.profiles.name || 'No Name'}</Text>
+                        <Text variant="titleMedium">{member.profiles.first_name ? (`${member.profiles.first_name} ${member.profiles.last_name}`) : 'No Name'}</Text>
                         <Text variant="bodyMedium">Email: {member.profiles.email}</Text>
                         <SegmentedButtons
                             value={member.role}
