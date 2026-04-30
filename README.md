@@ -9,7 +9,7 @@ actually extensively used by my section members and I the past season. Enjoy!
 > Access pocketbook on Apple TestFlight [here](https://testflight.apple.com/join/h8qeypdj)
 
 ## Demo
-<video src="github/videos/demo.mp4" controls width="400"></video>
+<video src="https://github.com/user-attachments/assets/b4d914df-ca4e-40e3-bd61-fa79102a7dc4" controls width="400"></video>
 
 ## Features/Screenshots
 
