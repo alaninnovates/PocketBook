@@ -8,6 +8,9 @@ actually extensively used by my section members and I the past season. Enjoy!
 > [!NOTE]
 > Access pocketbook on Apple TestFlight [here](https://testflight.apple.com/join/h8qeypdj)
 
+## Demo
+<video src="github/videos/demo.mp4" controls width="400"/>
+
 ## Features/Screenshots
 
 <table>
