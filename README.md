@@ -1,50 +1,47 @@
-# Welcome to your Expo app 👋
+# PocketBook
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+PocketBook is a drill visualizer for marching band drill, which is essentially just a series of formations that a
+marching band performs on a field. This project is specifically created around a high-school football field, and was
+actually extensively used by my section members and I the past season. Enjoy!
 
-## Get started
 
-1. Install dependencies
+> [!NOTE]
+> Access pocketbook on Apple TestFlight [here](https://testflight.apple.com/join/h8qeypdj)
 
-   ```bash
-   npm install
-   ```
+## Features/Screenshots
 
-2. Start the app
+<table>
+    <tr>
+        <td>
+            Visualize everything on the field<br>
+            <img src="github/images/view_drill.PNG" alt="Field" width="400"/>
+        </td>
+        <td>
+            Find your dots in a press<br>
+            <img src="github/images/select_set.PNG" alt="Dot List" width="400"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Join as many ensembles as you want<br>
+            <img src="github/images/ensembles.PNG" alt="Join Ensemble" width="400"/>
+        </td>
+        <td>
+            Have all your shows in one place<br>
+            <img src="github/images/shows.PNG" alt="List Shows" width="400"/>
+        </td>
+    </tr>
+    <tr>
+        <td>
+            Customize your settings<br>
+            <img src="github/images/settings.PNG" alt="Settings" width="400"/>
+        </td>
+        <td>
+            Manage your ensemble members<br>
+            <img src="github/images/manage.PNG" alt="Memberships" width="400"/>
+        </td>
+    </tr>
+</table>
 
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
-```
-
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
-
-## Learn more
-
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+This app has been heavily influenced by all of my friends in Marching Band, who have kindly provided feedback on ways
+that I can improve the app. If you have any suggestions, please let me know!
