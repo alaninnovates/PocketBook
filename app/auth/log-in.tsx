@@ -1,6 +1,7 @@
 import {IconButton, Text, TextInput, useTheme} from "react-native-paper";
 import {GoogleButton} from "@/components/auth/google-button";
 import {DiscordButton} from "@/components/auth/discord-button";
+import {AppleButton} from "@/components/auth/apple-button";
 import {EmailPassword} from "@/components/auth/email-password";
 import {SafeAreaView, useSafeAreaInsets} from "react-native-safe-area-context";
 import {View} from "react-native";
@@ -29,6 +30,7 @@ export default function LoginScreen() {
             <View style={{display: 'flex', flexDirection: 'row', gap: 16}}>
                 <GoogleButton/>
                 <DiscordButton/>
+                <AppleButton type="log-in"/>
             </View>
         </SafeAreaView>
     )
