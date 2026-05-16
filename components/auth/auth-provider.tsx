@@ -95,10 +95,10 @@ export default function AuthProvider({children}: PropsWithChildren) {
         }
     }, [profile]);
 
-    const updateProfileName = useCallback(async (firstName: string, lastName: string) => {
+    const updateProfileName = useCallback(async (name: string) => {
         const {data, error} = await supabase
             .from('profiles')
-            .update({first_name: firstName, last_name: lastName})
+            .update({name: name})
             .eq('id', profile.id)
             .select('*')
             .single();
@@ -110,7 +110,7 @@ export default function AuthProvider({children}: PropsWithChildren) {
         if (data) {
             setProfile(data);
             await AsyncStorage.setItem('user_profile', JSON.stringify(data));
-            console.log('Updated profile name to:', firstName, lastName, "(new profile data: ", data, ")");
+            console.log('Updated profile name to:', name, "(new profile data: ", data, ")");
         }
     }, [profile]);
 

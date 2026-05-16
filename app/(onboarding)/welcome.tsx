@@ -16,7 +16,7 @@ export default function OnboardingWelcomeScreen() {
             padding: 32,
         }}>
             <Text variant="headlineMedium" style={{color: theme.colors.primary}}>
-                Welcome to PocketBook, {profile?.name || 'there'}!
+                Welcome to PocketBook{profile?.name ? `, ${profile?.name}` : ''}!
             </Text>
             <Text variant="bodyMedium" style={{color: theme.colors.onSurfaceVariant}}>
                 PocketBook is the ultimate app for marching bands to learn and practice their drill, all in one place.

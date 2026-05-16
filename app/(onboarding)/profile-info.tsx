@@ -8,8 +8,7 @@ export default function OnboardingProfileInfoScreen() {
     const {profile, updateOnboardingStep, updateProfileName} = useAuthContext();
     const theme = useTheme();
     const router = useRouter();
-    const [firstName, setFirstName] = useState(profile?.name || '');
-    const [lastName, setLastName] = useState('');
+    const [name, setName] = useState(profile?.name || '');
     const [loading, setLoading] = useState(false);
 
     return (
@@ -25,14 +24,13 @@ export default function OnboardingProfileInfoScreen() {
             <Text variant="bodyMedium" style={{color: theme.colors.onSurfaceVariant}}>
                 This is the information that will be displayed to your ensemble and band directors. You can edit this information later in your profile settings.
             </Text>
-            <TextInput label="First Name" value={firstName} mode="outlined" onChangeText={setFirstName}/>
-            <TextInput label="Last Name" value={lastName} mode="outlined" onChangeText={setLastName}/>
+            <TextInput label="Full Name" value={name} mode="outlined" onChangeText={setName}/>
             <Button mode="contained" onPress={async () => {
                 setLoading(true);
-                await updateProfileName?.(firstName, lastName);
+                await updateProfileName?.(name);
                 await updateOnboardingStep?.(OnboardingStep.JoinEnsemble);
                 router.push('/(onboarding)/join-ensemble');
-            }} disabled={loading || !(firstName.trim() && lastName.trim())}>
+            }} disabled={loading || !name.trim()}>
                 Continue
             </Button>
         </View>
