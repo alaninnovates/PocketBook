@@ -1,8 +1,10 @@
 import {Alert, Platform} from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import {supabase} from '@/lib/supabase';
+import {useTheme} from "react-native-paper";
 
 export function AppleButton({type}: { type: "sign-up" | "log-in" }) {
+    const theme = useTheme();
     if (Platform.OS !== 'ios') return null;
 
     return (
@@ -12,7 +14,7 @@ export function AppleButton({type}: { type: "sign-up" | "log-in" }) {
                     ? AppleAuthentication.AppleAuthenticationButtonType.SIGN_UP
                     : AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN
             }
-            buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
+            buttonStyle={theme.dark ? AppleAuthentication.AppleAuthenticationButtonStyle.WHITE : AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
             cornerRadius={99}
             style={{width: 52, height: 52}}
             onPress={async () => {
