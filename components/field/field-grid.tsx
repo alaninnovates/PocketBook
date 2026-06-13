@@ -56,8 +56,7 @@ export const FieldGrid = ({theme, showGrid}: { theme: MD3Theme, showGrid: boolea
                                 key={`grid-h-${index}`}
                                 p1={vec(0, stepsToPixels(FIELD_HEIGHT_STEPS - index))}
                                 p2={vec(stepsToPixels(FIELD_WIDTH_STEPS), stepsToPixels(FIELD_HEIGHT_STEPS - index))}
-                                color={theme.dark ? 'white' : '#b9e9ea'}
-                                opacity={0.3}
+                                color={theme.dark ? '#606062' : '#b9e9ea'}
                                 style="stroke"
                                 strokeWidth={1}
                             />
@@ -69,8 +68,7 @@ export const FieldGrid = ({theme, showGrid}: { theme: MD3Theme, showGrid: boolea
                                 key={`grid-v-${index}`}
                                 p1={vec(stepsToPixels(index), 0)}
                                 p2={vec(stepsToPixels(index), stepsToPixels(FIELD_HEIGHT_STEPS))}
-                                color={theme.dark ? 'white' : '#b9e9ea'}
-                                opacity={0.3}
+                                color={theme.dark ? '#606062' : '#b9e9ea'}
                                 style="stroke"
                                 strokeWidth={1}
                             />
@@ -86,8 +84,7 @@ export const FieldGrid = ({theme, showGrid}: { theme: MD3Theme, showGrid: boolea
                         key={`halfline-h-${index}`}
                         p1={vec(0, stepsToPixels(FIELD_HEIGHT_STEPS - stepPosition))}
                         p2={vec(stepsToPixels(FIELD_WIDTH_STEPS), stepsToPixels(FIELD_HEIGHT_STEPS - stepPosition))}
-                        color={theme.dark ? 'white' : '#b9e9ea'}
-                        opacity={0.6}
+                        color={theme.dark ? '#C0BFC0' : '#888'}
                         style="stroke"
                         strokeWidth={2}
                     />
@@ -100,8 +97,7 @@ export const FieldGrid = ({theme, showGrid}: { theme: MD3Theme, showGrid: boolea
                         key={`halfline-v-${index}`}
                         p1={vec(stepsToPixels(stepPosition), 0)}
                         p2={vec(stepsToPixels(stepPosition), stepsToPixels(FIELD_HEIGHT_STEPS))}
-                        color={theme.dark ? 'white' : '#b9e9ea'}
-                        opacity={0.6}
+                        color={theme.dark ? '#C0BFC0' : '#888'}
                         style="stroke"
                         strokeWidth={2}
                     />
@@ -115,8 +111,7 @@ export const FieldGrid = ({theme, showGrid}: { theme: MD3Theme, showGrid: boolea
                         key={`yardline-${index}`}
                         p1={vec(stepsToPixels(stepPosition), 0)}
                         p2={vec(stepsToPixels(stepPosition), stepsToPixels(FIELD_HEIGHT_STEPS))}
-                        color={theme.dark ? 'white' : '#b9e9ea'}
-                        opacity={0.6}
+                        color={theme.dark ? 'white' : '#888'}
                         style="stroke"
                         strokeWidth={3}
                     />
@@ -126,16 +121,14 @@ export const FieldGrid = ({theme, showGrid}: { theme: MD3Theme, showGrid: boolea
             <Line
                 p1={vec(0, stepsToPixels(CENTER_FRONT_POINT_STEPS.y + FIELD_FRONT_HASH_STEPS))}
                 p2={vec(stepsToPixels(FIELD_WIDTH_STEPS), stepsToPixels(CENTER_FRONT_POINT_STEPS.y + FIELD_FRONT_HASH_STEPS))}
-                color={theme.dark ? 'white' : 'grey'}
-                opacity={0.85}
+                color={theme.dark ? 'white' : 'black'}
                 style="stroke"
                 strokeWidth={4}
             />
             <Line
                 p1={vec(0, stepsToPixels(CENTER_FRONT_POINT_STEPS.y + FIELD_BACK_HASH_STEPS))}
                 p2={vec(stepsToPixels(FIELD_WIDTH_STEPS), stepsToPixels(CENTER_FRONT_POINT_STEPS.y + FIELD_BACK_HASH_STEPS))}
-                color={theme.dark ? 'white' : 'grey'}
-                opacity={0.85}
+                color={theme.dark ? 'white' : 'black'}
                 style="stroke"
                 strokeWidth={4}
             />
@@ -143,8 +136,7 @@ export const FieldGrid = ({theme, showGrid}: { theme: MD3Theme, showGrid: boolea
             <Line
                 p1={vec(stepsToPixels(CENTER_FRONT_POINT_STEPS.x), 0)}
                 p2={vec(stepsToPixels(CENTER_FRONT_POINT_STEPS.x), stepsToPixels(FIELD_HEIGHT_STEPS))}
-                color={theme.dark ? 'white' : 'grey'}
-                opacity={0.85}
+                color={theme.dark ? 'white' : 'black'}
                 style="stroke"
                 strokeWidth={4}
             />
