@@ -32,6 +32,9 @@ export const stepsToYards = (steps: number) => (steps * INCHES_PER_STEP) / 36;
 export const FIELD_WIDTH_STEPS = yardsToSteps(100);
 export const FIELD_HEIGHT_STEPS = yardsToSteps(53 + 1 / 3);
 
+export const FIELD_WIDTH_PIXELS = stepsToPixels(FIELD_WIDTH_STEPS);
+export const FIELD_HEIGHT_PIXELS = stepsToPixels(FIELD_HEIGHT_STEPS);
+
 export const FIELD_FRONT_SIDE_LINE_STEPS = 0;
 export const FIELD_FRONT_HASH_STEPS = -28;
 export const FIELD_BACK_HASH_STEPS = -56;

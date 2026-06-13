@@ -1,6 +1,5 @@
 import {useLocalSearchParams, useRouter} from "expo-router";
 import {FieldCanvas} from "@/components/field/field-canvas";
-import {ReactNativeZoomableView} from "@openspacelabs/react-native-zoomable-view";
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {View} from "react-native";
 import {IconButton, Text, TouchableRipple, useTheme} from "react-native-paper";
@@ -21,7 +20,6 @@ export default function ShowScreen() {
     const {id} = useLocalSearchParams();
     const router = useRouter();
     const theme = useTheme();
-    const [zoom, setZoom] = useState(0);
     const {top, left, bottom, right} = useSafeAreaInsets();
     const {showData, loading} = useShowData(id as string);
     const [loadingInstrument, setLoadingInstrument] = useState(true);
@@ -171,21 +169,11 @@ export default function ShowScreen() {
 
     return (
         <View style={{width: '100%', height: '100%'}}>
-            <ReactNativeZoomableView
-                maxZoom={6}
-                minZoom={0}
-                initialZoom={0.4}
-                bindToBorders={false}
-                onTransform={(event) => {
-                    setZoom(event.zoomLevel);
-                }}
-            >
-                <FieldCanvas zoom={zoom} dotData={showData.dot_data} tempoData={showData.tempo_data}
-                             currentIndex={currentIndex}
-                             performer={selectedInstrument}
-                             animationProgress={animationProgress}
-                />
-            </ReactNativeZoomableView>
+            <FieldCanvas dotData={showData.dot_data} tempoData={showData.tempo_data}
+                         currentIndex={currentIndex}
+                         performer={selectedInstrument}
+                         animationProgress={animationProgress}
+            />
             <View
                 style={{
                     position: "absolute",

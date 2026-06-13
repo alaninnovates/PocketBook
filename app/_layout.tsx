@@ -6,6 +6,7 @@ import 'react-native-reanimated';
 
 import {PaperProvider} from "react-native-paper";
 import {useColorScheme} from "react-native";
+import {GestureHandlerRootView} from "react-native-gesture-handler";
 import {OnboardingStep, useAuthContext} from "@/lib/hooks/use-auth-context";
 import AuthProvider from "@/components/auth/auth-provider";
 import {CombinedDarkTheme, CombinedLightTheme} from "@/lib/theme";
@@ -57,15 +58,17 @@ export default function RootLayout() {
     const colorScheme = useColorScheme();
 
     return (
-        <PaperProvider theme={colorScheme === 'dark' ? CombinedDarkTheme : CombinedLightTheme}>
-            <ThemeProvider value={colorScheme === 'dark' ? CombinedDarkTheme : CombinedLightTheme}>
-                <AuthProvider>
-                    <ShowProvider>
-                        <RootNavigator/>
-                        <StatusBar style="auto"/>
-                    </ShowProvider>
-                </AuthProvider>
-            </ThemeProvider>
-        </PaperProvider>
+        <GestureHandlerRootView style={{flex: 1}}>
+            <PaperProvider theme={colorScheme === 'dark' ? CombinedDarkTheme : CombinedLightTheme}>
+                <ThemeProvider value={colorScheme === 'dark' ? CombinedDarkTheme : CombinedLightTheme}>
+                    <AuthProvider>
+                        <ShowProvider>
+                            <RootNavigator/>
+                            <StatusBar style="auto"/>
+                        </ShowProvider>
+                    </AuthProvider>
+                </ThemeProvider>
+            </PaperProvider>
+        </GestureHandlerRootView>
     );
 }
