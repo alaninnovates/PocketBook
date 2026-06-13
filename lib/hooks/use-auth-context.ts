@@ -20,7 +20,8 @@ export interface Profile {
 export type AuthData = {
     session?: Session | null
     profile?: Profile | null
-    isLoading: boolean
+    isLoadingSession: boolean
+    isLoadingProfile: boolean
     isLoggedIn: boolean
     updateOnboardingStep?: (newStep: OnboardingStep) => Promise<void>;
     updateProfileName?: (name: string) => Promise<void>;
@@ -30,7 +31,8 @@ export type AuthData = {
 export const AuthContext = createContext<AuthData>({
     session: undefined,
     profile: undefined,
-    isLoading: true,
+    isLoadingSession: true,
+    isLoadingProfile: true,
     isLoggedIn: false,
     updateOnboardingStep: undefined,
     updateProfileName: undefined,

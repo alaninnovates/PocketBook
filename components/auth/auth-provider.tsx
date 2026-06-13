@@ -5,28 +5,29 @@ import {PropsWithChildren, useCallback, useEffect, useState} from 'react'
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export default function AuthProvider({children}: PropsWithChildren) {
-    const [session, setSession] = useState<Session | undefined | null>()
-    const [profile, setProfile] = useState<any>()
-    const [isLoading, setIsLoading] = useState<boolean>(true)
+    const [session, setSession] = useState<Session | undefined | null>();
+    const [profile, setProfile] = useState<any>();
+    const [isLoadingSession, setIsLoadingSession] = useState<boolean>(true);
+    const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(true);
 
     useEffect(() => {
         const fetchSession = async () => {
-            setIsLoading(true)
+            setIsLoadingSession(true);
 
             const {
                 data: {session},
                 error,
-            } = await supabase.auth.getSession()
+            } = await supabase.auth.getSession();
 
             if (error) {
-                console.error('Error fetching session:', error)
+                console.error('Error fetching session:', error);
             }
 
-            setSession(session)
-            setIsLoading(false)
+            setSession(session);
+            setIsLoadingSession(false);
         }
 
-        fetchSession()
+        fetchSession();
 
         const {
             data: {subscription},
@@ -42,7 +43,7 @@ export default function AuthProvider({children}: PropsWithChildren) {
 
     useEffect(() => {
         const fetchProfile = async () => {
-            setIsLoading(true)
+            setIsLoadingProfile(true);
 
             if (session) {
                 const {data, error} = await supabase
@@ -51,25 +52,23 @@ export default function AuthProvider({children}: PropsWithChildren) {
                     .eq('id', session.user.id)
                     .single()
 
-                if (error) {
+                if (error || !data) {
                     console.error('Error fetching profile:', error)
-                    if (error.message === 'TypeError: Network request failed') {
-                        const storedProfile = await AsyncStorage.getItem('user_profile');
-                        if (storedProfile) {
-                            const profileData = JSON.parse(storedProfile);
-                            setProfile(profileData);
-                            setIsLoading(false);
-                            return;
-                        }
+                    const storedProfile = await AsyncStorage.getItem('user_profile');
+                    if (storedProfile) {
+                        setProfile(JSON.parse(storedProfile));
                     }
+                    setIsLoadingProfile(false);
+                    return;
                 }
-                setProfile(data)
+
+                setProfile(data);
                 await AsyncStorage.setItem('user_profile', JSON.stringify(data));
             } else {
                 setProfile(null)
             }
 
-            setIsLoading(false)
+            setIsLoadingProfile(false);
         }
 
         fetchProfile()
@@ -127,7 +126,8 @@ export default function AuthProvider({children}: PropsWithChildren) {
         <AuthContext.Provider
             value={{
                 session,
-                isLoading,
+                isLoadingSession,
+                isLoadingProfile,
                 profile,
                 isLoggedIn: session != undefined,
                 updateOnboardingStep,

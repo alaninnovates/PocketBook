@@ -23,16 +23,16 @@ SplashScreen.setOptions({
 });
 
 function RootNavigator() {
-    const {profile, isLoggedIn} = useAuthContext();
+    const {isLoadingSession, isLoadingProfile, profile, isLoggedIn} = useAuthContext();
     const isOnboarding = profile?.onboarding_step !== OnboardingStep.Completed;
 
     useEffect(() => {
-        if ((isLoggedIn && !profile) || !isLoggedIn) {
+        if ((isLoggedIn && !profile && !isLoadingProfile) || (!isLoadingSession && !isLoggedIn)) {
             setTimeout(() => {
                 SplashScreen.hideAsync();
             }, 1000);
         }
-    }, [profile]);
+    }, [isLoadingSession, isLoadingProfile, isLoggedIn, profile]);
 
     return (
         <Stack>
