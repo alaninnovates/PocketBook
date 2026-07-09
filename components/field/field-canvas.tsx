@@ -16,11 +16,8 @@ const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 6;
 const GRID_ZOOM_THRESHOLD = 0.9;
 
-export const FieldCanvas = ({showData, currentIndex, setName, performerLabel, animationProgress}: {
-    showData: ShowData
-    currentIndex: number;
-    setName: string;
-    performerLabel: string;
+export const FieldCanvas = ({showData, animationProgress}: {
+    showData: ShowData;
     animationProgress: number;
 }) => {
     const theme = useTheme();
@@ -146,11 +143,9 @@ export const FieldCanvas = ({showData, currentIndex, setName, performerLabel, an
                                 transform={fieldRotationTransform}
                             >
                                 <FieldGrid theme={theme} showGrid={lodZoom > GRID_ZOOM_THRESHOLD}/>
-                                <OtherPerformers showData={showData} setName={setName} zoom={lodZoom}
+                                <OtherPerformers showData={showData} zoom={lodZoom}
                                                  animationProgress={animationProgress}/>
-                                <ActivePerformer showData={showData} currentIndex={currentIndex} setName={setName}
-                                                 zoom={lodZoom}
-                                                 performerLabel={performerLabel} animationProgress={animationProgress}/>
+                                <ActivePerformer showData={showData} zoom={lodZoom} animationProgress={animationProgress}/>
                             </Group>
                         </Group>
                     </Group>

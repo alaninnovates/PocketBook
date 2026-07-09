@@ -23,13 +23,13 @@ export default function ShowScreen() {
     const {top, left, bottom, right} = useSafeAreaInsets();
     const {showData, loading} = useShowData(id as string);
     const [loadingInstrument, setLoadingInstrument] = useState(true);
-    const {currentIndex, setCurrentIndex, selectedInstrument, setSelectedInstrument} = useShowContext();
+    const {currentCount, setCurrentCount, selectedInstrument, setSelectedInstrument} = useShowContext();
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [animationProgress, setAnimationProgress] = useState(0);
     const animationFrameRef = useRef<number | null>(null);
     const startTimeRef = useRef<number | null>(null);
-    const currentAnimationStepRef = useRef(currentIndex);
+    const currentAnimationStepRef = useRef(currentCount);
 
     useEffect(() => {
         (async () => {
@@ -43,8 +43,8 @@ export default function ShowScreen() {
     }, []);
 
     useMemo(() => {
-        currentAnimationStepRef.current = currentIndex;
-    }, [currentIndex]);
+        currentAnimationStepRef.current = currentCount;
+    }, [currentCount]);
 
     const dotsLength = useMemo(() => {
         if (!showData) return 0;
@@ -115,16 +115,16 @@ export default function ShowScreen() {
     }, [id]);
 
     const isHold = useMemo(() => {
-        if (!coordinates) return false;
-        if (coordinates.length === 0) return false;
-        if (currentIndex === 0) return false;
-        const currentDot = coordinates[currentIndex];
-        const previousDot = coordinates[currentIndex - 1];
+        if (!showData || !selectedInstrument) return false;
+        if (currentCount === 0) return false;
+        const currentDot = showData.getCoordAtCount(currentCount, selectedInstrument);
+        const previousIndex = showData.getSetIndexAtCount(currentCount)! - 1;
+        const previousDot = showData.getCoordAtCount(showData.getCountAtSetIndex(previousIndex)!, selectedInstrument);
         return (
             currentDot.x === previousDot.x &&
             currentDot.y === previousDot.y
         );
-    }, [currentIndex]);
+    }, [showData, currentCount, selectedInstrument]);
 
     if (loading || !showData) {
         return <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
@@ -139,23 +139,24 @@ export default function ShowScreen() {
 
     const coordinates = showData.getCoordsForPerformer(selectedInstrument);
     const sets = showData.getSets();
-    const currentDot = fieldCoordinateToDot(coordinates[currentIndex]);
+    const currentIndex = showData.getSetIndexAtCount(currentCount)!;
+    const currentDot = fieldCoordinateToDot(coordinates[currentIndex].coord);
 
     const midset =
-        currentIndex > 0 && !dotCoordinatesEqual(coordinates[currentIndex - 1], coordinates[currentIndex])
+        currentIndex > 0 && !dotCoordinatesEqual(coordinates[currentIndex - 1].coord, coordinates[currentIndex].coord)
             ? fieldCoordinateToDot(
                 calculateMidset(
-                    coordinates[currentIndex - 1],
-                    coordinates[currentIndex],
+                    coordinates[currentIndex - 1].coord,
+                    coordinates[currentIndex].coord,
                 ),
             )
             : null;
 
     const stepSize =
-        currentIndex > 0 && !dotCoordinatesEqual(coordinates[currentIndex - 1], coordinates[currentIndex])
+        currentIndex > 0 && !dotCoordinatesEqual(coordinates[currentIndex - 1].coord, coordinates[currentIndex].coord)
             ? calculateStepSize(
-                coordinates[currentIndex - 1],
-                coordinates[currentIndex],
+                coordinates[currentIndex - 1].coord,
+                coordinates[currentIndex].coord,
                 sets[currentIndex].counts,
             )
             : null;
@@ -163,9 +164,6 @@ export default function ShowScreen() {
     return (
         <View style={{width: '100%', height: '100%'}}>
             <FieldCanvas showData={showData}
-                         currentIndex={currentIndex}
-                         setName={sets[currentIndex].name}
-                         performerLabel={selectedInstrument}
                          animationProgress={animationProgress}
             />
             <View
@@ -284,7 +282,8 @@ export default function ShowScreen() {
                     mode="contained"
                     size={32}
                     onPress={() => {
-                        setCurrentIndex((prev) => Math.max(prev - 1, 0));
+                        const newCount = Math.max(0, currentCount - sets[currentIndex].counts);
+                        setCurrentCount(newCount);
                     }}
                 />
                 <IconButton
@@ -292,7 +291,8 @@ export default function ShowScreen() {
                     mode="contained"
                     size={32}
                     onPress={() => {
-                        setCurrentIndex((prev) => prev + 1);
+                        const newCount = currentCount + sets[currentIndex].counts;
+                        setCurrentCount(newCount);
                     }}
                 />
             </View>

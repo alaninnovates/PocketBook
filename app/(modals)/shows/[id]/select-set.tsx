@@ -3,13 +3,14 @@ import {useShowData} from "@/lib/hooks/use-show-data";
 import {ScrollView, View} from "react-native";
 import {DataTable, IconButton, Text, useTheme} from "react-native-paper";
 import {useShowContext} from "@/lib/hooks/use-show-context";
+import {fieldCoordinateToDot} from "@/components/field/parser";
 
 export default function SelectInstrumentModalScreen() {
     const theme = useTheme();
     const {id} = useLocalSearchParams();
     const router = useRouter();
     const {showData, loading} = useShowData(id as string, true);
-    const {currentIndex, setCurrentIndex, selectedInstrument} = useShowContext();
+    const {currentCount, setCurrentCount, selectedInstrument} = useShowContext();
 
     if (loading || !showData || !selectedInstrument) {
         return (
@@ -47,19 +48,21 @@ export default function SelectInstrumentModalScreen() {
                     </DataTable.Header>
 
                     {showData.getCoordsForPerformer(selectedInstrument)
-                        .map((coord, index) => {
+                        .map(({coord, totalCounts, set}) => {
+                            const {side, sideToSide, frontToBack} = fieldCoordinateToDot(coord);
                             return (
                                 <DataTable.Row
-                                    key={movement + '_' + set}
+                                    key={set.name}
                                     onPress={() => {
-                                        setCurrentIndex(index);
+                                        setCurrentCount(totalCounts);
                                         router.back();
                                     }}
-                                    style={index === currentIndex ? {backgroundColor: 'rgba(0, 0, 255, 0.1)'} : {}}
+                                    style={(currentCount > totalCounts - set.counts && currentCount <= totalCounts) ?
+                                        {backgroundColor: 'rgba(0, 0, 255, 0.1)'} : {}}
                                 >
                                     {/*<DataTable.Cell style={narrowerCell}>{movement}</DataTable.Cell>*/}
-                                    <DataTable.Cell style={narrowerCell}>{set}</DataTable.Cell>
-                                    <DataTable.Cell style={narrowerCell}>{counts}</DataTable.Cell>
+                                    <DataTable.Cell style={narrowerCell}>{set.name}</DataTable.Cell>
+                                    <DataTable.Cell style={narrowerCell}>{set.counts}</DataTable.Cell>
                                     <DataTable.Cell>
                                         Side {side}:{' '}
                                         {sideToSide.stepOffset}{' '}

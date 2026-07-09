@@ -3,6 +3,9 @@ import {supabase} from "@/lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useRouter} from "expo-router";
 import {DotData, TempoData} from "@/lib/types";
+import {parsePyware3DAFile} from "pyware-parser";
+
+type Pyware3DAFile = ReturnType<typeof parsePyware3DAFile>;
 
 export interface Count {
     number: number;
@@ -45,7 +48,7 @@ export class ShowData {
     private name: string
     private created_at: string
     private updated_at: string
-    private dot_data: DotData | object
+    private dot_data: DotData | Pyware3DAFile;
     private tempo_data: TempoData | object
     private upload_type: 'pocketbook' | '3da'
 
@@ -81,6 +84,8 @@ export class ShowData {
         return [];
     }
 
+    public getTotalCounts(): number {}
+
     public getCounts(): Count[] {
         if (this.upload_type === 'pocketbook') {
             return [];
@@ -90,19 +95,83 @@ export class ShowData {
         return [];
     }
 
-    public getCoordAtCount(set: string, label: string, count: number): Coordinate {
+    public getSetAtCount(count: number): SetMetadata | null {
+        if (this.upload_type === 'pocketbook') {
+            return {};
+        } else if (this.upload_type === '3da') {
+            return {};
+        }
+        return null;
     }
 
-    public getCoordForPerformer(set: string, label: string): Coordinate {
+    public getSetIndexAtCount(count: number): number | null {
+        if (this.upload_type === 'pocketbook') {
+            return null;
+        } else if (this.upload_type === '3da') {
+            return null;
+        }
+        return null;
+    }
+
+    public getCountAtSetIndex(setIndex: number): number | null {
+        if (this.upload_type === 'pocketbook') {
+            return null;
+        } else if (this.upload_type === '3da') {
+            return null;
+        }
+        return null;
+    }
+
+
+    private getPywarePerformerIdForLabel(label: string): number | null {
+        if (this.upload_type === '3da') {
+            const performer = (this.dot_data as Pyware3DAFile).cast.castMembers.find(m => m.label === label);
+            if (performer) {
+                return performer.id;
+            } else {
+                return null;
+            }
+        }
+        return null;
+    }
+
+    public getSetAtCount(count: number): SetMetadata | null {}
+
+    // count: zero-indexed
+    public getCoordAtCount(count: number, label: string): Coordinate {
+        if (this.upload_type === 'pocketbook') {
+            return {};
+        } else if (this.upload_type === '3da') {
+            const performerId = this.getPywarePerformerIdForLabel(label);
+            const position = (this.dot_data as Pyware3DAFile).pages.pages[count].performerPositionList.positions.find(p => p.id === performerId);
+            return {
+                x: position?.x!,
+                y: position?.y!,
+            }
+        }
+        return null;
     }
 
     public getCoordsForPerformer(label: string) {
-        return this.getSets().map(({name}) => this.getCoordForPerformer(name, label));
+        const setsWithCounts: (SetMetadata & {totalCounts: number})[] = [];
+        for (const set of this.getSets()) {
+            const totalCounts = setsWithCounts.reduce((sum, s) => sum + s.counts, 0) + set.counts;
+            setsWithCounts.push({
+                ...set,
+                totalCounts
+            });
+        }
+
+        return setsWithCounts.map(({totalCounts, ...meta}) => ({
+            coord: this.getCoordAtCount(totalCounts, label),
+            totalCounts,
+            set: meta
+        }));
     }
 
-    public getPerformerCoordsForSet(set: string) {
+    public getPerformerCoordsForCount(count: number) {
         return this.getPerformers().map((performer) => ({
-            coord: this.getCoordForPerformer(set, performer.label),
+            coord: this.getCoordAtCount(count, performer.label),
             performer
         }));
     }
@@ -129,7 +198,7 @@ export interface ShowDataPocketbook extends ShowDataBase {
 
 export interface ShowDataPyware extends ShowDataBase {
     dot_data: object;
-    tempo_data: object;
+    tempo_data: Pyware3DAFile;
     upload_type: '3da';
 }
 

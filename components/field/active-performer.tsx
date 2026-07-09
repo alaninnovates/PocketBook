@@ -8,6 +8,7 @@ import {Platform} from "react-native";
 import {interpolatePosition} from "@/components/field/playback";
 import {FieldView, SettingsProperty, useProperty} from "@/lib/settings-manager";
 import {Coordinate, ShowData} from "@/lib/hooks/use-show-data";
+import {useShowContext} from "@/lib/hooks/use-show-context";
 
 const fontFamily = Platform.select({ios: "Arial", default: "arial"});
 
@@ -33,7 +34,7 @@ const CurrentPageDisplay = ({
 
     const multiplier = fieldView === FieldView.Performer ? 1 : -1;
     const textX = stepsToPixels(CENTER_FRONT_POINT_STEPS.x - coord.x) + (font.getTextWidth(performer) / 2) * multiplier;
-    const textY = stepsToPixels(CENTER_FRONT_POINT_STEPS.y + coord.y) + (- font.measureText(performer).height / 2 + 1.5) * multiplier;
+    const textY = stepsToPixels(CENTER_FRONT_POINT_STEPS.y + coord.y) + (-font.measureText(performer).height / 2 + 1.5) * multiplier;
     return (
         <>
             <Circle
@@ -115,16 +116,18 @@ const AdditionalPagesDisplay = ({
     );
 };
 
-export const ActivePerformer = ({showData, currentIndex, setName, zoom, performerLabel, animationProgress}: {
+export const ActivePerformer = ({showData, zoom, animationProgress}: {
     showData: ShowData;
-    currentIndex: number;
-    setName: string;
     zoom: number;
-    performerLabel: string;
     animationProgress: number;
 }) => {
+    const {currentCount, selectedInstrument} = useShowContext();
+    if (!selectedInstrument) {
+        return null;
+    }
     let minusQuantity = 1, plusQuantity = 1;
-    const coords = showData.getCoordsForPerformer(performerLabel);
+    const coords = showData.getCoordsForPerformer(selectedInstrument).map(c => c.coord);
+    const currentIndex = showData.getSetIndexAtCount(currentCount)!;
     const minusCoords = minusQuantity
         ? coords.slice(
             Math.max(0, currentIndex - minusQuantity),
@@ -155,15 +158,16 @@ export const ActivePerformer = ({showData, currentIndex, setName, zoom, performe
                 direction={1}
             />
             <CurrentPageDisplay
-                coord={dots[currentIndex + 1] && animationProgress > 0
+                coord={coords[currentIndex + 1] && animationProgress > 0
                     ? interpolatePosition(
-                        dotToFieldCoordinateSteps(dots[currentIndex]),
-                        dotToFieldCoordinateSteps(dots[currentIndex + 1]),
+                        showData.getCoordAtCount(currentCount, selectedInstrument),
+                        showData.getCoordAtCount(currentCount+1, selectedInstrument),
                         animationProgress,
                     )
-                    : dotToFieldCoordinateSteps(dots[currentIndex])}
+                    : showData.getCoordAtCount(currentCount, selectedInstrument)
+                }
                 zoom={zoom}
-                performer={performerLabel}
+                performer={selectedInstrument}
             />
         </>
     )
