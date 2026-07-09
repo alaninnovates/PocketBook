@@ -7,20 +7,20 @@ import {FIELD_HEIGHT_PIXELS, FIELD_WIDTH_PIXELS} from "./dimensions";
 import {FieldGrid} from "./field-grid";
 import {OtherPerformers} from "./other-performers";
 import {useTheme} from "react-native-paper";
-import {DotData, TempoData} from "@/lib/types";
 import {ActivePerformer} from "@/components/field/active-performer";
 import {FieldView, SettingsProperty, useProperty} from "@/lib/settings-manager";
+import {ShowData} from "@/lib/hooks/use-show-data";
 
 const INITIAL_ZOOM = 0.4;
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 6;
 const GRID_ZOOM_THRESHOLD = 0.9;
 
-export const FieldCanvas = ({dotData, tempoData, currentIndex, performer, animationProgress}: {
-    dotData: DotData;
-    tempoData: TempoData;
+export const FieldCanvas = ({showData, currentIndex, setName, performerLabel, animationProgress}: {
+    showData: ShowData
     currentIndex: number;
-    performer: string;
+    setName: string;
+    performerLabel: string;
     animationProgress: number;
 }) => {
     const theme = useTheme();
@@ -146,10 +146,11 @@ export const FieldCanvas = ({dotData, tempoData, currentIndex, performer, animat
                                 transform={fieldRotationTransform}
                             >
                                 <FieldGrid theme={theme} showGrid={lodZoom > GRID_ZOOM_THRESHOLD}/>
-                                <OtherPerformers dotData={dotData} currentIndex={currentIndex} zoom={lodZoom}
+                                <OtherPerformers showData={showData} setName={setName} zoom={lodZoom}
                                                  animationProgress={animationProgress}/>
-                                <ActivePerformer dotData={dotData} currentIndex={currentIndex} zoom={lodZoom}
-                                                 performer={performer} animationProgress={animationProgress}/>
+                                <ActivePerformer showData={showData} currentIndex={currentIndex} setName={setName}
+                                                 zoom={lodZoom}
+                                                 performerLabel={performerLabel} animationProgress={animationProgress}/>
                             </Group>
                         </Group>
                     </Group>

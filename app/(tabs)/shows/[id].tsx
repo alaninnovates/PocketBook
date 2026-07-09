@@ -47,9 +47,9 @@ export default function ShowScreen() {
     }, [currentIndex]);
 
     const dotsLength = useMemo(() => {
-        if (!showData || !selectedInstrument) return 0;
-        return showData.dot_data[selectedInstrument].dots.length;
-    }, [showData, selectedInstrument]);
+        if (!showData) return 0;
+        return showData.getSets().length;
+    }, [showData]);
 
     const animate = useCallback(
         (timestamp: number) => {
@@ -57,12 +57,12 @@ export default function ShowScreen() {
             if (startTimeRef.current === null) startTimeRef.current = timestamp;
             const elapsed = timestamp - startTimeRef.current;
 
-            const currentDot = dots[currentAnimationStepRef.current];
+            const currentDot = coordinates[currentAnimationStepRef.current];
             const tempo = (showData.tempo_data?.[currentDot.movement]?.[currentDot.set]) ?? 120;
             const durationPerCount = 60000 / tempo;
             const totalDuration =
                 currentAnimationStepRef.current < dotsLength - 1
-                    ? dots[currentAnimationStepRef.current + 1].counts *
+                    ? coordinates[currentAnimationStepRef.current + 1].counts *
                     durationPerCount
                     : 0;
 
@@ -115,23 +115,14 @@ export default function ShowScreen() {
     }, [id]);
 
     const isHold = useMemo(() => {
-        if (!dots) return false;
-        if (dots.length === 0) return false;
+        if (!coordinates) return false;
+        if (coordinates.length === 0) return false;
         if (currentIndex === 0) return false;
-        const currentDot = dots[currentIndex];
-        const previousDot = dots[currentIndex - 1];
+        const currentDot = coordinates[currentIndex];
+        const previousDot = coordinates[currentIndex - 1];
         return (
-            currentDot.sideToSide.stepOffset ===
-            previousDot.sideToSide.stepOffset &&
-            currentDot.sideToSide.stepOffsetDirection ===
-            previousDot.sideToSide.stepOffsetDirection &&
-            currentDot.sideToSide.yardline ===
-            previousDot.sideToSide.yardline &&
-            currentDot.frontToBack.stepOffset ===
-            previousDot.frontToBack.stepOffset &&
-            currentDot.frontToBack.stepOffsetDirection ===
-            previousDot.frontToBack.stepOffsetDirection &&
-            currentDot.frontToBack.line === previousDot.frontToBack.line
+            currentDot.x === previousDot.x &&
+            currentDot.y === previousDot.y
         );
     }, [currentIndex]);
 
@@ -146,32 +137,35 @@ export default function ShowScreen() {
         return null;
     }
 
-    const dots = showData.dot_data[selectedInstrument].dots;
+    const coordinates = showData.getCoordsForPerformer(selectedInstrument);
+    const sets = showData.getSets();
+    const currentDot = fieldCoordinateToDot(coordinates[currentIndex]);
 
     const midset =
-        currentIndex > 0 && !dotCoordinatesEqual(dots[currentIndex - 1], dots[currentIndex])
+        currentIndex > 0 && !dotCoordinatesEqual(coordinates[currentIndex - 1], coordinates[currentIndex])
             ? fieldCoordinateToDot(
                 calculateMidset(
-                    dotToFieldCoordinateSteps(dots[currentIndex - 1]),
-                    dotToFieldCoordinateSteps(dots[currentIndex]),
+                    coordinates[currentIndex - 1],
+                    coordinates[currentIndex],
                 ),
             )
             : null;
 
     const stepSize =
-        currentIndex > 0 && !dotCoordinatesEqual(dots[currentIndex - 1], dots[currentIndex])
+        currentIndex > 0 && !dotCoordinatesEqual(coordinates[currentIndex - 1], coordinates[currentIndex])
             ? calculateStepSize(
-                dots[currentIndex - 1],
-                dots[currentIndex],
-                dots[currentIndex].counts,
+                coordinates[currentIndex - 1],
+                coordinates[currentIndex],
+                sets[currentIndex].counts,
             )
             : null;
 
     return (
         <View style={{width: '100%', height: '100%'}}>
-            <FieldCanvas dotData={showData.dot_data} tempoData={showData.tempo_data}
+            <FieldCanvas showData={showData}
                          currentIndex={currentIndex}
-                         performer={selectedInstrument}
+                         setName={sets[currentIndex].name}
+                         performerLabel={selectedInstrument}
                          animationProgress={animationProgress}
             />
             <View
@@ -192,11 +186,11 @@ export default function ShowScreen() {
                     width: '90%'
                 }}>
                     <View>
+                        {/*<Text variant="bodyLarge">*/}
+                        {/*    Movement {coordinates[currentIndex].movement}*/}
+                        {/*</Text>*/}
                         <Text variant="bodyLarge">
-                            Movement {dots[currentIndex].movement}
-                        </Text>
-                        <Text variant="bodyLarge">
-                            Page {dots[currentIndex].set}
+                            Page {sets[currentIndex].name}
                         </Text>
                     </View>
                     <View>
@@ -231,19 +225,19 @@ export default function ShowScreen() {
                     </View>
                     <View>
                         <Text variant="bodyLarge">
-                            Side {dots[currentIndex].side}:{' '}
-                            {dots[currentIndex].sideToSide.stepOffset}{' '}
-                            {dots[currentIndex].sideToSide.stepOffsetDirection}{' '}
-                            {dots[currentIndex].sideToSide.yardline} yd ln
+                            Side {currentDot.side}:{' '}
+                            {currentDot.sideToSide.stepOffset}{' '}
+                            {currentDot.sideToSide.stepOffsetDirection}{' '}
+                            {currentDot.sideToSide.yardline} yd ln
                         </Text>
                         <Text variant="bodyLarge">
-                            {dots[currentIndex].frontToBack.stepOffset}{' '}
-                            {dots[currentIndex].frontToBack.stepOffsetDirection}{' '}
-                            {dots[currentIndex].frontToBack.line}
+                            {currentDot.frontToBack.stepOffset}{' '}
+                            {currentDot.frontToBack.stepOffsetDirection}{' '}
+                            {currentDot.frontToBack.line}
                         </Text>
                         <Text variant="bodyLarge">
                             {isHold ? 'Hold' : 'Move'}:{' '}
-                            {dots[currentIndex].counts}
+                            {sets[currentIndex].counts}
                         </Text>
                     </View>
                 </View>

@@ -22,55 +22,58 @@ export default function SelectInstrumentModalScreen() {
         );
     }
 
-    const dots = showData.dot_data[selectedInstrument].dots;
-
-    const narrowerCell =  {
+    const narrowerCell = {
         maxWidth: 80,
     }
 
     return (
         <>
-            <Stack.Screen options={{title: 'Select Set', headerRight: () => (
-                <IconButton icon="close" onPress={() => router.back()} iconColor={theme.colors.onSurfaceVariant} />
-            )}}/>
+            <Stack.Screen options={{
+                title: 'Select Set', headerRight: () => (
+                    <IconButton icon="close" onPress={() => router.back()} iconColor={theme.colors.onSurfaceVariant}/>
+                )
+            }}/>
             <ScrollView
                 style={{padding: 16}}
                 contentContainerStyle={{display: 'flex', flexDirection: 'column', gap: 12, padding: 16}}
             >
                 <DataTable>
                     <DataTable.Header>
-                        <DataTable.Title style={narrowerCell}>Movement</DataTable.Title>
+                        {/*<DataTable.Title style={narrowerCell}>Movement</DataTable.Title>*/}
                         <DataTable.Title style={narrowerCell}>Set</DataTable.Title>
                         <DataTable.Title style={narrowerCell}>Counts</DataTable.Title>
                         <DataTable.Title>Side to Side</DataTable.Title>
                         <DataTable.Title>Front to Back</DataTable.Title>
                     </DataTable.Header>
 
-                    {dots.map(({movement, set, counts, side, sideToSide, frontToBack}, index) => (
-                        <DataTable.Row
-                            key={movement + '_' + set}
-                            onPress={() => {
-                                setCurrentIndex(index);
-                                router.back();
-                            }}
-                            style={index === currentIndex ? {backgroundColor: 'rgba(0, 0, 255, 0.1)'} : {}}
-                        >
-                            <DataTable.Cell style={narrowerCell}>{movement}</DataTable.Cell>
-                            <DataTable.Cell style={narrowerCell}>{set}</DataTable.Cell>
-                            <DataTable.Cell style={narrowerCell}>{counts}</DataTable.Cell>
-                            <DataTable.Cell>
-                                Side {side}:{' '}
-                                {sideToSide.stepOffset}{' '}
-                                {sideToSide.stepOffsetDirection}{' '}
-                                {sideToSide.yardline} yd ln
-                            </DataTable.Cell>
-                            <DataTable.Cell>
-                                {frontToBack.stepOffset}{' '}
-                                {frontToBack.stepOffsetDirection}{' '}
-                                {frontToBack.line}
-                            </DataTable.Cell>
-                        </DataTable.Row>
-                    ))}
+                    {showData.getCoordsForPerformer(selectedInstrument)
+                        .map((coord, index) => {
+                            return (
+                                <DataTable.Row
+                                    key={movement + '_' + set}
+                                    onPress={() => {
+                                        setCurrentIndex(index);
+                                        router.back();
+                                    }}
+                                    style={index === currentIndex ? {backgroundColor: 'rgba(0, 0, 255, 0.1)'} : {}}
+                                >
+                                    {/*<DataTable.Cell style={narrowerCell}>{movement}</DataTable.Cell>*/}
+                                    <DataTable.Cell style={narrowerCell}>{set}</DataTable.Cell>
+                                    <DataTable.Cell style={narrowerCell}>{counts}</DataTable.Cell>
+                                    <DataTable.Cell>
+                                        Side {side}:{' '}
+                                        {sideToSide.stepOffset}{' '}
+                                        {sideToSide.stepOffsetDirection}{' '}
+                                        {sideToSide.yardline} yd ln
+                                    </DataTable.Cell>
+                                    <DataTable.Cell>
+                                        {frontToBack.stepOffset}{' '}
+                                        {frontToBack.stepOffsetDirection}{' '}
+                                        {frontToBack.line}
+                                    </DataTable.Cell>
+                                </DataTable.Row>
+                            )
+                        })}
                 </DataTable>
             </ScrollView>
         </>

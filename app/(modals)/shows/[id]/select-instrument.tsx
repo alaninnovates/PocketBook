@@ -38,7 +38,7 @@ export default function SelectInstrumentModalScreen() {
         <>
             <Stack.Screen options={{title: 'Select Instrument'}}/>
             <ScrollView style={{padding: 16}} contentContainerStyle={{display: 'flex', flexDirection: 'column', gap: 12, padding: 16}}>
-                {Object.values(showData.dot_data)
+                {showData.getPerformers()
                     .sort((a, b) => a.label.localeCompare(b.label))
                     .map(({ performer, label }) => (
                         <Button

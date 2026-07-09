@@ -3,11 +3,11 @@ import {CENTER_FRONT_POINT_STEPS, stepsToPixels} from "@/components/field/dimens
 import React from "react";
 import {useTheme} from "react-native-paper";
 import {clampMax} from "@/lib/utils";
-import {DotbookEntry, DotData} from "@/lib/types";
 import {calculateMidset, dotToFieldCoordinateSteps} from "@/components/field/parser";
 import {Platform} from "react-native";
 import {interpolatePosition} from "@/components/field/playback";
 import {FieldView, SettingsProperty, useProperty} from "@/lib/settings-manager";
+import {Coordinate, ShowData} from "@/lib/hooks/use-show-data";
 
 const fontFamily = Platform.select({ios: "Arial", default: "arial"});
 
@@ -16,7 +16,7 @@ const CurrentPageDisplay = ({
                                 zoom,
                                 performer,
                             }: {
-    coord: { x: number; y: number };
+    coord: Coordinate;
     zoom: number;
     performer: string;
 }) => {
@@ -68,24 +68,21 @@ const CurrentPageDisplay = ({
 };
 
 const AdditionalPagesDisplay = ({
-                                    pages,
+                                    coords,
                                     currentIndex,
                                     additionalDots,
                                     direction,
                                 }: {
-    pages: DotbookEntry[];
+    coords: Coordinate[];
     currentIndex: number;
-    additionalDots: DotbookEntry[];
+    additionalDots: Coordinate[];
     direction: number;
 }) => {
     const [dotScale] = useProperty<number>(SettingsProperty.DotScale, 1);
     return (
         <>
-            {additionalDots.map((dot, index) => {
-                const currentCoord = dotToFieldCoordinateSteps(dot);
-                const nextCoord = dotToFieldCoordinateSteps(
-                    additionalDots[index + 1] || pages[currentIndex],
-                );
+            {additionalDots.map((currentCoord, index) => {
+                const nextCoord = additionalDots[index + 1] || coords[currentIndex];
                 const midCoord = calculateMidset(currentCoord, nextCoord);
 
                 return (
@@ -105,8 +102,8 @@ const AdditionalPagesDisplay = ({
                         {(currentCoord.x !== nextCoord.x ||
                             currentCoord.y !== nextCoord.y) && (
                             <Circle
-                                cx={stepsToPixels(CENTER_FRONT_POINT_STEPS.x - midCoord[0])}
-                                cy={stepsToPixels(CENTER_FRONT_POINT_STEPS.y + midCoord[1])}
+                                cx={stepsToPixels(CENTER_FRONT_POINT_STEPS.x - midCoord.x)}
+                                cy={stepsToPixels(CENTER_FRONT_POINT_STEPS.y + midCoord.y)}
                                 r={2 * dotScale}
                                 color={direction === -1 ? 'blue' : 'green'}
                             />
@@ -118,26 +115,27 @@ const AdditionalPagesDisplay = ({
     );
 };
 
-export const ActivePerformer = ({dotData, currentIndex, zoom, performer, animationProgress}: {
-    dotData: DotData;
+export const ActivePerformer = ({showData, currentIndex, setName, zoom, performerLabel, animationProgress}: {
+    showData: ShowData;
     currentIndex: number;
+    setName: string;
     zoom: number;
-    performer: string;
+    performerLabel: string;
     animationProgress: number;
 }) => {
     let minusQuantity = 1, plusQuantity = 1;
-    const dots = dotData[performer].dots;
-    const minusDots = minusQuantity
-        ? dots.slice(
+    const coords = showData.getCoordsForPerformer(performerLabel);
+    const minusCoords = minusQuantity
+        ? coords.slice(
             Math.max(0, currentIndex - minusQuantity),
             currentIndex,
         )
         : [];
-    const plusDots = plusQuantity
-        ? dots.slice(
+    const plusCoords = plusQuantity
+        ? coords.slice(
             currentIndex + 1,
             Math.min(
-                dots.length,
+                coords.length,
                 currentIndex + 1 + plusQuantity,
             ),
         )
@@ -145,15 +143,15 @@ export const ActivePerformer = ({dotData, currentIndex, zoom, performer, animati
     return (
         <>
             <AdditionalPagesDisplay
-                pages={dots}
+                coords={coords}
                 currentIndex={currentIndex}
-                additionalDots={minusDots}
+                additionalDots={minusCoords}
                 direction={-1}
             />
             <AdditionalPagesDisplay
-                pages={dots}
+                coords={coords}
                 currentIndex={currentIndex}
-                additionalDots={plusDots}
+                additionalDots={plusCoords}
                 direction={1}
             />
             <CurrentPageDisplay
@@ -165,7 +163,7 @@ export const ActivePerformer = ({dotData, currentIndex, zoom, performer, animati
                     )
                     : dotToFieldCoordinateSteps(dots[currentIndex])}
                 zoom={zoom}
-                performer={performer}
+                performer={performerLabel}
             />
         </>
     )

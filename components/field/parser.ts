@@ -4,6 +4,7 @@ import {
     FIELD_FRONT_HASH_STEPS, FIELD_HEIGHT_STEPS, stepsToYards,
     yardsToSteps
 } from "@/components/field/dimensions";
+import {Coordinate} from "@/lib/hooks/use-show-data";
 
 export const dotToFieldCoordinateSteps = (
     dot: DotbookEntry,
@@ -61,14 +62,17 @@ export const dotToFieldCoordinateSteps = (
 export const calculateMidset = (
     coord1: { x: number; y: number },
     coord2: { x: number; y: number },
-): [number, number] => {
-    return [(coord1.x + coord2.x) / 2, (coord1.y + coord2.y) / 2];
+): Coordinate => {
+    return {
+        x: (coord1.x + coord2.x) / 2,
+        y: (coord1.y + coord2.y) / 2
+    };
 };
 
 export const fieldCoordinateToDot = (
-    coord: [number, number],
+    coord: Coordinate
 ): Omit<DotbookEntry, 'set' | 'counts' | 'movement'> => {
-    const [x, y] = coord;
+    const {x, y} = coord;
 
     let side: 1 | 2;
     let sideToSideYardline: number;
@@ -162,27 +166,15 @@ export const fieldCoordinateToDot = (
     };
 };
 
-export const dotCoordinatesEqual = (dot1: DotbookEntry, dot2: DotbookEntry) => {
-    return (
-        dot1.side === dot2.side &&
-        dot1.sideToSide.yardline === dot2.sideToSide.yardline &&
-        dot1.sideToSide.stepOffset === dot2.sideToSide.stepOffset &&
-        dot1.sideToSide.stepOffsetDirection ===
-        dot2.sideToSide.stepOffsetDirection &&
-        dot1.frontToBack.line === dot2.frontToBack.line &&
-        dot1.frontToBack.stepOffset === dot2.frontToBack.stepOffset &&
-        dot1.frontToBack.stepOffsetDirection ===
-        dot2.frontToBack.stepOffsetDirection
-    );
+export const dotCoordinatesEqual = (dot1: Coordinate, dot2: Coordinate) => {
+    return dot1.x === dot2.x && dot1.y === dot2.y
 };
 
 export const calculateStepSize = (
-    dot1: DotbookEntry,
-    dot2: DotbookEntry,
+    coord1: Coordinate,
+    coord2: Coordinate,
     counts: number,
 ): number => {
-    const coord1 = dotToFieldCoordinateSteps(dot1);
-    const coord2 = dotToFieldCoordinateSteps(dot2);
     // console.log('coord1:', coord1, 'coord2:', coord2);
     const yards = stepsToYards(Math.sqrt(
         Math.pow(coord2.x - coord1.x, 2) +

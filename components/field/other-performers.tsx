@@ -1,4 +1,3 @@
-import {DotData} from "@/lib/types";
 import React from "react";
 import {Circle, matchFont, Text, vec} from "@shopify/react-native-skia";
 import {instrumentToColor} from "@/components/field/color";
@@ -9,12 +8,13 @@ import {Platform} from "react-native";
 import {clampMax} from "@/lib/utils";
 import {interpolatePosition} from "@/components/field/playback";
 import {FieldView, SettingsProperty, useProperty} from "@/lib/settings-manager";
+import {ShowData} from "@/lib/hooks/use-show-data";
 
 const fontFamily = Platform.select({ios: "Arial", default: "arial"});
 
-export const OtherPerformers = ({dotData, currentIndex, zoom, animationProgress}: {
-    dotData: DotData;
-    currentIndex: number;
+export const OtherPerformers = ({showData, setName, zoom, animationProgress}: {
+    showData: ShowData;
+    setName: string;
     zoom: number;
     animationProgress: number;
 }) => {
@@ -25,16 +25,14 @@ export const OtherPerformers = ({dotData, currentIndex, zoom, animationProgress}
         fontSize: clampMax(6 * 6 / (zoom), 10),
     });
 
-    return Object.values(dotData).map(({performer, label, dots}) => {
-        if (dots[currentIndex] == null) {
-            console.log(
-                `No dot for performer ${performer} ${label} at index ${currentIndex}`,
-            );
-            return null;
-        }
+    return showData.getPerformerCoordsForSet(setName).map(({performer: {performer, label}, coord}) => {
+        // if (dots[currentIndex] == null) {
+        //     console.log(
+        //         `No dot for performer ${performer} ${label} at index ${currentIndex}`,
+        //     );
+        //     return null;
+        // }
 
-        let coord = dotToFieldCoordinateSteps(dots[currentIndex]);
-        // console.log('performer coord:', performer, label, coord);
         if (animationProgress > 0 && dots[currentIndex + 1] != null) {
             const nextCoord = dotToFieldCoordinateSteps(
                 dots[currentIndex + 1],
