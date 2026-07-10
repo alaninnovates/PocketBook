@@ -84,13 +84,14 @@ export class ShowData {
             return [];
         } else if (this.upload_type === '3da') {
             let currentSet = (this.dot_data as Pyware3DAFile).generalInfo.firstSet - 1;
+            let currentLetter = 65; // 'A'
             return (this.dot_data as Pyware3DAFile).productionTab.productionTabEntries.map(entry => {
                 if (entry.tabType === 0) {
                     currentSet++;
+                    currentLetter = 65;
                 }
-                // todo: ok theoretically there can be A, B, C, etc
                 return {
-                    name: currentSet.toString() + (entry.tabType === 1 ? 'A' : ''),
+                    name: currentSet.toString() + (entry.tabType === 1 ? String.fromCharCode(currentLetter++) : ''),
                     counts: entry.count,
                     measures: entry.measures,
                     subset: entry.tabType === 1,

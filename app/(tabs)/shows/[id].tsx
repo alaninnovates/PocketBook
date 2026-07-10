@@ -291,9 +291,8 @@ export default function ShowScreen() {
                     mode="contained"
                     size={32}
                     onPress={() => {
-                        const newCount = Math.max(0, sets[currentIndex - 1].counts);
-                        console.log(newCount, currentCount);
-                        setCurrentCount(newCount);
+                        if (currentIndex === 0) return;
+                        setCurrentCount(sets[currentIndex - 1].counts);
                     }}
                 />
                 <IconButton

@@ -1,9 +1,9 @@
 import {Circle, Line, matchFont, Rect, Text, vec} from "@shopify/react-native-skia";
-import {CENTER_FRONT_POINT_STEPS, stepsToPixels} from "@/components/field/dimensions";
+import {stepsToPixels} from "@/components/field/dimensions";
 import React from "react";
 import {useTheme} from "react-native-paper";
 import {clampMax} from "@/lib/utils";
-import {calculateMidset, dotToFieldCoordinateSteps} from "@/components/field/parser";
+import {calculateMidset} from "@/components/field/parser";
 import {Platform} from "react-native";
 import {interpolatePosition} from "@/components/field/playback";
 import {FieldView, SettingsProperty, useProperty} from "@/lib/settings-manager";

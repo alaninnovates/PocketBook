@@ -48,7 +48,7 @@ export default function SelectInstrumentModalScreen() {
                     </DataTable.Header>
 
                     {showData.getCoordsForPerformer(selectedInstrument)
-                        .map(({coord, set}) => {
+                        .map(({coord, set}, index) => {
                             const {side, sideToSide, frontToBack} = fieldCoordinateToDot(coord);
                             return (
                                 <DataTable.Row
@@ -57,7 +57,7 @@ export default function SelectInstrumentModalScreen() {
                                         setCurrentCount(set.counts);
                                         router.back();
                                     }}
-                                    style={(currentCount > set.counts) ?
+                                    style={(showData.getSetIndexAtCount(currentCount) === index) ?
                                         {backgroundColor: 'rgba(0, 0, 255, 0.1)'} : {}}
                                 >
                                     {/*<DataTable.Cell style={narrowerCell}>{movement}</DataTable.Cell>*/}
