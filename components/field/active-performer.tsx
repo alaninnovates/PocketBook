@@ -28,13 +28,13 @@ const CurrentPageDisplay = ({
     });
     const theme = useTheme();
 
-    const cx = stepsToPixels(CENTER_FRONT_POINT_STEPS.x - coord.x);
-    const cy = stepsToPixels(CENTER_FRONT_POINT_STEPS.y + coord.y);
+    const cx = stepsToPixels(coord.x);
+    const cy = stepsToPixels(coord.y);
     const r = clampMax(4 * 6 / (zoom), 6);
 
     const multiplier = fieldView === FieldView.Performer ? 1 : -1;
-    const textX = stepsToPixels(CENTER_FRONT_POINT_STEPS.x - coord.x) + (font.getTextWidth(performer) / 2) * multiplier;
-    const textY = stepsToPixels(CENTER_FRONT_POINT_STEPS.y + coord.y) + (-font.measureText(performer).height / 2 + 1.5) * multiplier;
+    const textX = stepsToPixels(coord.x) + (font.getTextWidth(performer) / 2) * multiplier;
+    const textY = stepsToPixels(coord.y) + (-font.measureText(performer).height / 2 + 1.5) * multiplier;
     return (
         <>
             <Circle
@@ -89,22 +89,22 @@ const AdditionalPagesDisplay = ({
                 return (
                     <React.Fragment key={index}>
                         <Circle
-                            cx={stepsToPixels(CENTER_FRONT_POINT_STEPS.x - currentCoord.x)}
-                            cy={stepsToPixels(CENTER_FRONT_POINT_STEPS.y + currentCoord.y)}
+                            cx={stepsToPixels(currentCoord.x)}
+                            cy={stepsToPixels(currentCoord.y)}
                             r={4 * dotScale}
                             color="red"
                         />
                         <Line
-                            p1={vec(stepsToPixels(CENTER_FRONT_POINT_STEPS.x - currentCoord.x), stepsToPixels(CENTER_FRONT_POINT_STEPS.y + currentCoord.y))}
-                            p2={vec(stepsToPixels(CENTER_FRONT_POINT_STEPS.x - nextCoord.x), stepsToPixels(CENTER_FRONT_POINT_STEPS.y + nextCoord.y))}
+                            p1={vec(stepsToPixels(currentCoord.x), stepsToPixels(currentCoord.y))}
+                            p2={vec(stepsToPixels(nextCoord.x), stepsToPixels(nextCoord.y))}
                             color={direction === -1 ? 'blue' : 'green'}
                             strokeWidth={2 * dotScale}
                         />
                         {(currentCoord.x !== nextCoord.x ||
                             currentCoord.y !== nextCoord.y) && (
                             <Circle
-                                cx={stepsToPixels(CENTER_FRONT_POINT_STEPS.x - midCoord.x)}
-                                cy={stepsToPixels(CENTER_FRONT_POINT_STEPS.y + midCoord.y)}
+                                cx={stepsToPixels(midCoord.x)}
+                                cy={stepsToPixels(midCoord.y)}
                                 r={2 * dotScale}
                                 color={direction === -1 ? 'blue' : 'green'}
                             />

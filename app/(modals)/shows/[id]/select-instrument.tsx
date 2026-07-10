@@ -42,14 +42,14 @@ export default function SelectInstrumentModalScreen() {
                     .sort((a, b) => a.label.localeCompare(b.label))
                     .map(({ performer, label }) => (
                         <Button
-                            key={label}
+                            key={performer}
                             onPress={() => {
-                                setSelectedInstrument(label);
+                                setSelectedInstrument(performer);
                                 router.back();
                             }}
-                            buttonColor={instrumentToColor(performer, theme.dark)}
+                            buttonColor={instrumentToColor(label, theme.dark)}
                         >
-                            {performer} {label}
+                            {label} {performer}
                         </Button>
                     ))}
             </ScrollView>

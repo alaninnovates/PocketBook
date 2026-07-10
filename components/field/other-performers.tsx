@@ -34,7 +34,7 @@ export const OtherPerformers = ({showData, zoom, animationProgress}: {
         // }
 
         if (animationProgress > 0 && currentCount <= showData.getTotalCounts()) {
-            const nextCoord = showData.getCoordAtCount(currentCount + 1, label);
+            const nextCoord = showData.getCoordAtCount(currentCount + 1, performer);
             coord = interpolatePosition(
                 coord,
                 nextCoord,
@@ -43,29 +43,31 @@ export const OtherPerformers = ({showData, zoom, animationProgress}: {
         }
 
         const multiplier = fieldView === FieldView.Performer ? 1 : -1;
+        // console.log("performer:",performer, "label:", label)
 
-        const textX = stepsToPixels(CENTER_FRONT_POINT_STEPS.x - coord.x) + (font.getTextWidth(label) / 2) * multiplier;
-        const textY = stepsToPixels(CENTER_FRONT_POINT_STEPS.y + coord.y) + (-font.measureText(label).height / 2 + 1.5) * multiplier;
+        const textX = stepsToPixels(coord.x) + (font.getTextWidth(performer) / 2) * multiplier;
+        const textY = stepsToPixels(coord.y) + (-font.measureText(performer).height / 2 + 1.5) * multiplier;
+        // console.log(coord.x, coord.y);
 
         return (
-            <React.Fragment key={label}>
+            <React.Fragment key={performer}>
                 <Circle
-                    key={label}
-                    cx={stepsToPixels(CENTER_FRONT_POINT_STEPS.x - coord.x)}
-                    cy={stepsToPixels(CENTER_FRONT_POINT_STEPS.y + coord.y)}
+                    key={performer}
+                    cx={stepsToPixels(coord.x)}
+                    cy={stepsToPixels(coord.y)}
                     r={clampMax(4 * 6 / (zoom), 6)}
-                    color={instrumentToColor(performer, theme.dark)}
+                    color={instrumentToColor(label, theme.dark)}
                     opacity={1}
                 />
                 <Text
-                    key={`text-${label}`}
+                    key={`text-${performer}`}
                     x={textX}
                     y={textY}
                     transform={[{rotate: fieldView === FieldView.Performer ? Math.PI : 0}]}
                     origin={vec(textX, textY)}
                     color={theme.colors.background}
                     font={font}
-                    text={label}
+                    text={performer}
                 />
             </React.Fragment>
         );

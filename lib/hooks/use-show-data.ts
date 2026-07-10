@@ -70,7 +70,11 @@ export class ShowData {
         if (this.upload_type === 'pocketbook') {
             return [];
         } else if (this.upload_type === '3da') {
-            return [];
+            return (this.dot_data as Pyware3DAFile).cast.castMembers.map(m => ({
+                label: m.label,
+                symbol: m.name.at(0)!,
+                performer: m.name
+            }));
         }
         return [];
     }
@@ -79,36 +83,51 @@ export class ShowData {
         if (this.upload_type === 'pocketbook') {
             return [];
         } else if (this.upload_type === '3da') {
-            return [];
+            let currentSet = (this.dot_data as Pyware3DAFile).generalInfo.firstSet - 1;
+            return (this.dot_data as Pyware3DAFile).productionTab.productionTabEntries.map(entry => {
+                if (entry.tabType === 0) {
+                    currentSet++;
+                }
+                // todo: ok theoretically there can be A, B, C, etc
+                return {
+                    name: currentSet.toString() + (entry.tabType === 1 ? 'A' : ''),
+                    counts: entry.count,
+                    measures: entry.measures,
+                    subset: entry.tabType === 1,
+                    title: entry.title,
+                    notes: [
+                        entry.note1,
+                        entry.note2,
+                        entry.note3,
+                        entry.note4,
+                        entry.note5,
+                    ]
+                }
+            })
         }
         return [];
     }
 
-    public getTotalCounts(): number {}
-
-    public getCounts(): Count[] {
+    public getTotalCounts(): number {
         if (this.upload_type === 'pocketbook') {
-            return [];
+            return 0;
         } else if (this.upload_type === '3da') {
-            return [];
+            return (this.dot_data as Pyware3DAFile).pages.arrayLength;
         }
-        return [];
-    }
-
-    public getSetAtCount(count: number): SetMetadata | null {
-        if (this.upload_type === 'pocketbook') {
-            return {};
-        } else if (this.upload_type === '3da') {
-            return {};
-        }
-        return null;
+        return 0;
     }
 
     public getSetIndexAtCount(count: number): number | null {
         if (this.upload_type === 'pocketbook') {
             return null;
         } else if (this.upload_type === '3da') {
-            return null;
+            const pTabEntries = (this.dot_data as Pyware3DAFile).productionTab.productionTabEntries;
+            // find first ptab entry where count is less than or equal to the count
+            for (let i = 0; i < pTabEntries.length; i++) {
+                if (count <= pTabEntries[i].count) {
+                    return i;
+                }
+            }
         }
         return null;
     }
@@ -117,15 +136,17 @@ export class ShowData {
         if (this.upload_type === 'pocketbook') {
             return null;
         } else if (this.upload_type === '3da') {
-            return null;
+            // console.log('set index:', setIndex);
+            return (this.dot_data as Pyware3DAFile).productionTab.productionTabEntries[setIndex]?.count;
         }
         return null;
     }
 
-
     private getPywarePerformerIdForLabel(label: string): number | null {
-        if (this.upload_type === '3da') {
-            const performer = (this.dot_data as Pyware3DAFile).cast.castMembers.find(m => m.label === label);
+        if (this.upload_type === 'pocketbook') {
+            return null;
+        } else if (this.upload_type === '3da') {
+            const performer = (this.dot_data as Pyware3DAFile).cast.castMembers.find(m => m.name === label);
             if (performer) {
                 return performer.id;
             } else {
@@ -135,52 +156,43 @@ export class ShowData {
         return null;
     }
 
-    public getSetAtCount(count: number): SetMetadata | null {}
-
     // count: zero-indexed
     public getCoordAtCount(count: number, label: string): Coordinate {
         if (this.upload_type === 'pocketbook') {
-            return {};
+            return {x: 0, y: 0};
         } else if (this.upload_type === '3da') {
+            // console.log('total counts:', this.getTotalCounts());
+            // console.log('count:', count, 'label:', label);
             const performerId = this.getPywarePerformerIdForLabel(label);
+            // console.log('performerId:', performerId);
             const position = (this.dot_data as Pyware3DAFile).pages.pages[count].performerPositionList.positions.find(p => p.id === performerId);
             return {
                 x: position?.x!,
                 y: position?.y!,
             }
         }
-        return null;
+        return {x: 0, y: 0};
     }
 
     public getCoordsForPerformer(label: string) {
-        const setsWithCounts: (SetMetadata & {totalCounts: number})[] = [];
-        for (const set of this.getSets()) {
-            const totalCounts = setsWithCounts.reduce((sum, s) => sum + s.counts, 0) + set.counts;
-            setsWithCounts.push({
-                ...set,
-                totalCounts
-            });
-        }
-
-        return setsWithCounts.map(({totalCounts, ...meta}) => ({
-            coord: this.getCoordAtCount(totalCounts, label),
-            totalCounts,
-            set: meta
+        return this.getSets().map(set => ({
+            coord: this.getCoordAtCount(set.counts, label),
+            set
         }));
     }
 
     public getPerformerCoordsForCount(count: number) {
         return this.getPerformers().map((performer) => ({
-            coord: this.getCoordAtCount(count, performer.label),
+            coord: this.getCoordAtCount(count, performer.performer),
             performer
         }));
     }
 
-    public getGridData(): {
-        lines: GridLine[];
-    } {
-        return {};
-    }
+    // public getGridData(): {
+    //     lines: GridLine[];
+    // } {
+    //     return {};
+    // }
 }
 
 interface ShowDataBase {
@@ -197,8 +209,8 @@ export interface ShowDataPocketbook extends ShowDataBase {
 }
 
 export interface ShowDataPyware extends ShowDataBase {
-    dot_data: object;
-    tempo_data: Pyware3DAFile;
+    dot_data: Pyware3DAFile;
+    tempo_data: object;
     upload_type: '3da';
 }
 

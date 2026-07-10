@@ -10,6 +10,7 @@ import {useTheme} from "react-native-paper";
 import {ActivePerformer} from "@/components/field/active-performer";
 import {FieldView, SettingsProperty, useProperty} from "@/lib/settings-manager";
 import {ShowData} from "@/lib/hooks/use-show-data";
+import {ShowContext, useShowContext} from "@/lib/hooks/use-show-context";
 
 const INITIAL_ZOOM = 0.4;
 const MIN_ZOOM = 0.1;
@@ -132,23 +133,28 @@ export const FieldCanvas = ({showData, animationProgress}: {
         [fieldView],
     );
 
+    const {currentCount, setCurrentCount, selectedInstrument, setSelectedInstrument} = useShowContext();
+
     return (
         <GestureDetector gesture={gesture}>
             <View collapsable={false} style={StyleSheet.absoluteFill} onLayout={onLayout}>
                 <Canvas style={StyleSheet.absoluteFill}>
-                    <Group transform={translateTransform}>
-                        <Group transform={scaleTransform}>
-                            <Group
-                                origin={vec(FIELD_WIDTH_PIXELS / 2, FIELD_HEIGHT_PIXELS / 2)}
-                                transform={fieldRotationTransform}
-                            >
-                                <FieldGrid theme={theme} showGrid={lodZoom > GRID_ZOOM_THRESHOLD}/>
-                                <OtherPerformers showData={showData} zoom={lodZoom}
-                                                 animationProgress={animationProgress}/>
-                                <ActivePerformer showData={showData} zoom={lodZoom} animationProgress={animationProgress}/>
+                    <ShowContext.Provider value={{currentCount, setCurrentCount, selectedInstrument, setSelectedInstrument}}>
+                        <Group transform={translateTransform}>
+                            <Group transform={scaleTransform}>
+                                <Group
+                                    origin={vec(FIELD_WIDTH_PIXELS / 2, FIELD_HEIGHT_PIXELS / 2)}
+                                    transform={fieldRotationTransform}
+                                >
+                                    <FieldGrid theme={theme} showGrid={lodZoom > GRID_ZOOM_THRESHOLD}/>
+                                    <OtherPerformers showData={showData} zoom={lodZoom}
+                                                     animationProgress={animationProgress}/>
+                                    <ActivePerformer showData={showData} zoom={lodZoom}
+                                                     animationProgress={animationProgress}/>
+                                </Group>
                             </Group>
                         </Group>
-                    </Group>
+                    </ShowContext.Provider>
                 </Canvas>
             </View>
         </GestureDetector>

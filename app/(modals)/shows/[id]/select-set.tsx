@@ -48,16 +48,16 @@ export default function SelectInstrumentModalScreen() {
                     </DataTable.Header>
 
                     {showData.getCoordsForPerformer(selectedInstrument)
-                        .map(({coord, totalCounts, set}) => {
+                        .map(({coord, set}) => {
                             const {side, sideToSide, frontToBack} = fieldCoordinateToDot(coord);
                             return (
                                 <DataTable.Row
                                     key={set.name}
                                     onPress={() => {
-                                        setCurrentCount(totalCounts);
+                                        setCurrentCount(set.counts);
                                         router.back();
                                     }}
-                                    style={(currentCount > totalCounts - set.counts && currentCount <= totalCounts) ?
+                                    style={(currentCount > set.counts) ?
                                         {backgroundColor: 'rgba(0, 0, 255, 0.1)'} : {}}
                                 >
                                     {/*<DataTable.Cell style={narrowerCell}>{movement}</DataTable.Cell>*/}

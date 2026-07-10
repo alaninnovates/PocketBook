@@ -46,16 +46,17 @@ export default function ShowsScreen() {
             ...show,
             downloaded: await AsyncStorage.getItem(`show_${show.id}`) !== null,
             pages: await (async () => {
-                const storedInstrument = await AsyncStorage.getItem(`show_${show.id}_selected_instrument`);
-                if (storedInstrument) {
-                    setStoredInstrument(storedInstrument);
-                    const showDataString = await AsyncStorage.getItem(`show_${show.id}`);
-                    if (showDataString) {
-                        const showData = JSON.parse(showDataString);
-                        const dotData = showData.dot_data;
-                        return dotData[storedInstrument].dots.length;
-                    }
-                }
+                // const storedInstrument = await AsyncStorage.getItem(`show_${show.id}_selected_instrument`);
+                // if (storedInstrument) {
+                //     setStoredInstrument(storedInstrument);
+                //     const showDataString = await AsyncStorage.getItem(`show_${show.id}`);
+                //     if (showDataString) {
+                //         const showData = JSON.parse(showDataString);
+                //         const dotData = showData.dot_data;
+                //         return dotData[storedInstrument].dots.length;
+                //     }
+                // }
+                return 1;
                 return undefined;
             })()
         })) || []);

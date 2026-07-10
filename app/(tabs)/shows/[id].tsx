@@ -32,6 +32,10 @@ export default function ShowScreen() {
     const currentAnimationStepRef = useRef(currentCount);
 
     useEffect(() => {
+        console.log('currnet count is:', currentCount, 'current index is:', showData?.getSetIndexAtCount(currentCount));
+    }, [currentCount]);
+
+    useEffect(() => {
         (async () => {
             await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT);
         })();
@@ -51,56 +55,56 @@ export default function ShowScreen() {
         return showData.getSets().length;
     }, [showData]);
 
-    const animate = useCallback(
-        (timestamp: number) => {
-            if (!showData) return null;
-            if (startTimeRef.current === null) startTimeRef.current = timestamp;
-            const elapsed = timestamp - startTimeRef.current;
-
-            const currentDot = coordinates[currentAnimationStepRef.current];
-            const tempo = (showData.tempo_data?.[currentDot.movement]?.[currentDot.set]) ?? 120;
-            const durationPerCount = 60000 / tempo;
-            const totalDuration =
-                currentAnimationStepRef.current < dotsLength - 1
-                    ? coordinates[currentAnimationStepRef.current + 1].counts *
-                    durationPerCount
-                    : 0;
-
-            if (totalDuration > 0) {
-                const progress = Math.min(elapsed / totalDuration, 1);
-                setAnimationProgress(progress);
-
-                if (progress >= 1) {
-                    const nextStep = currentAnimationStepRef.current + 1;
-                    if (nextStep >= dotsLength) {
-                        setIsPlaying(false);
-                        setAnimationProgress(0);
-                        animationFrameRef.current = null;
-                        startTimeRef.current = null;
-                        return;
-                    }
-                    setCurrentIndex(nextStep);
-                    setAnimationProgress(0);
-                    startTimeRef.current = null;
-                }
-            } else {
-                const nextStep = currentAnimationStepRef.current + 1;
-                if (nextStep >= dotsLength) {
-                    setIsPlaying(false);
-                    setAnimationProgress(0);
-                    animationFrameRef.current = null;
-                    startTimeRef.current = null;
-                    return;
-                }
-                setCurrentIndex(nextStep);
-                setAnimationProgress(0);
-                startTimeRef.current = null;
-            }
-
-            animationFrameRef.current = requestAnimationFrame(animate);
-        },
-        [isPlaying, dotsLength, showData]
-    );
+    // const animate = useCallback(
+    //     (timestamp: number) => {
+    //         if (!showData) return null;
+    //         if (startTimeRef.current === null) startTimeRef.current = timestamp;
+    //         const elapsed = timestamp - startTimeRef.current;
+    //
+    //         const currentDot = coordinates[currentAnimationStepRef.current];
+    //         const tempo = (showData.tempo_data?.[currentDot.movement]?.[currentDot.set]) ?? 120;
+    //         const durationPerCount = 60000 / tempo;
+    //         const totalDuration =
+    //             currentAnimationStepRef.current < dotsLength - 1
+    //                 ? coordinates[currentAnimationStepRef.current + 1].counts *
+    //                 durationPerCount
+    //                 : 0;
+    //
+    //         if (totalDuration > 0) {
+    //             const progress = Math.min(elapsed / totalDuration, 1);
+    //             setAnimationProgress(progress);
+    //
+    //             if (progress >= 1) {
+    //                 const nextStep = currentAnimationStepRef.current + 1;
+    //                 if (nextStep >= dotsLength) {
+    //                     setIsPlaying(false);
+    //                     setAnimationProgress(0);
+    //                     animationFrameRef.current = null;
+    //                     startTimeRef.current = null;
+    //                     return;
+    //                 }
+    //                 setCurrentIndex(nextStep);
+    //                 setAnimationProgress(0);
+    //                 startTimeRef.current = null;
+    //             }
+    //         } else {
+    //             const nextStep = currentAnimationStepRef.current + 1;
+    //             if (nextStep >= dotsLength) {
+    //                 setIsPlaying(false);
+    //                 setAnimationProgress(0);
+    //                 animationFrameRef.current = null;
+    //                 startTimeRef.current = null;
+    //                 return;
+    //             }
+    //             setCurrentIndex(nextStep);
+    //             setAnimationProgress(0);
+    //             startTimeRef.current = null;
+    //         }
+    //
+    //         animationFrameRef.current = requestAnimationFrame(animate);
+    //     },
+    //     [isPlaying, dotsLength, showData]
+    // );
 
     useEffect(() => {
         const fetchSelectedInstrument = async () => {
@@ -119,7 +123,10 @@ export default function ShowScreen() {
         if (currentCount === 0) return false;
         const currentDot = showData.getCoordAtCount(currentCount, selectedInstrument);
         const previousIndex = showData.getSetIndexAtCount(currentCount)! - 1;
-        const previousDot = showData.getCoordAtCount(showData.getCountAtSetIndex(previousIndex)!, selectedInstrument);
+        if (previousIndex < 0) return false;
+        const si = showData.getCountAtSetIndex(previousIndex)!;
+        console.log("previous index:", previousIndex, "si:", si, "current count:", currentCount);
+        const previousDot = showData.getCoordAtCount(si, selectedInstrument);
         return (
             currentDot.x === previousDot.x &&
             currentDot.y === previousDot.y
@@ -141,6 +148,7 @@ export default function ShowScreen() {
     const sets = showData.getSets();
     const currentIndex = showData.getSetIndexAtCount(currentCount)!;
     const currentDot = fieldCoordinateToDot(coordinates[currentIndex].coord);
+    console.log('set index:', currentIndex, 'current count:', currentCount, 'current dot:', currentDot);
 
     const midset =
         currentIndex > 0 && !dotCoordinatesEqual(coordinates[currentIndex - 1].coord, coordinates[currentIndex].coord)
@@ -235,7 +243,8 @@ export default function ShowScreen() {
                         </Text>
                         <Text variant="bodyLarge">
                             {isHold ? 'Hold' : 'Move'}:{' '}
-                            {sets[currentIndex].counts}
+                            {currentIndex === 0 ? sets[currentIndex].counts :
+                                sets[currentIndex].counts - sets[currentIndex - 1].counts}
                         </Text>
                     </View>
                 </View>
@@ -257,8 +266,8 @@ export default function ShowScreen() {
                             return;
                         }
                         setIsPlaying(true);
-                        animationFrameRef.current =
-                            requestAnimationFrame(animate);
+                        // animationFrameRef.current =
+                        //     requestAnimationFrame(animate);
                     }}
                 />
                 <IconButton
@@ -282,7 +291,8 @@ export default function ShowScreen() {
                     mode="contained"
                     size={32}
                     onPress={() => {
-                        const newCount = Math.max(0, currentCount - sets[currentIndex].counts);
+                        const newCount = Math.max(0, sets[currentIndex - 1].counts);
+                        console.log(newCount, currentCount);
                         setCurrentCount(newCount);
                     }}
                 />
@@ -291,7 +301,8 @@ export default function ShowScreen() {
                     mode="contained"
                     size={32}
                     onPress={() => {
-                        const newCount = currentCount + sets[currentIndex].counts;
+                        const newCount = sets[currentIndex + 1].counts;
+                        console.log(newCount, currentCount);
                         setCurrentCount(newCount);
                     }}
                 />
