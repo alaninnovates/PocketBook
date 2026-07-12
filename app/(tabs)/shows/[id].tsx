@@ -300,8 +300,8 @@ export default function ShowScreen() {
                     mode="contained"
                     size={32}
                     onPress={() => {
+                        if (currentIndex === sets.length - 1) return;
                         const newCount = sets[currentIndex + 1].counts;
-                        console.log(newCount, currentCount);
                         setCurrentCount(newCount);
                     }}
                 />
