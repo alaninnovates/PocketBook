@@ -146,7 +146,7 @@ export const FieldCanvas = ({showData, animationProgress}: {
                                     origin={vec(FIELD_WIDTH_PIXELS / 2, FIELD_HEIGHT_PIXELS / 2)}
                                     transform={fieldRotationTransform}
                                 >
-                                    <FieldGrid theme={theme} showGrid={lodZoom > GRID_ZOOM_THRESHOLD}/>
+                                    <FieldGrid theme={theme} showGrid={lodZoom > GRID_ZOOM_THRESHOLD} showData={showData} />
                                     <OtherPerformers showData={showData} zoom={lodZoom}
                                                      animationProgress={animationProgress}/>
                                     <ActivePerformer showData={showData} zoom={lodZoom}

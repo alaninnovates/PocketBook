@@ -1,42 +1,143 @@
-import {Line, useFont, vec, Text} from "@shopify/react-native-skia";
-import {
-    FIELD_HEIGHT_STEPS, FIELD_WIDTH_STEPS, FIELD_FRONT_HASH_STEPS, FIELD_BACK_HASH_STEPS, stepsToPixels,
-    CENTER_FRONT_POINT_STEPS, HOME_LABEL_BOTTOM_STEPS, yardsToSteps,
-    AWAY_LABEL_BOTTOM_STEPS
-} from "@/components/field/dimensions";
+import {Line, Skia, Text, useTypeface, vec} from "@shopify/react-native-skia";
+import {stepsToPixels, yardsToSteps} from "@/components/field/dimensions";
 import {MD3Theme} from "react-native-paper";
 import React from "react";
+import {GridLineType, MeasureDirection, ShowData, Unit} from "@/lib/hooks/use-show-data";
 
-export const FieldGrid = ({theme, showGrid}: { theme: MD3Theme, showGrid: boolean }) => {
-    const font = useFont(require('@/assets/fonts/cmunrm.ttf'), 54);
+export const FieldGrid = ({theme, showGrid, showData}: { theme: MD3Theme, showGrid: boolean; showData: ShowData }) => {
+    const typeface = useTypeface(require('@/assets/fonts/cmunrm.ttf'));
 
-    if (!font) {
+    if (!typeface) {
         return null;
+    }
+
+    const fieldMetadata = showData.getFieldMetadata();
+    // console.log('field metadata', fieldMetadata);
+    const gridData = showData.getGridData();
+    // console.log('gridData', gridData);
+
+    // convert selected unit to steps
+    const selectedUnitToSteps = (value: number) => {
+        switch (fieldMetadata.units) {
+            case Unit.Yards:
+                return yardsToSteps(value);
+            case Unit.Meters:
+                return yardsToSteps(value * 1.09361);
+            case Unit.Feet:
+                return yardsToSteps(value / 3);
+            default:
+                return value;
+        }
+    }
+
+    console.log('dimensions', fieldMetadata.dimensions);
+    const gridUnitLines = [];
+    /*GRID - every step at x and y*/
+    /*start at (0,0) and go up and down until exceeds fieldMetadata.dimensions.top, and also bottom*/
+    let step = 0;
+    while (step <= selectedUnitToSteps(fieldMetadata.dimensions.right)) {
+        gridUnitLines.push(
+            <Line
+                key={`grid-v-r-${step}`}
+                p1={vec(stepsToPixels(step), stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.top)))}
+                p2={vec(stepsToPixels(step), stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.bottom)))}
+                color={theme.dark ? '#606062' : '#b9e9ea'}
+                style="stroke"
+                strokeWidth={1}
+            />
+        )
+        step += 1;
+    }
+    step = 0;
+    while (step >= selectedUnitToSteps(fieldMetadata.dimensions.left)) {
+        gridUnitLines.push(
+            <Line
+                key={`grid-v-l-${step}`}
+                p1={vec(stepsToPixels(step), stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.top)))}
+                p2={vec(stepsToPixels(step), stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.bottom)))}
+                color={theme.dark ? '#606062' : '#b9e9ea'}
+                style="stroke"
+                strokeWidth={1}
+            />
+        )
+        step -= 1;
+    }
+    step = 0;
+    while (step >= selectedUnitToSteps(fieldMetadata.dimensions.top)) {
+        gridUnitLines.push(
+            <Line
+                key={`grid-h-t-${step}`}
+                p1={vec(stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.left)), stepsToPixels(step))}
+                p2={vec(stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.right)), stepsToPixels(step))}
+                color={theme.dark ? '#606062' : '#b9e9ea'}
+                style="stroke"
+                strokeWidth={1}
+            />
+        )
+        step -= 1;
+    }
+    step = 0;
+    while (step <= selectedUnitToSteps(fieldMetadata.dimensions.bottom)) {
+        gridUnitLines.push(
+            <Line
+                key={`grid-h-b-${step}`}
+                p1={vec(stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.left)), stepsToPixels(step))}
+                p2={vec(stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.right)), stepsToPixels(step))}
+                color={theme.dark ? '#606062' : '#b9e9ea'}
+                style="stroke"
+                strokeWidth={1}
+            />
+        )
+        step += 1;
+    }
+
+    // based on method_3191
+    const getFont = () => {
+        const fontSizeInSteps = selectedUnitToSteps(fieldMetadata.markers.front.size);
+        // console.log('fnt size steps:',fontSizeInSteps);
+        const baseFont = Skia.Font(typeface, 12);
+        const metrics = baseFont.getMetrics();
+        const baseHeight = metrics.descent - metrics.ascent;
+        // console.log('base height:', baseHeight);
+
+        // todo: lwk magic number i dont get it fix later
+        const PIXELS_TO_POINTS = 1.88;
+        // console.log(PIXELS_TO_POINTS);
+        const targetPoints = stepsToPixels(fontSizeInSteps) * PIXELS_TO_POINTS;
+
+        const size = baseFont.getSize() * targetPoints / baseHeight;
+        // console.log('scaled font size:', size);
+        return Skia.Font(typeface, size);
     }
 
     return (
         <>
-            {/*YARD LINE NUMBERS*/}
-            {Array.from({length: 9}).map((_, index) => {
-                const yardNumber = (index + 1) * 10;
-                const stepPosition = stepsToPixels(CENTER_FRONT_POINT_STEPS.x + yardsToSteps(yardNumber - 50));
-                const text = (index < 5 ? (index + 1) * 10 : (9 - index) * 10).toString();
-
-                const bottomX = (stepPosition + (font.measureText(text).width / 2));
-                const bottomY = stepsToPixels(CENTER_FRONT_POINT_STEPS.y + AWAY_LABEL_BOTTOM_STEPS);
-                return (
-                    <React.Fragment key={`yard-number-fragment-${index}`}>
+            {showGrid && gridUnitLines}
+            {/*GRID LINES*/}
+            {gridData.lines.map(({direction, position, label, type, showMarker}, index) => {
+                if (type === GridLineType.YardTick) return;
+                const strokeWidth = {
+                    [GridLineType.DivisionLine]: 4,
+                    [GridLineType.SubDivisionLine]: 2,
+                    [GridLineType.MajorHash]: 4,
+                    [GridLineType.MinorHash]: 2,
+                }[type] || 2;
+                const markers = [];
+                if (type === GridLineType.DivisionLine && direction === 'vertical' && showMarker) {
+                    const text = label || (
+                        fieldMetadata.measureDirection === MeasureDirection.Inward ?
+                            (50 - Math.abs(position)).toString() :
+                            position.toString()
+                    );
+                    if (text === '0') return;
+                    const font = getFont();
+                    // for the back number
+                    const bottomX = stepsToPixels(selectedUnitToSteps(position)) - (font.measureText(text).width / 2);
+                    const bottomY = stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.bottom)) - stepsToPixels(selectedUnitToSteps(fieldMetadata.markers.back.distance - fieldMetadata.markers.front.size / 2));
+                    markers.push(
                         <Text
-                            key={`yard-number-top-${index}`}
-                            x={stepPosition - (font.measureText(text).width / 2)}
-                            y={stepsToPixels(CENTER_FRONT_POINT_STEPS.y + HOME_LABEL_BOTTOM_STEPS)}
-                            font={font}
-                            color={theme.colors.onBackground}
-                            text={text}
-                        />
-                        <Text
-                            key={`yard-number-bottom-${index}`}
-                            transform={[{rotate: Math.PI}]}
+                            key={`grid-line-marker-back-${index}`}
+                            transform={[{rotate: 0}]}
                             origin={vec(bottomX, bottomY)}
                             x={bottomX}
                             y={bottomY}
@@ -44,127 +145,72 @@ export const FieldGrid = ({theme, showGrid}: { theme: MD3Theme, showGrid: boolea
                             color={theme.colors.onBackground}
                             text={text}
                         />
-                    </React.Fragment>
-                )
-            })}
-            {showGrid && (
-                <>
-                    {/*GRID - every step at x and y*/}
-                    {Array.from({length: FIELD_HEIGHT_STEPS + 1}).map((_, index) => {
-                        return (
+                    );
+                    // for the front number
+                    const topX = stepsToPixels(selectedUnitToSteps(position)) + (font.measureText(text).width / 2);
+                    const topY = stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.top)) + stepsToPixels(selectedUnitToSteps(fieldMetadata.markers.front.distance - fieldMetadata.markers.front.size / 2));
+                    markers.push(
+                        <Text
+                            key={`grid-line-marker-front-${index}`}
+                            transform={[{rotate: Math.PI}]}
+                            origin={vec(topX, topY)}
+                            x={topX}
+                            y={topY}
+                            font={font}
+                            color={theme.colors.onBackground}
+                            text={text}
+                        />
+                    );
+                }
+                return (
+                    direction === 'vertical' ? (
+                        <React.Fragment key={`grid-line-${index}`}>
+                            {markers}
                             <Line
-                                key={`grid-h-${index}`}
-                                p1={vec(0, stepsToPixels(FIELD_HEIGHT_STEPS - index))}
-                                p2={vec(stepsToPixels(FIELD_WIDTH_STEPS), stepsToPixels(FIELD_HEIGHT_STEPS - index))}
-                                color={theme.dark ? '#606062' : '#b9e9ea'}
+                                p1={vec(stepsToPixels(selectedUnitToSteps(position)), stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.top)))}
+                                p2={vec(stepsToPixels(selectedUnitToSteps(position)), stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.bottom)))}
+                                color={theme.dark ? 'white' : 'black'}
                                 style="stroke"
-                                strokeWidth={1}
+                                strokeWidth={strokeWidth}
                             />
-                        )
-                    })}
-                    {Array.from({length: FIELD_WIDTH_STEPS + 1}).map((_, index) => {
-                        return (
-                            <Line
-                                key={`grid-v-${index}`}
-                                p1={vec(stepsToPixels(index), 0)}
-                                p2={vec(stepsToPixels(index), stepsToPixels(FIELD_HEIGHT_STEPS))}
-                                color={theme.dark ? '#606062' : '#b9e9ea'}
-                                style="stroke"
-                                strokeWidth={1}
-                            />
-                        )
-                    })}
-                </>
-            )}
-            {/*HALF-LINES - every 4 steps at x and y*/}
-            {Array.from({length: FIELD_HEIGHT_STEPS / 4 + 1}).map((_, index) => {
-                const stepPosition = 4 * index;
-                return (
-                    <Line
-                        key={`halfline-h-${index}`}
-                        p1={vec(0, stepsToPixels(FIELD_HEIGHT_STEPS - stepPosition))}
-                        p2={vec(stepsToPixels(FIELD_WIDTH_STEPS), stepsToPixels(FIELD_HEIGHT_STEPS - stepPosition))}
-                        color={theme.dark ? '#C0BFC0' : '#888'}
-                        style="stroke"
-                        strokeWidth={2}
-                    />
+                        </React.Fragment>
+                    ) : (
+                        <Line
+                            key={`grid-line-${index}`}
+                            p1={vec(stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.left)), stepsToPixels(selectedUnitToSteps(position)))}
+                            p2={vec(stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.right)), stepsToPixels(selectedUnitToSteps(position)))}
+                            color={theme.dark ? 'white' : 'black'}
+                            style="stroke"
+                            strokeWidth={strokeWidth}
+                        />
+                    )
                 )
             })}
-            {Array.from({length: FIELD_WIDTH_STEPS / 4 + 1}).map((_, index) => {
-                const stepPosition = 4 * index;
-                return (
-                    <Line
-                        key={`halfline-v-${index}`}
-                        p1={vec(stepsToPixels(stepPosition), 0)}
-                        p2={vec(stepsToPixels(stepPosition), stepsToPixels(FIELD_HEIGHT_STEPS))}
-                        color={theme.dark ? '#C0BFC0' : '#888'}
-                        style="stroke"
-                        strokeWidth={2}
-                    />
-                )
-            })}
-            {/*VERTICAL YARDLINES*/}
-            {Array.from({length: 20}).map((_, index) => {
-                const stepPosition = (FIELD_WIDTH_STEPS / 20) * index;
-                return (
-                    <Line
-                        key={`yardline-${index}`}
-                        p1={vec(stepsToPixels(stepPosition), 0)}
-                        p2={vec(stepsToPixels(stepPosition), stepsToPixels(FIELD_HEIGHT_STEPS))}
-                        color={theme.dark ? 'white' : '#888'}
-                        style="stroke"
-                        strokeWidth={3}
-                    />
-                )
-            })}
-            {/*FRONT/BACK HASH*/}
-            <Line
-                p1={vec(0, stepsToPixels(CENTER_FRONT_POINT_STEPS.y + FIELD_FRONT_HASH_STEPS))}
-                p2={vec(stepsToPixels(FIELD_WIDTH_STEPS), stepsToPixels(CENTER_FRONT_POINT_STEPS.y + FIELD_FRONT_HASH_STEPS))}
-                color={theme.dark ? 'white' : 'black'}
-                style="stroke"
-                strokeWidth={4}
-            />
-            <Line
-                p1={vec(0, stepsToPixels(CENTER_FRONT_POINT_STEPS.y + FIELD_BACK_HASH_STEPS))}
-                p2={vec(stepsToPixels(FIELD_WIDTH_STEPS), stepsToPixels(CENTER_FRONT_POINT_STEPS.y + FIELD_BACK_HASH_STEPS))}
-                color={theme.dark ? 'white' : 'black'}
-                style="stroke"
-                strokeWidth={4}
-            />
-            {/*FIFTY*/}
-            <Line
-                p1={vec(stepsToPixels(CENTER_FRONT_POINT_STEPS.x), 0)}
-                p2={vec(stepsToPixels(CENTER_FRONT_POINT_STEPS.x), stepsToPixels(FIELD_HEIGHT_STEPS))}
-                color={theme.dark ? 'white' : 'black'}
-                style="stroke"
-                strokeWidth={4}
-            />
             {/*FRONT/BACK/LEFT/RIGHT SIDELINE*/}
             <Line
-                p1={vec(0, 0)}
-                p2={vec(stepsToPixels(FIELD_WIDTH_STEPS), 0)}
+                p1={vec(stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.left)), stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.bottom)))}
+                p2={vec(stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.right)), stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.bottom)))}
                 color={theme.colors.onBackground}
                 style="stroke"
                 strokeWidth={4}
             />
             <Line
-                p1={vec(0, stepsToPixels(FIELD_HEIGHT_STEPS))}
-                p2={vec(stepsToPixels(FIELD_WIDTH_STEPS), stepsToPixels(FIELD_HEIGHT_STEPS))}
+                p1={vec(stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.left)), stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.top)))}
+                p2={vec(stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.right)), stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.top)))}
                 color={theme.colors.onBackground}
                 style="stroke"
                 strokeWidth={4}
             />
             <Line
-                p1={vec(0, 0)}
-                p2={vec(0, stepsToPixels(FIELD_HEIGHT_STEPS))}
+                p1={vec(stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.left)), stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.bottom)))}
+                p2={vec(stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.left)), stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.top)))}
                 color={theme.colors.onBackground}
                 style="stroke"
                 strokeWidth={4}
             />
             <Line
-                p1={vec(stepsToPixels(FIELD_WIDTH_STEPS), 0)}
-                p2={vec(stepsToPixels(FIELD_WIDTH_STEPS), stepsToPixels(FIELD_HEIGHT_STEPS))}
+                p1={vec(stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.right)), stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.bottom)))}
+                p2={vec(stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.right)), stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.top)))}
                 color={theme.colors.onBackground}
                 style="stroke"
                 strokeWidth={4}
