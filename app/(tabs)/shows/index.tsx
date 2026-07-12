@@ -74,10 +74,13 @@ export default function ShowsScreen() {
     });
 
     return (
-        <SafeAreaView style={{padding: 16}}>
-            {/*<Text variant="headlineLarge" style={{marginBottom: 16}}>Shows</Text>*/}
+        <SafeAreaView style={{padding: 16, flex: 1}}>
             <EnsembleSwitcher selectedEnsemble={selectedEnsemble} setSelectedEnsemble={setSelectedEnsemble}/>
-            <ScrollView contentContainerStyle={{display: 'flex', flexDirection: 'column', gap: 16, height: '100%'}}>
+            <ScrollView
+                style={{flex: 1}}
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{gap: 16, paddingBottom: 16}}
+            >
                 {shows.length === 0 && (
                     <Text variant="bodyMedium" style={{marginTop: 32, textAlign: 'center'}}>No shows available for this
                         ensemble.</Text>
