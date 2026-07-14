@@ -3,7 +3,6 @@ import {LayoutChangeEvent, StyleSheet, View} from "react-native";
 import {Canvas, Group, vec} from "@shopify/react-native-skia";
 import {Gesture, GestureDetector} from "react-native-gesture-handler";
 import {runOnJS, useAnimatedReaction, useDerivedValue, useSharedValue} from "react-native-reanimated";
-import {FIELD_HEIGHT_PIXELS, FIELD_WIDTH_PIXELS} from "./dimensions";
 import {FieldGrid} from "./field-grid";
 import {OtherPerformers} from "./other-performers";
 import {useTheme} from "react-native-paper";
@@ -66,8 +65,8 @@ export const FieldCanvas = ({showData, animationProgress}: {
 
     const centerField = useCallback((viewportWidth: number, viewportHeight: number) => {
         scale.value = INITIAL_ZOOM;
-        translateX.value = (viewportWidth - FIELD_WIDTH_PIXELS * INITIAL_ZOOM) / 2;
-        translateY.value = (viewportHeight - FIELD_HEIGHT_PIXELS * INITIAL_ZOOM) / 2;
+        translateX.value = viewportWidth / 2;
+        translateY.value = viewportHeight / 2;
         setLodZoom(INITIAL_ZOOM);
     }, [scale, translateX, translateY]);
 
@@ -143,7 +142,7 @@ export const FieldCanvas = ({showData, animationProgress}: {
                         <Group transform={translateTransform}>
                             <Group transform={scaleTransform}>
                                 <Group
-                                    origin={vec(FIELD_WIDTH_PIXELS / 2, FIELD_HEIGHT_PIXELS / 2)}
+                                    origin={vec(0, 0)}
                                     transform={fieldRotationTransform}
                                 >
                                     <FieldGrid theme={theme} showGrid={lodZoom > GRID_ZOOM_THRESHOLD} showData={showData} />
