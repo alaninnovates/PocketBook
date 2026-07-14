@@ -71,11 +71,15 @@ idx side offset dir  offset ???  ?? label
 
 After this, there will be a lot more data until the next set. just stop reading after you've read enough instruments in to cover all indexes
 Still have to figure out what this data below means... props maybe?
-02 00 01 00 04 00 00 00 00 1D 4C 00 00 0D
-6E 00 00 57 E4 00 00 0F DF 00 00 00 00 00
-00 01 B4 00 02 00 02 00 04 00 00 FF FF DB
-61 00 00 2D 2B FF FF EA 07 00 00 39 60 00
-00 00 00 00 00 00 00 00 02 00 3A 00
+02
+00 01 00 04 00 00 00 00 1D 4C 00 00 0D 6E
+00 00 57 E4 00 00 0F DF 00 00 00 00 00 00
+01 B4
+00 02 00 02 00 04 00 00 FF FF DB 61 00 00
+2D 2B FF FF EA 07 00 00 39 60 00 00 00 00
+00 00 00 00 00 02
+
+00 3A 00
 
 01 FF FF E2 B4 00 00 0C 35 FF 99 00 55 00
 02 FF FF EE E9 00 00 15 F9 FF 99 00 52 00
