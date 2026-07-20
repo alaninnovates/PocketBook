@@ -164,7 +164,7 @@ export default function ShowScreen() {
             ? calculateStepSize(
                 coordinates[currentIndex - 1].coord,
                 coordinates[currentIndex].coord,
-                sets[currentIndex].counts,
+                sets[currentIndex].counts - sets[currentIndex - 1].counts
             )
             : null;
 

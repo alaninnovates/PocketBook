@@ -56,9 +56,9 @@ export const fieldCoordinateToDot = (
     let frontToBackStepOffset: number;
     let frontToBackStepOffsetDirection: 'In Front Of' | 'Behind';
 
-    const distanceFromFrontHash = y - FIELD_FRONT_HASH_STEPS;
-    const distanceFromBackHash = y - FIELD_BACK_HASH_STEPS;
-    const distanceFromFrontSideline = y - FIELD_HEIGHT_STEPS;
+    const distanceFromFrontHash = 14 - y;
+    const distanceFromBackHash = y - 14;
+    const distanceFromFrontSideline = 42 - y;
 
     if (
         Math.abs(distanceFromFrontSideline) <=
@@ -67,11 +67,11 @@ export const fieldCoordinateToDot = (
     ) {
         frontToBackLine = 'Front Side Line';
         const offset = distanceFromFrontSideline;
-        if (offset >= 0) {
-            frontToBackStepOffset = Math.round(offset);
+        if (offset <= 0) {
+            frontToBackStepOffset = Math.round(-offset);
             frontToBackStepOffsetDirection = 'In Front Of';
         } else {
-            frontToBackStepOffset = Math.round(-offset);
+            frontToBackStepOffset = Math.round(offset);
             frontToBackStepOffsetDirection = 'Behind';
         }
     } else if (
@@ -79,21 +79,21 @@ export const fieldCoordinateToDot = (
     ) {
         frontToBackLine = 'Front Hash (HS)';
         const offset = distanceFromFrontHash;
-        if (offset >= 0) {
-            frontToBackStepOffset = Math.round(offset);
+        if (offset <= 0) {
+            frontToBackStepOffset = Math.round(-offset);
             frontToBackStepOffsetDirection = 'In Front Of';
         } else {
-            frontToBackStepOffset = Math.round(-offset);
+            frontToBackStepOffset = Math.round(offset);
             frontToBackStepOffsetDirection = 'Behind';
         }
     } else {
         frontToBackLine = 'Back Hash (HS)';
         const offset = distanceFromBackHash;
-        if (offset >= 0) {
-            frontToBackStepOffset = Math.round(offset);
+        if (offset <= 0) {
+            frontToBackStepOffset = Math.round(-offset);
             frontToBackStepOffsetDirection = 'In Front Of';
         } else {
-            frontToBackStepOffset = Math.round(-offset);
+            frontToBackStepOffset = Math.round(offset);
             frontToBackStepOffsetDirection = 'Behind';
         }
     }
@@ -123,10 +123,11 @@ export const calculateStepSize = (
     counts: number,
 ): number => {
     // console.log('coord1:', coord1, 'coord2:', coord2);
-    const yards = stepsToYards(Math.sqrt(
+    const stepsDelta = Math.sqrt(
         Math.pow(coord2.x - coord1.x, 2) +
         Math.pow(coord2.y - coord1.y, 2),
-    ));
+    );
+    const yards = stepsToYards(stepsDelta);
     // console.log('yards between dots:', yards);
     return Math.round((8 * yards / counts) * 100) / 100;
 };
