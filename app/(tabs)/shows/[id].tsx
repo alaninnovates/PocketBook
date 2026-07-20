@@ -1,14 +1,13 @@
 import {useLocalSearchParams, useRouter} from "expo-router";
 import {FieldCanvas} from "@/components/field/field-canvas";
-import {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {useEffect, useMemo, useRef, useState} from "react";
 import {View} from "react-native";
-import {IconButton, Text, TouchableRipple, useTheme} from "react-native-paper";
+import {IconButton, Text, useTheme} from "react-native-paper";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {
     calculateMidset,
     calculateStepSize,
     dotCoordinatesEqual,
-    dotToFieldCoordinateSteps,
     fieldCoordinateToDot
 } from "@/components/field/parser";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -250,6 +249,7 @@ export default function ShowScreen() {
                 </View>
             </View>
             <View style={{position: "absolute", right: right, top: '45%'}}>
+                {/*
                 <IconButton
                     icon={isPlaying ? "pause" : "play"}
                     mode="contained"
@@ -270,6 +270,7 @@ export default function ShowScreen() {
                         //     requestAnimationFrame(animate);
                     }}
                 />
+                */}
                 <IconButton
                     icon={"format-list-bulleted"}
                     mode="contained"

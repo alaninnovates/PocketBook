@@ -2,7 +2,6 @@ import {useEffect, useState} from "react";
 import {supabase} from "@/lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useRouter} from "expo-router";
-import {DotData, TempoData} from "@/lib/types";
 import {parsePyware3DAFile, parsePywareSNCFile} from "pyware-parser";
 
 type Pyware3DAFile = ReturnType<typeof parsePyware3DAFile>;
@@ -92,11 +91,11 @@ export class ShowData {
     private name: string
     private created_at: string
     private updated_at: string
-    private dot_data: DotData | Pyware3DAFile;
-    private tempo_data: TempoData | PywareSNCFile;
-    private upload_type: 'pocketbook' | '3da'
+    private dot_data: Pyware3DAFile;
+    private tempo_data: PywareSNCFile;
+    private upload_type: '3da'
 
-    constructor(data: ShowDataPocketbook | ShowDataPyware) {
+    constructor(data: ShowDataPyware) {
         this.id = data.id;
         this.name = data.name;
         this.created_at = data.created_at;
@@ -106,14 +105,20 @@ export class ShowData {
         this.upload_type = data.upload_type;
     }
 
+    public getId(): string {
+        return this.id;
+    }
+
+    public getUpdatedAt(): Date {
+        return new Date(this.updated_at);
+    }
+
     public getPerformers(): {
         label: string;
         symbol: string;
         performer: string;
     }[] {
-        if (this.upload_type === 'pocketbook') {
-            return [];
-        } else if (this.upload_type === '3da') {
+        if (this.upload_type === '3da') {
             return (this.dot_data as Pyware3DAFile).cast.castMembers.map(m => ({
                 label: m.label,
                 symbol: m.name.at(0)!,
@@ -124,9 +129,7 @@ export class ShowData {
     }
 
     public getSets(): SetMetadata[] {
-        if (this.upload_type === 'pocketbook') {
-            return [];
-        } else if (this.upload_type === '3da') {
+        if (this.upload_type === '3da') {
             let currentSet = (this.dot_data as Pyware3DAFile).generalInfo.firstSet - 1;
             let currentLetter = 65; // 'A'
             return (this.dot_data as Pyware3DAFile).productionTab.productionTabEntries.map(entry => {
@@ -154,18 +157,14 @@ export class ShowData {
     }
 
     public getTotalCounts(): number {
-        if (this.upload_type === 'pocketbook') {
-            return 0;
-        } else if (this.upload_type === '3da') {
+        if (this.upload_type === '3da') {
             return (this.dot_data as Pyware3DAFile).pages.arrayLength;
         }
         return 0;
     }
 
     public getSetIndexAtCount(count: number): number | null {
-        if (this.upload_type === 'pocketbook') {
-            return null;
-        } else if (this.upload_type === '3da') {
+        if (this.upload_type === '3da') {
             const pTabEntries = (this.dot_data as Pyware3DAFile).productionTab.productionTabEntries;
             // find first ptab entry where count is less than or equal to the count
             for (let i = 0; i < pTabEntries.length; i++) {
@@ -178,9 +177,7 @@ export class ShowData {
     }
 
     public getCountAtSetIndex(setIndex: number): number | null {
-        if (this.upload_type === 'pocketbook') {
-            return null;
-        } else if (this.upload_type === '3da') {
+        if (this.upload_type === '3da') {
             // console.log('set index:', setIndex);
             return (this.dot_data as Pyware3DAFile).productionTab.productionTabEntries[setIndex]?.count;
         }
@@ -188,9 +185,7 @@ export class ShowData {
     }
 
     private getPywarePerformerIdForLabel(label: string): number | null {
-        if (this.upload_type === 'pocketbook') {
-            return null;
-        } else if (this.upload_type === '3da') {
+        if (this.upload_type === '3da') {
             const performer = (this.dot_data as Pyware3DAFile).cast.castMembers.find(m => m.name === label);
             if (performer) {
                 return performer.id;
@@ -203,9 +198,7 @@ export class ShowData {
 
     // count: zero-indexed
     public getCoordAtCount(count: number, label: string): Coordinate {
-        if (this.upload_type === 'pocketbook') {
-            return {x: 0, y: 0};
-        } else if (this.upload_type === '3da') {
+        if (this.upload_type === '3da') {
             // console.log('total counts:', this.getTotalCounts());
             // console.log('count:', count, 'label:', label);
             const performerId = this.getPywarePerformerIdForLabel(label);
@@ -232,447 +225,9 @@ export class ShowData {
             performer
         }));
     }
-    /*
 
-  "gridPattern": {
-    "gridPatternHeader": "GRD1",
-    "sectionSizeBytes": 1325,
-    "field_4929": 2,
-    "size": 89,
-    "gridData": {
-      "horizontalGridLines": [
-        {
-          "type": "divisionLine",
-          "distance": -27.083334,
-          "showMarker": false,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": 26.25,
-          "showMarker": false,
-          "label": ""
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -8.75
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 23.75
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 13.75
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -21.25
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -18.75
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -16.25
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -13.75
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -11.25
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -6.25
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -3.75
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -1.25
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 1.25
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 3.75
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 6.25
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 16.25
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 18.75
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 21.25
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 11.25
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -23.75
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 8.75
-        },
-        {
-          "type": "yardTick",
-          "distance": -10
-        },
-        {
-          "type": "yardTick",
-          "distance": -26.458334
-        },
-        {
-          "type": "majorHash",
-          "distance": -9.666667,
-          "label": ""
-        },
-        {
-          "type": "majorHash",
-          "distance": 8.75,
-          "label": ""
-        },
-        {
-          "type": "yardTick",
-          "distance": 25.625
-        },
-        {
-          "type": "yardTick",
-          "distance": 9
-        }
-      ],
-      "verticalGridLines": [
-        {
-          "type": "divisionLine",
-          "distance": -50,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": -45,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": -40,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": -35,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": -30,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": -25,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": -20,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": -15,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": -10,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": -5,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": 0,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": 5,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": 10,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": 15,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": 20,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": 25,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": 30,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": 35,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": 40,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": 45,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "divisionLine",
-          "distance": 50,
-          "showMarker": true,
-          "label": ""
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -47.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -42.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -37.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -32.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -27.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -22.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -17.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -12.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -7.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": -2.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 2.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 7.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 12.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 17.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 22.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 27.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 32.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 37.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 42.5
-        },
-        {
-          "type": "subDivisionLine",
-          "distance": 47.5
-        }
-      ],
-      "version": "0 0",
-      "title": "/Users/timothymcafee/Documents/Pyware 3D/Layouts/True HS Grid.grd",
-      "unit": {
-        "type": 0,
-        "direction": 0
-      },
-      "grid": {
-        "topBottom": {
-          "steps": 8,
-          "perUnit": 5
-        },
-        "leftRight": {
-          "steps": 8,
-          "perUnit": 5
-        },
-        "style": 1,
-        "resolution": 1,
-        "gridLineColor": {
-          "r": 200,
-          "g": 255,
-          "b": 255
-        }
-      },
-      "perspectiveBackgroundColor": {
-        "r": 240,
-        "g": 240,
-        "b": 240
-      },
-      "perspectiveLineColor": {
-        "r": 255,
-        "g": 255,
-        "b": 255
-      },
-      "standColors": {
-        "homeStandColor": {
-          "r": 0,
-          "g": 96,
-          "b": 96
-        },
-        "visitorStandColor": {
-          "r": 96,
-          "g": 0,
-          "b": 96
-        }
-      },
-      "measureFromStageFront": true,
-      "border": {
-        "left": -50,
-        "top": -27.083334,
-        "right": 50,
-        "bottom": 26.25,
-        "backgroundColor": {
-          "r": 255,
-          "g": 255,
-          "b": 255
-        }
-      },
-      "majorLineColor": {
-        "r": 64,
-        "g": 64,
-        "b": 64
-      },
-      "minorLineColor": {
-        "r": 88,
-        "g": 190,
-        "b": 215
-      },
-      "hashLineColor": {
-        "r": 64,
-        "g": 64,
-        "b": 64
-      },
-      "frontMarker": {
-        "unknownValue": -2,
-        "distance": 8.039847,
-        "size": 2,
-        "color": {
-          "r": 192,
-          "g": 192,
-          "b": 192
-        }
-      },
-      "backMarker": {
-        "distance": 8.039847,
-        "flipOrientation": true
-      },
-      "groundPath": "",
-      "venue": "9001",
-      "sky": "11001",
-      "markingFont": "dialog",
-      "lineWeights": {
-        "sideline": 1.25,
-        "endzone": 1.25,
-        "divisionLine": 1.25,
-        "subDivisionLine": 1.1,
-        "stepGrid": 2,
-        "hashAndTick": 1
-      }
-    }
-  },
-     */
     public getFieldMetadata(): FieldMetadata {
-        if (this.upload_type === 'pocketbook') {
-
-        } else if (this.upload_type === '3da') {
+        if (this.upload_type === '3da') {
             const gridData = (this.dot_data as Pyware3DAFile).gridPattern.gridData;
             return {
                 units: gridData.unit.type,
@@ -705,15 +260,19 @@ export class ShowData {
                 }
             }
         }
-        return {}
+        return {
+            dimensions: {bottom: 0, left: 0, right: 0, top: 0},
+            divisions: {leftRight: {perUnit: 0, steps: 0}, topBottom: {perUnit: 0, steps: 0}},
+            markers: {back: {distance: 0, flipOrientation: false}, front: {distance: 0, size: 0}},
+            measureDirection: MeasureDirection.Inward,
+            units: Unit.Yards
+        }
     }
 
     public getGridData(): {
         lines: GridLine[];
     } {
-        if (this.upload_type === 'pocketbook') {
-            return {lines: []};
-        } else if (this.upload_type === '3da') {
+        if (this.upload_type === '3da') {
             const gridData = (this.dot_data as Pyware3DAFile).gridPattern.gridData;
             const lines: GridLine[] = [];
             gridData.horizontalGridLines.forEach(line => {
@@ -745,12 +304,6 @@ interface ShowDataBase {
     name: string;
     created_at: string;
     updated_at: string;
-}
-
-export interface ShowDataPocketbook extends ShowDataBase {
-    dot_data: DotData;
-    tempo_data: TempoData;
-    upload_type: 'pocketbook';
 }
 
 export interface ShowDataPyware extends ShowDataBase {

@@ -5,9 +5,6 @@ export type FrontBack =
     | 'Back Side Line';
 
 export type DotbookEntry = {
-    movement: number;
-    set: string;
-    counts: number;
     side: number;
     sideToSide: {
         yardline: number;
@@ -18,21 +15,5 @@ export type DotbookEntry = {
         line: FrontBack;
         stepOffset: number;
         stepOffsetDirection: 'In Front Of' | 'Behind';
-    };
-    note?: string;
-};
-
-export type DotData = {
-    [key: string]: {
-        performer: string;
-        symbol: string;
-        label: string;
-        dots: DotbookEntry[];
-    };
-};
-
-export type TempoData = {
-    [movement: string]: {
-        [set: string]: number;
     };
 };
