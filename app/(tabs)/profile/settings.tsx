@@ -1,6 +1,7 @@
 import {Button, Dialog, Portal, Text, useTheme} from "react-native-paper";
 import {useEffect, useState} from "react";
 import {ScrollView, View} from "react-native";
+import * as Application from "expo-application";
 import {FieldView, SettingsManager, SettingsProperty} from "@/lib/settings-manager";
 import Slider from '@react-native-community/slider';
 import {SafeAreaView} from "react-native-safe-area-context";
@@ -118,6 +119,11 @@ export default function SettingsScreen() {
                     >
                         Delete Account
                     </Button>
+                </View>
+                <View style={{padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8}}>
+                    <Text>
+                        Version {Application.nativeApplicationVersion} ({Application.nativeBuildVersion})
+                    </Text>
                 </View>
             </ScrollView>
             <Portal>
