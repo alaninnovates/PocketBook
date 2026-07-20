@@ -1,11 +1,13 @@
 import {ScrollView, View} from "react-native";
-import {Button, IconButton, Text, useTheme} from "react-native-paper";
+import {Button, Dialog, Portal, Text, useTheme} from "react-native-paper";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useFocusEffect, useRouter} from "expo-router";
 import {EnsembleSwitcher} from "@/components/ensemble-switcher";
-import {useEffect, useLayoutEffect, useMemo, useState} from "react";
+import {useState} from "react";
 import {supabase} from "@/lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {ShowData} from "@/lib/hooks/use-show-data";
+import {useNetInfo} from '@react-native-community/netinfo'
 
 export default function ShowsScreen() {
     const theme = useTheme();
@@ -18,15 +20,19 @@ export default function ShowsScreen() {
         created_at: string;
         // not database property, added later
         downloaded: boolean;
-        pages?: number;
+        newVersionAvailable?: boolean;
+        sets?: number;
     }[]>([]);
     const [downloadingShowIds, setDownloadingShowIds] = useState<number[]>([]);
+    const [updateingShowIds, setUpdatingShowIds] = useState<number[]>([]);
     const [storedInstrument, setStoredInstrument] = useState<string | null>(null);
+    const [offlineDialogVisible, setOfflineDialogVisible] = useState(false);
+    const {isConnected} = useNetInfo();
 
     const fetchShows = async () => {
         const {data, error} = await supabase
             .from('shows')
-            .select('id, ensemble_id, name, created_at')
+            .select('id, ensemble_id, name, created_at, updated_at')
             .eq('ensemble_id', selectedEnsemble)
             .order('created_at', {ascending: false});
         if (error) {
@@ -45,20 +51,29 @@ export default function ShowsScreen() {
         const showsData = await Promise.all(data?.map(async show => ({
             ...show,
             downloaded: await AsyncStorage.getItem(`show_${show.id}`) !== null,
-            pages: await (async () => {
-                // const storedInstrument = await AsyncStorage.getItem(`show_${show.id}_selected_instrument`);
-                // if (storedInstrument) {
-                //     setStoredInstrument(storedInstrument);
-                //     const showDataString = await AsyncStorage.getItem(`show_${show.id}`);
-                //     if (showDataString) {
-                //         const showData = JSON.parse(showDataString);
-                //         const dotData = showData.dot_data;
-                //         return dotData[storedInstrument].dots.length;
-                //     }
-                // }
-                return 1;
+            sets: await (async () => {
+                const storedInstrument = await AsyncStorage.getItem(`show_${show.id}_selected_instrument`);
+                if (storedInstrument) {
+                    setStoredInstrument(storedInstrument);
+                }
+                const showDataString = await AsyncStorage.getItem(`show_${show.id}`);
+                if (showDataString) {
+                    const showData = new ShowData(JSON.parse(showDataString));
+                    console.log(showData.getSets().length)
+                    return showData.getSets().length;
+                }
                 return undefined;
-            })()
+            })(),
+            newVersionAvailable: await (async () => {
+                const showDataString = await AsyncStorage.getItem(`show_${show.id}`);
+                if (showDataString) {
+                    const showData = new ShowData(JSON.parse(showDataString));
+                    if (showData.getUpdatedAt() < new Date(show.updated_at)) {
+                        return true;
+                    }
+                }
+                return false;
+            })(),
         })) || []);
         setShows(showsData);
         await AsyncStorage.setItem(`shows_ensemble_${selectedEnsemble}`, JSON.stringify(showsData));
@@ -98,7 +113,7 @@ export default function ShowsScreen() {
                             <View style={{maxWidth: '80%'}}>
                                 <Text variant="headlineMedium" style={{marginBottom: 8}}>{show.name}</Text>
                                 <Text>Date: {new Date(show.created_at).toDateString()}</Text>
-                                <Text>Pages: {show.pages !== undefined ? show.pages : '-'}</Text>
+                                <Text>Sets: {show.sets !== undefined ? show.sets : '-'}</Text>
                             </View>
                             {storedInstrument && (
                                 <Button
@@ -111,45 +126,103 @@ export default function ShowsScreen() {
                                 </Button>
                             )}
                         </View>
-                        <Button mode="contained" style={{marginTop: 8}}
-                                onPress={async () => {
-                                    if (show.downloaded) {
-                                        router.push(`/shows/${show.id}`)
-                                    } else {
-                                        setDownloadingShowIds((prev) => [...prev, show.id]);
-                                        const {data, error} = await supabase
-                                            .from('shows')
-                                            .select('*')
-                                            .eq('id', show.id)
-                                            .single();
-
-                                        if (error) {
-                                            console.error('err fetching show data:', error);
+                        <View style={{display: 'flex', flexDirection: 'row', marginTop: 8, gap: 8, width: '100%'}}>
+                            <Button mode="contained" style={{flex: 1}}
+                                    onPress={async () => {
+                                        if (show.downloaded) {
+                                            router.push(`/shows/${show.id}`)
                                         } else {
-                                            await AsyncStorage.setItem(`show_${show.id}`, JSON.stringify(data));
-                                            const newShows = shows.map((s) => {
-                                                if (s.id === show.id) {
-                                                    return {...s, downloaded: true};
+                                            setDownloadingShowIds((prev) => [...prev, show.id]);
+                                            const {data, error} = await supabase
+                                                .from('shows')
+                                                .select('*')
+                                                .eq('id', show.id)
+                                                .single();
+
+                                            if (error) {
+                                                console.error('err fetching show data:', error);
+                                            } else {
+                                                await AsyncStorage.setItem(`show_${show.id}`, JSON.stringify(data));
+                                                const newShows = shows.map((s) => {
+                                                    if (s.id === show.id) {
+                                                        return {...s, downloaded: true};
+                                                    }
+                                                    return s;
+                                                });
+                                                setShows(newShows);
+                                                if (selectedEnsemble) {
+                                                    await AsyncStorage.setItem(`shows_ensemble_${selectedEnsemble}`, JSON.stringify(newShows));
                                                 }
-                                                return s;
-                                            });
-                                            setShows(newShows);
-                                            if (selectedEnsemble) {
-                                                await AsyncStorage.setItem(`shows_ensemble_${selectedEnsemble}`, JSON.stringify(newShows));
                                             }
+                                            setDownloadingShowIds((prev) => prev.filter((id) => id !== show.id));
                                         }
-                                        setDownloadingShowIds((prev) => prev.filter((id) => id !== show.id));
-                                    }
-                                }}
-                                buttonColor={show.downloaded ? theme.colors.primary : theme.colors.secondary}
-                                loading={downloadingShowIds.includes(show.id)}
-                                disabled={downloadingShowIds.includes(show.id)}
-                        >
-                            {show.downloaded ? 'Open' : 'Download'}
-                        </Button>
+                                    }}
+                                    buttonColor={show.downloaded ? theme.colors.primary : theme.colors.secondary}
+                                    loading={downloadingShowIds.includes(show.id) || updateingShowIds.includes(show.id)}
+                                    disabled={downloadingShowIds.includes(show.id) || updateingShowIds.includes(show.id)}
+                            >
+                                {show.downloaded ? 'Open' : 'Download'}
+                            </Button>
+                            {show.newVersionAvailable && (
+                                <Button mode="outlined"
+                                        onPress={async () => {
+                                            if (!isConnected) {
+                                                setOfflineDialogVisible(true);
+                                                return;
+                                            }
+                                            setUpdatingShowIds((prev) => [...prev, show.id]);
+                                            const {data, error} = await supabase
+                                                .from('shows')
+                                                .select('*')
+                                                .eq('id', show.id)
+                                                .single();
+
+                                            if (error) {
+                                                console.error('err fetching show data:', error);
+                                            } else {
+                                                await AsyncStorage.setItem(`show_${show.id}`, JSON.stringify(data));
+                                                const newShows = shows.map((s) => {
+                                                    if (s.id === show.id) {
+                                                        return {...s, newVersionAvailable: false};
+                                                    }
+                                                    return s;
+                                                });
+                                                setShows(newShows);
+                                                if (selectedEnsemble) {
+                                                    await AsyncStorage.setItem(`shows_ensemble_${selectedEnsemble}`, JSON.stringify(newShows));
+                                                }
+                                            }
+                                            setUpdatingShowIds((prev) => prev.filter((id) => id !== show.id));
+                                        }}
+                                        loading={updateingShowIds.includes(show.id)}
+                                        disabled={updateingShowIds.includes(show.id)}
+                                >
+                                    Update
+                                </Button>
+                            )}
+                        </View>
                     </View>
                 ))}
             </ScrollView>
+            <Portal>
+                <Dialog visible={offlineDialogVisible} onDismiss={() => setOfflineDialogVisible(false)}>
+                    <Dialog.Title>
+                        Offline
+                    </Dialog.Title>
+                    <Dialog.Content>
+                        <Text variant="bodyMedium">
+                            You are currently offline. Please connect to the internet to update the show.
+                        </Text>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button onPress={async () => {
+                            setOfflineDialogVisible(false);
+                        }}>
+                            OK
+                        </Button>
+                    </Dialog.Actions>
+                </Dialog>
+            </Portal>
         </SafeAreaView>
     );
 }
