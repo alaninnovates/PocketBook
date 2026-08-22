@@ -1,5 +1,5 @@
-import React, {useCallback, useMemo, useRef, useState} from "react";
-import {LayoutChangeEvent, StyleSheet, View} from "react-native";
+import React, {useCallback, useEffect, useMemo, useRef, useState} from "react";
+import {LayoutChangeEvent, Platform, StyleSheet, View} from "react-native";
 import {Canvas, Group, vec} from "@shopify/react-native-skia";
 import {Gesture, GestureDetector} from "react-native-gesture-handler";
 import {runOnJS, useAnimatedReaction, useDerivedValue, useSharedValue} from "react-native-reanimated";
@@ -166,6 +166,88 @@ export const FieldCanvas = ({showData, animationProgress}: {
 
     const gesture = useMemo(() => Gesture.Simultaneous(panGesture, pinchGesture, tapGesture), [panGesture, pinchGesture, tapGesture]);
 
+    const viewRef = useRef<View>(null);
+
+    useEffect(() => {
+        if (Platform.OS !== 'web') return;
+        const node = viewRef.current as unknown as HTMLElement | null;
+        if (!node) return;
+
+        const clampZoom = (z: number) => Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, z));
+
+        const zoomAt = (clientX: number, clientY: number, factor: number) => {
+            const nextScale = clampZoom(scale.value * factor);
+            const ratio = nextScale / scale.value;
+            const rect = node.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+            translateX.value = x - (x - translateX.value) * ratio;
+            translateY.value = y - (y - translateY.value) * ratio;
+            scale.value = nextScale;
+        };
+
+        const deltaToPixels = (delta: number, deltaMode: number) =>
+            deltaMode === 1 ? delta * 33 : deltaMode === 2 ? delta * node.clientHeight : delta;
+
+        let safariPinch: {scale: number; tx: number; ty: number; cx: number; cy: number} | null = null;
+
+        const onWheel = (event: WheelEvent) => {
+            if (safariPinch) return;
+            event.preventDefault();
+            if (event.ctrlKey) {
+                zoomAt(event.clientX, event.clientY,
+                    Math.exp(-deltaToPixels(event.deltaY, event.deltaMode) * 0.002));
+            } else {
+                translateX.value += deltaToPixels(event.deltaX, event.deltaMode);
+                translateY.value += deltaToPixels(event.deltaY, event.deltaMode);
+            }
+        };
+
+        const onGestureStart = (event: GestureEvent) => {
+            event.preventDefault();
+            safariPinch = {
+                scale: scale.value,
+                tx: translateX.value,
+                ty: translateY.value,
+                cx: event.clientX,
+                cy: event.clientY,
+            };
+        };
+
+        const onGestureChange = (event: GestureEvent) => {
+            event.preventDefault();
+            if (!safariPinch) return;
+            const start = safariPinch;
+            const nextScale = clampZoom(start.scale * event.scale);
+            const ratio = nextScale / start.scale;
+            const rect = node.getBoundingClientRect();
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+            const startX = start.cx - rect.left;
+            const startY = start.cy - rect.top;
+            translateX.value = x - (startX - start.tx) * ratio;
+            translateY.value = y - (startY - start.ty) * ratio;
+            scale.value = nextScale;
+        };
+
+        const onGestureEnd = () => {
+            safariPinch = null;
+            updateLodZoom(scale.value);
+        };
+
+        node.addEventListener('wheel', onWheel, {passive: false});
+        node.addEventListener('gesturestart', onGestureStart as EventListener);
+        node.addEventListener('gesturechange', onGestureChange as EventListener);
+        node.addEventListener('gestureend', onGestureEnd as EventListener);
+
+        return () => {
+            node.removeEventListener('wheel', onWheel);
+            node.removeEventListener('gesturestart', onGestureStart as EventListener);
+            node.removeEventListener('gesturechange', onGestureChange as EventListener);
+            node.removeEventListener('gestureend', onGestureEnd as EventListener);
+        };
+    }, [scale, translateX, translateY, updateLodZoom]);
+
     const translateTransform = useDerivedValue(() => [
         {translateX: translateX.value},
         {translateY: translateY.value},
@@ -179,7 +261,7 @@ export const FieldCanvas = ({showData, animationProgress}: {
 
     return (
         <GestureDetector gesture={gesture}>
-            <View collapsable={false} style={StyleSheet.absoluteFill} onLayout={onLayout}>
+            <View ref={viewRef} collapsable={false} style={StyleSheet.absoluteFill} onLayout={onLayout}>
                 <Canvas style={StyleSheet.absoluteFill}>
                     <ShowContext.Provider value={{currentCount, setCurrentCount, selectedInstrument, setSelectedInstrument, defaultInstrument, setDefaultInstrument}}>
                         <Group transform={translateTransform}>
