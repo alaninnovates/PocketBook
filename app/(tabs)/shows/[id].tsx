@@ -1,6 +1,6 @@
 import {useLocalSearchParams, useRouter} from "expo-router";
 import {FieldCanvas} from "@/components/field/field-canvas";
-import {useEffect, useMemo, useRef, useState} from "react";
+import {useCallback, useEffect, useMemo, useRef, useState} from "react";
 import {View} from "react-native";
 import {IconButton, Text, useTheme} from "react-native-paper";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
@@ -28,7 +28,12 @@ export default function ShowScreen() {
     const [animationProgress, setAnimationProgress] = useState(0);
     const animationFrameRef = useRef<number | null>(null);
     const startTimeRef = useRef<number | null>(null);
-    const currentAnimationStepRef = useRef(currentCount);
+    const startCountTimeInShowRef = useRef<number | null>(null);
+    const currentCountRef = useRef(currentCount);
+
+    useEffect(() => {
+        currentCountRef.current = currentCount;
+    }, [currentCount]);
 
     useEffect(() => {
         console.log('currnet count is:', currentCount, 'current index is:', showData?.getSetIndexAtCount(currentCount));
@@ -45,65 +50,48 @@ export default function ShowScreen() {
         }
     }, []);
 
-    useMemo(() => {
-        currentAnimationStepRef.current = currentCount;
-    }, [currentCount]);
+    const animate = useCallback(
+        (timestamp: number) => {
+            if (!showData) return null;
+            if (startTimeRef.current === null) startTimeRef.current = timestamp;
+            const elapsed = timestamp - startTimeRef.current;
+            if (startCountTimeInShowRef.current === null) {
+                startCountTimeInShowRef.current = showData.getTimeForCount(currentCountRef.current);
+            }
 
-    const dotsLength = useMemo(() => {
-        if (!showData) return 0;
-        return showData.getSets().length;
-    }, [showData]);
+            const currentCountTimestamp = showData.getTimeForCount(currentCountRef.current) - startCountTimeInShowRef.current;
+            const nextCountTimestamp = showData.getTimeForCount(currentCountRef.current + 1) - startCountTimeInShowRef.current;
 
-    // const animate = useCallback(
-    //     (timestamp: number) => {
-    //         if (!showData) return null;
-    //         if (startTimeRef.current === null) startTimeRef.current = timestamp;
-    //         const elapsed = timestamp - startTimeRef.current;
-    //
-    //         const currentDot = coordinates[currentAnimationStepRef.current];
-    //         const tempo = (showData.tempo_data?.[currentDot.movement]?.[currentDot.set]) ?? 120;
-    //         const durationPerCount = 60000 / tempo;
-    //         const totalDuration =
-    //             currentAnimationStepRef.current < dotsLength - 1
-    //                 ? coordinates[currentAnimationStepRef.current + 1].counts *
-    //                 durationPerCount
-    //                 : 0;
-    //
-    //         if (totalDuration > 0) {
-    //             const progress = Math.min(elapsed / totalDuration, 1);
-    //             setAnimationProgress(progress);
-    //
-    //             if (progress >= 1) {
-    //                 const nextStep = currentAnimationStepRef.current + 1;
-    //                 if (nextStep >= dotsLength) {
-    //                     setIsPlaying(false);
-    //                     setAnimationProgress(0);
-    //                     animationFrameRef.current = null;
-    //                     startTimeRef.current = null;
-    //                     return;
-    //                 }
-    //                 setCurrentIndex(nextStep);
-    //                 setAnimationProgress(0);
-    //                 startTimeRef.current = null;
-    //             }
-    //         } else {
-    //             const nextStep = currentAnimationStepRef.current + 1;
-    //             if (nextStep >= dotsLength) {
-    //                 setIsPlaying(false);
-    //                 setAnimationProgress(0);
-    //                 animationFrameRef.current = null;
-    //                 startTimeRef.current = null;
-    //                 return;
-    //             }
-    //             setCurrentIndex(nextStep);
-    //             setAnimationProgress(0);
-    //             startTimeRef.current = null;
-    //         }
-    //
-    //         animationFrameRef.current = requestAnimationFrame(animate);
-    //     },
-    //     [isPlaying, dotsLength, showData]
-    // );
+            const progress = (elapsed / 1000 - currentCountTimestamp) / (nextCountTimestamp - currentCountTimestamp);
+            setAnimationProgress(progress);
+            // console.log('elapsed:', elapsed/1000, 'currentCount:', currentCountRef.current, 'progress:', progress);
+
+
+            if (progress >= 1) {
+                // increment count
+                const nextCount = currentCountRef.current + 1;
+                // console.log('incrementing count from', currentCountRef.current, 'to', nextCount);
+                // console.log('nextCount:', nextCount, 'totalCounts:', showData.getTotalCounts());
+                if (nextCount >= showData.getTotalCounts()) {
+                    setIsPlaying(false);
+                    setAnimationProgress(0);
+                    animationFrameRef.current = null;
+                    startTimeRef.current = null;
+                    startCountTimeInShowRef.current = null;
+                    return;
+                }
+                // update the ref synchronously so the next frame sees the new
+                // count even before React re-renders
+                currentCountRef.current = nextCount;
+                setCurrentCount(nextCount);
+                setAnimationProgress(0);
+                // startTimeRef.current = null;
+            }
+
+            animationFrameRef.current = requestAnimationFrame(animate);
+        },
+        [showData, setCurrentCount]
+    );
 
     useEffect(() => {
         const fetchSelectedInstrument = async () => {
@@ -147,7 +135,7 @@ export default function ShowScreen() {
     const sets = showData.getSets();
     const currentIndex = showData.getSetIndexAtCount(currentCount)!;
     const currentDot = fieldCoordinateToDot(coordinates[currentIndex].coord);
-    console.log('set index:', currentIndex, 'current count:', currentCount, 'current dot:', currentDot);
+    // console.log('set index:', currentIndex, 'current count:', currentCount, 'current dot:', currentDot);
 
     const midset =
         currentIndex > 0 && !dotCoordinatesEqual(coordinates[currentIndex - 1].coord, coordinates[currentIndex].coord)
@@ -249,7 +237,6 @@ export default function ShowScreen() {
                 </View>
             </View>
             <View style={{position: "absolute", right: right, top: '45%'}}>
-                {/*
                 <IconButton
                     icon={isPlaying ? "pause" : "play"}
                     mode="contained"
@@ -263,14 +250,14 @@ export default function ShowScreen() {
                             setIsPlaying(false);
                             setAnimationProgress(0);
                             startTimeRef.current = null;
+                            startCountTimeInShowRef.current = null;
                             return;
                         }
                         setIsPlaying(true);
-                        // animationFrameRef.current =
-                        //     requestAnimationFrame(animate);
+                        animationFrameRef.current =
+                            requestAnimationFrame(animate);
                     }}
                 />
-                */}
                 <IconButton
                     icon={"format-list-bulleted"}
                     mode="contained"

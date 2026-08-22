@@ -297,6 +297,47 @@ export class ShowData {
         }
         return {lines: []};
     }
+
+    public getTempoData(): PywareSNCFile | null {
+        if (this.upload_type === '3da') {
+            return this.tempo_data;
+        }
+        return null;
+    }
+
+    // time in seconds, starting at the time of startCount + time
+    public getCurrentCountForTime(startCount: number, time: number): number {
+        if (this.upload_type === '3da') {
+            const tempoData = this.getTempoData();
+            if (tempoData) {
+                const startTime = tempoData.timestamps[startCount] || 0;
+                const targetTime = startTime + time;
+                for (let i = startCount; i < tempoData.timestamps.length; i++) {
+                    if (tempoData.timestamps[i] >= targetTime) {
+                        return i;
+                    }
+                }
+            }
+        }
+        return 0;
+    }
+
+    public getTimeForCount(count: number): number {
+        if (this.upload_type === '3da') {
+            const tempoData = this.getTempoData();
+            if (tempoData) {
+                return tempoData.timestamps[count] || 0;
+            }
+        }
+        return 0;
+    }
+
+    public getAnimationBPM(): number {
+        if (this.upload_type === '3da') {
+            return this.dot_data.generalInfo.animationFixedTempoBPM;
+        }
+        return 120;
+    }
 }
 
 interface ShowDataBase {
