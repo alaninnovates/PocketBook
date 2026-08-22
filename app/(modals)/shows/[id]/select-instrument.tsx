@@ -39,7 +39,7 @@ export default function SelectInstrumentModalScreen() {
             <Stack.Screen options={{title: 'Select Instrument'}}/>
             <ScrollView style={{padding: 16}} contentContainerStyle={{display: 'flex', flexDirection: 'column', gap: 12, padding: 16}}>
                 {showData.getPerformers()
-                    .sort((a, b) => a.label.localeCompare(b.label))
+                    .sort((a, b) => a.performer.localeCompare(b.performer))
                     .map(({ performer, label }) => (
                         <Button
                             key={performer}
@@ -47,7 +47,7 @@ export default function SelectInstrumentModalScreen() {
                                 setSelectedInstrument(performer);
                                 router.back();
                             }}
-                            buttonColor={instrumentToColor(label, theme.dark)}
+                            buttonColor={instrumentToColor(performer, theme.dark)}
                         >
                             {label} {performer}
                         </Button>

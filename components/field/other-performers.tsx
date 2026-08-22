@@ -25,7 +25,7 @@ export const OtherPerformers = ({showData, zoom, animationProgress}: {
         fontSize: clampMax(6 * 6 / (zoom), 10),
     });
 
-    return showData.getPerformerCoordsForCount(currentCount).map(({performer: {performer, label}, coord}) => {
+    return showData.getPerformerCoordsForCount(currentCount).map(({performer: {performer, label}, coord}, indx) => {
         // if (dots[currentIndex] == null) {
         //     console.log(
         //         `No dot for performer ${performer} ${label} at index ${currentIndex}`,
@@ -50,13 +50,13 @@ export const OtherPerformers = ({showData, zoom, animationProgress}: {
         // console.log(coord.x, coord.y);
 
         return (
-            <React.Fragment key={performer}>
+            <React.Fragment key={indx}>
                 <Circle
                     key={performer}
                     cx={stepsToPixels(coord.x)}
                     cy={stepsToPixels(coord.y)}
                     r={clampMax(4 * 6 / (zoom), 6)}
-                    color={instrumentToColor(label, theme.dark)}
+                    color={instrumentToColor(performer, theme.dark)}
                     opacity={1}
                 />
                 <Text
