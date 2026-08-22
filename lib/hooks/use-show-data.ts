@@ -21,7 +21,7 @@ export interface Coordinate {
 
 export interface SetMetadata {
     name: string;
-    counts: number;
+    count: number;
     measures: string;
     subset: boolean;
     title: string;
@@ -139,7 +139,7 @@ export class ShowData {
                 }
                 return {
                     name: currentSet.toString() + (entry.tabType === 1 ? String.fromCharCode(currentLetter++) : ''),
-                    counts: entry.count,
+                    count: entry.count,
                     measures: entry.measures,
                     subset: entry.tabType === 1,
                     title: entry.title,
@@ -214,7 +214,7 @@ export class ShowData {
 
     public getCoordsForPerformer(label: string) {
         return this.getSets().map(set => ({
-            coord: this.getCoordAtCount(set.counts, label),
+            coord: this.getCoordAtCount(set.count, label),
             set
         }));
     }

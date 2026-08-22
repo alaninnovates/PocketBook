@@ -27,6 +27,13 @@ export default function SelectInstrumentModalScreen() {
         maxWidth: 80,
     }
 
+    const coords = showData.getCoordsForPerformer(selectedInstrument);
+    const coordsWithCounts = coords.map(({coord, set}, idx) => ({
+        coord,
+        set,
+        counts: set.count - (idx > 0 ? coords[idx - 1].set.count : 0)
+    }));
+
     return (
         <>
             <Stack.Screen options={{
@@ -47,14 +54,13 @@ export default function SelectInstrumentModalScreen() {
                         <DataTable.Title>Front to Back</DataTable.Title>
                     </DataTable.Header>
 
-                    {showData.getCoordsForPerformer(selectedInstrument)
-                        .map(({coord, set}, index) => {
+                    {coordsWithCounts.map(({coord, set, counts}, index) => {
                             const {side, sideToSide, frontToBack} = fieldCoordinateToDot(coord);
                             return (
                                 <DataTable.Row
                                     key={set.name}
                                     onPress={() => {
-                                        setCurrentCount(set.counts);
+                                        setCurrentCount(set.count);
                                         router.back();
                                     }}
                                     style={(showData.getSetIndexAtCount(currentCount) === index) ?
@@ -62,7 +68,7 @@ export default function SelectInstrumentModalScreen() {
                                 >
                                     {/*<DataTable.Cell style={narrowerCell}>{movement}</DataTable.Cell>*/}
                                     <DataTable.Cell style={narrowerCell}>{set.name}</DataTable.Cell>
-                                    <DataTable.Cell style={narrowerCell}>{set.counts}</DataTable.Cell>
+                                    <DataTable.Cell style={narrowerCell}>{counts}</DataTable.Cell>
                                     <DataTable.Cell>
                                         Side {side}:{' '}
                                         {sideToSide.stepOffset}{' '}

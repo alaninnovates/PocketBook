@@ -154,7 +154,7 @@ export default function ShowScreen() {
             ? calculateStepSize(
                 coordinates[currentIndex - 1].coord,
                 coordinates[currentIndex].coord,
-                sets[currentIndex].counts - sets[currentIndex - 1].counts
+                sets[currentIndex].count - sets[currentIndex - 1].count
             )
             : null;
 
@@ -186,6 +186,9 @@ export default function ShowScreen() {
                         {/*</Text>*/}
                         <Text variant="bodyLarge">
                             Page {sets[currentIndex].name}
+                        </Text>
+                        <Text variant="bodyLarge">
+                            Count {currentCount - sets[currentIndex-1].count}  of {sets[currentIndex].count - (currentIndex > 0 ? sets[currentIndex - 1].count : 0)}
                         </Text>
                     </View>
                     <View>
@@ -232,8 +235,8 @@ export default function ShowScreen() {
                         </Text>
                         <Text variant="bodyLarge">
                             {isHold ? 'Hold' : 'Move'}:{' '}
-                            {currentIndex === 0 ? sets[currentIndex].counts :
-                                sets[currentIndex].counts - sets[currentIndex - 1].counts}
+                            {currentIndex === 0 ? sets[currentIndex].count :
+                                sets[currentIndex].count - sets[currentIndex - 1].count}
                         </Text>
                     </View>
                 </View>
@@ -282,7 +285,7 @@ export default function ShowScreen() {
                     size={32}
                     onPress={() => {
                         if (currentIndex === 0) return;
-                        setCurrentCount(sets[currentIndex - 1].counts);
+                        setCurrentCount(sets[currentIndex - 1].count);
                     }}
                 />
                 <IconButton
@@ -291,7 +294,7 @@ export default function ShowScreen() {
                     size={32}
                     onPress={() => {
                         if (currentIndex === sets.length - 1) return;
-                        const newCount = sets[currentIndex + 1].counts;
+                        const newCount = sets[currentIndex + 1].count;
                         setCurrentCount(newCount);
                     }}
                 />
