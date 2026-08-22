@@ -1,10 +1,36 @@
 import {Alert, Platform} from 'react-native';
 import * as AppleAuthentication from 'expo-apple-authentication';
 import {supabase} from '@/lib/supabase';
-import {useTheme} from "react-native-paper";
+import {signInWithOAuth} from '@/lib/oauth';
+import {IconButton, useTheme} from "react-native-paper";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 
 export function AppleButton({type}: { type: "sign-up" | "log-in" }) {
     const theme = useTheme();
+
+    if (Platform.OS === 'web') {
+        return (
+            <IconButton
+                mode="contained"
+                icon={({size, color}) => (
+                    <FontAwesome6
+                        name="apple"
+                        size={size}
+                        color={color}
+                    />
+                )}
+                size={32}
+                onPress={async () => {
+                    try {
+                        await signInWithOAuth('apple');
+                    } catch (error) {
+                        console.error('Apple sign-in failed:', error);
+                    }
+                }}
+            />
+        );
+    }
+
     if (Platform.OS !== 'ios') return null;
 
     return (
