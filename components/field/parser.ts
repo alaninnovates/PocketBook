@@ -6,6 +6,12 @@ import {
 } from "@/components/field/dimensions";
 import {Coordinate} from "@/lib/hooks/use-show-data";
 
+const roundToDecimal = (num: number, decimalPlaces: number): number => {
+    // round to nearest 1/2^decimalPlaces
+    const factor = Math.pow(2, decimalPlaces);
+    return Math.round(num * factor) / factor;
+}
+
 export const calculateMidset = (
     coord1: { x: number; y: number },
     coord2: { x: number; y: number },
@@ -32,10 +38,10 @@ export const fieldCoordinateToDot = (
         sideToSideYardline = Math.round((50 - stepsToYards(x)) / 5) * 5;
         const offset = (x - (yardsToSteps(50 - sideToSideYardline)));
         if (offset >= 0) {
-            sideToSideStepOffset = Math.round(offset);
+            sideToSideStepOffset = roundToDecimal(offset, 2);
             sideToSideStepOffsetDirection = 'Outside';
         } else {
-            sideToSideStepOffset = Math.round(-offset);
+            sideToSideStepOffset = roundToDecimal(-offset, 2);
             sideToSideStepOffsetDirection = 'Inside';
         }
     } else {
@@ -44,10 +50,10 @@ export const fieldCoordinateToDot = (
         sideToSideYardline = Math.round((50 - stepsToYards(-x)) / 5) * 5;
         const offset = (-x - (yardsToSteps(50 - sideToSideYardline)));
         if (offset >= 0) {
-            sideToSideStepOffset = Math.round(offset);
+            sideToSideStepOffset = roundToDecimal(offset, 2);
             sideToSideStepOffsetDirection = 'Outside';
         } else {
-            sideToSideStepOffset = Math.round(-offset);
+            sideToSideStepOffset = roundToDecimal(-offset, 2);
             sideToSideStepOffsetDirection = 'Inside';
         }
     }
@@ -68,10 +74,10 @@ export const fieldCoordinateToDot = (
         frontToBackLine = 'Front Side Line';
         const offset = distanceFromFrontSideline;
         if (offset <= 0) {
-            frontToBackStepOffset = Math.round(-offset);
+            frontToBackStepOffset = roundToDecimal(-offset, 2);
             frontToBackStepOffsetDirection = 'In Front Of';
         } else {
-            frontToBackStepOffset = Math.round(offset);
+            frontToBackStepOffset = roundToDecimal(offset, 2);
             frontToBackStepOffsetDirection = 'Behind';
         }
     } else if (
@@ -80,20 +86,20 @@ export const fieldCoordinateToDot = (
         frontToBackLine = 'Front Hash (HS)';
         const offset = distanceFromFrontHash;
         if (offset <= 0) {
-            frontToBackStepOffset = Math.round(-offset);
+            frontToBackStepOffset = roundToDecimal(-offset, 2);
             frontToBackStepOffsetDirection = 'In Front Of';
         } else {
-            frontToBackStepOffset = Math.round(offset);
+            frontToBackStepOffset = roundToDecimal(offset, 2);
             frontToBackStepOffsetDirection = 'Behind';
         }
     } else {
         frontToBackLine = 'Back Hash (HS)';
         const offset = distanceFromBackHash;
         if (offset <= 0) {
-            frontToBackStepOffset = Math.round(-offset);
+            frontToBackStepOffset = roundToDecimal(-offset, 2);
             frontToBackStepOffsetDirection = 'In Front Of';
         } else {
-            frontToBackStepOffset = Math.round(offset);
+            frontToBackStepOffset = roundToDecimal(offset, 2);
             frontToBackStepOffsetDirection = 'Behind';
         }
     }
