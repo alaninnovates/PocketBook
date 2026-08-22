@@ -1,7 +1,7 @@
 import {useLocalSearchParams, useRouter} from "expo-router";
 import {FieldCanvas} from "@/components/field/field-canvas";
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {View} from "react-native";
+import {Platform, View} from "react-native";
 import {IconButton, Text, useTheme} from "react-native-paper";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {
@@ -40,6 +40,7 @@ export default function ShowScreen() {
     }, [currentCount]);
 
     useEffect(() => {
+        if (Platform.OS === "web") return;
         (async () => {
             await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT);
         })();
@@ -157,7 +158,7 @@ export default function ShowScreen() {
             : null;
 
     return (
-        <View style={{width: '100%', height: '100%'}}>
+        <View style={{width: '100%', height: '100%', backgroundColor: theme.colors.background}}>
             <FieldCanvas showData={showData}
                          animationProgress={animationProgress}
             />
