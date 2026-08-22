@@ -2,7 +2,7 @@ import {useEffect, useState} from "react";
 import {supabase} from "@/lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useRouter} from "expo-router";
-import {parsePyware3DAFile, parsePywareSNCFile} from "pyware-parser";
+import {parsePyware3DAFile, parsePywareSNCFile} from "pyware.js";
 
 type Pyware3DAFile = ReturnType<typeof parsePyware3DAFile>;
 type PywareSNCFile = ReturnType<typeof parsePywareSNCFile>;

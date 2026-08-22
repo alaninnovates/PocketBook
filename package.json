@@ -1,14 +1,16 @@
 {
   "name": "pocketbook",
-  "main": "expo-router/entry",
-  "version": "1.1.0",
+  "main": "index",
+  "version": "1.0.2",
   "scripts": {
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "deploy:web": "bash scripts/deploy-web.sh",
+    "postinstall": "setup-skia-web"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",
@@ -33,12 +35,13 @@
     "expo-router": "~6.0.21",
     "expo-screen-orientation": "~9.0.8",
     "expo-splash-screen": "~31.0.13",
+    "expo-stallion-plugin": "^1.0.4",
     "expo-status-bar": "~3.0.9",
     "expo-symbols": "~1.0.8",
     "expo-system-ui": "~6.0.9",
     "expo-web-browser": "~15.0.10",
     "lodash": "^4.17.21",
-    "pyware-parser": "file:../pyware-parser",
+    "pyware.js": "^1.0.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
@@ -47,6 +50,7 @@
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",
+    "react-native-stallion": "^2.4.2",
     "react-native-web": "~0.21.0",
     "react-native-worklets": "0.5.1"
   },
