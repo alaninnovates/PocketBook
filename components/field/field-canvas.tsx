@@ -5,6 +5,8 @@ import {Gesture, GestureDetector} from "react-native-gesture-handler";
 import {runOnJS, useAnimatedReaction, useDerivedValue, useSharedValue} from "react-native-reanimated";
 import {FieldGrid} from "./field-grid";
 import {OtherPerformers} from "./other-performers";
+import {interpolatePosition} from "@/components/field/playback";
+import {stepsToPixels} from "@/components/field/dimensions";
 import {useTheme} from "react-native-paper";
 import {ActivePerformer} from "@/components/field/active-performer";
 import {FieldView, SettingsProperty, useProperty} from "@/lib/settings-manager";
@@ -15,6 +17,7 @@ const INITIAL_ZOOM = 0.4;
 const MIN_ZOOM = 0.1;
 const MAX_ZOOM = 6;
 const GRID_ZOOM_THRESHOLD = 0.9;
+const TAP_HIT_RADIUS = 24;
 
 export const FieldCanvas = ({showData, animationProgress}: {
     showData: ShowData;
@@ -119,7 +122,49 @@ export const FieldCanvas = ({showData, animationProgress}: {
             runOnJS(updateLodZoom)(scale.value);
         }), [pinchStartScale, pinchStartX, pinchStartY, pinchStartFocalX, pinchStartFocalY, translateX, translateY, scale, updateLodZoom]);
 
-    const gesture = useMemo(() => Gesture.Simultaneous(panGesture, pinchGesture), [panGesture, pinchGesture]);
+    const {currentCount, setCurrentCount, selectedInstrument, setSelectedInstrument, defaultInstrument, setDefaultInstrument} = useShowContext();
+
+    const handleFieldTap = useCallback((fieldX: number, fieldY: number, hitRadius: number) => {
+        if (!showData) return;
+        let hitPerformer: string | null = null;
+        let hitDistance = Infinity;
+        for (const {performer: {performer}, coord} of showData.getPerformerCoordsForCount(currentCount)) {
+            let dotCoord = coord;
+            if (animationProgress > 0 && currentCount <= showData.getTotalCounts()) {
+                dotCoord = interpolatePosition(coord, showData.getCoordAtCount(currentCount + 1, performer), animationProgress);
+            }
+            const dx = stepsToPixels(dotCoord.x) - fieldX;
+            const dy = stepsToPixels(dotCoord.y) - fieldY;
+            const distance = Math.hypot(dx, dy);
+            if (distance <= hitRadius && distance < hitDistance) {
+                hitDistance = distance;
+                hitPerformer = performer;
+            }
+        }
+        if (hitPerformer) {
+            setSelectedInstrument(hitPerformer);
+        } else if (defaultInstrument) {
+            setSelectedInstrument(defaultInstrument);
+        }
+    }, [showData, currentCount, animationProgress, setSelectedInstrument, defaultInstrument]);
+
+    const tapGesture = useMemo(() => Gesture.Tap()
+        .maxDuration(250)
+        .maxDeltaX(12)
+        .maxDeltaY(12)
+        .onEnd((event, success) => {
+            'worklet';
+            if (!success) return;
+            const dx = (event.x - translateX.value) / scale.value;
+            const dy = (event.y - translateY.value) / scale.value;
+            runOnJS(handleFieldTap)(
+                fieldView === FieldView.Performer ? -dx : dx,
+                fieldView === FieldView.Performer ? -dy : dy,
+                TAP_HIT_RADIUS / scale.value,
+            );
+        }), [handleFieldTap, translateX, translateY, scale, fieldView]);
+
+    const gesture = useMemo(() => Gesture.Simultaneous(panGesture, pinchGesture, tapGesture), [panGesture, pinchGesture, tapGesture]);
 
     const translateTransform = useDerivedValue(() => [
         {translateX: translateX.value},
@@ -132,13 +177,11 @@ export const FieldCanvas = ({showData, animationProgress}: {
         [fieldView],
     );
 
-    const {currentCount, setCurrentCount, selectedInstrument, setSelectedInstrument} = useShowContext();
-
     return (
         <GestureDetector gesture={gesture}>
             <View collapsable={false} style={StyleSheet.absoluteFill} onLayout={onLayout}>
                 <Canvas style={StyleSheet.absoluteFill}>
-                    <ShowContext.Provider value={{currentCount, setCurrentCount, selectedInstrument, setSelectedInstrument}}>
+                    <ShowContext.Provider value={{currentCount, setCurrentCount, selectedInstrument, setSelectedInstrument, defaultInstrument, setDefaultInstrument}}>
                         <Group transform={translateTransform}>
                             <Group transform={scaleTransform}>
                                 <Group

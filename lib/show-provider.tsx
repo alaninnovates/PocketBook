@@ -4,6 +4,7 @@ import {ShowContext} from "@/lib/hooks/use-show-context";
 export default function ShowProvider({children}: PropsWithChildren) {
     const [currentCount, setCurrentCount] = useState(0);
     const [selectedInstrument, setSelectedInstrument] = useState<string | null>(null);
+    const [defaultInstrument, setDefaultInstrument] = useState<string | null>(null);
 
     return (
         <ShowContext.Provider value={{
@@ -11,6 +12,8 @@ export default function ShowProvider({children}: PropsWithChildren) {
             setCurrentCount,
             selectedInstrument,
             setSelectedInstrument,
+            defaultInstrument,
+            setDefaultInstrument,
         }}>
             {children}
         </ShowContext.Provider>

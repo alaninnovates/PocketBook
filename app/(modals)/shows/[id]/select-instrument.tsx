@@ -12,7 +12,7 @@ export default function SelectInstrumentModalScreen() {
     const {id} = useLocalSearchParams();
     const router = useRouter();
     const {showData, loading} = useShowData(id as string);
-    const {selectedInstrument, setSelectedInstrument} = useShowContext();
+    const {selectedInstrument, setSelectedInstrument, setDefaultInstrument} = useShowContext();
 
     useEffect(() => {
         const storeSelectedInstrument = async () => {
@@ -45,6 +45,7 @@ export default function SelectInstrumentModalScreen() {
                             key={performer}
                             onPress={() => {
                                 setSelectedInstrument(performer);
+                                setDefaultInstrument(performer);
                                 router.back();
                             }}
                             buttonColor={instrumentToColor(performer, theme.dark)}

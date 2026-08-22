@@ -22,7 +22,7 @@ export default function ShowScreen() {
     const {top, left, bottom, right} = useSafeAreaInsets();
     const {showData, loading} = useShowData(id as string);
     const [loadingInstrument, setLoadingInstrument] = useState(true);
-    const {currentCount, setCurrentCount, selectedInstrument, setSelectedInstrument} = useShowContext();
+    const {currentCount, setCurrentCount, selectedInstrument, setSelectedInstrument, setDefaultInstrument} = useShowContext();
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [animationProgress, setAnimationProgress] = useState(0);
@@ -100,6 +100,7 @@ export default function ShowScreen() {
             if (storedInstrument) {
                 console.log('fetched stored instrument:', storedInstrument);
                 setSelectedInstrument(storedInstrument);
+                setDefaultInstrument(storedInstrument);
             }
             setLoadingInstrument(false);
         }
