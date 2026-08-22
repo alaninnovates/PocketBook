@@ -20,6 +20,15 @@ export default function ShowScreen() {
     const router = useRouter();
     const theme = useTheme();
     const {top, left, bottom, right} = useSafeAreaInsets();
+    const [headerWidth, setHeaderWidth] = useState(0);
+    const [pageColWidth, setPageColWidth] = useState(0);
+    const [dotColWidth, setDotColWidth] = useState(0);
+    const [stepColWidth, setStepColWidth] = useState(0);
+    const [midsetColWidth, setMidsetColWidth] = useState(0);
+
+    const showStepAndMidset =
+        headerWidth === 0 ||
+        headerWidth >= pageColWidth + dotColWidth + stepColWidth + midsetColWidth + 32;
     const {showData, loading} = useShowData(id as string);
     const [loadingInstrument, setLoadingInstrument] = useState(true);
     const {currentCount, setCurrentCount, selectedInstrument, setSelectedInstrument, setDefaultInstrument} = useShowContext();
@@ -179,8 +188,9 @@ export default function ShowScreen() {
                     flexDirection: 'row',
                     justifyContent: 'space-between',
                     width: '90%'
-                }}>
-                    <View>
+                }}
+                      onLayout={(e) => setHeaderWidth(e.nativeEvent.layout.width)}>
+                    <View onLayout={(e) => setPageColWidth((prev) => Math.max(prev, e.nativeEvent.layout.width))}>
                         {/*<Text variant="bodyLarge">*/}
                         {/*    Movement {coordinates[currentIndex].movement}*/}
                         {/*</Text>*/}
@@ -188,18 +198,18 @@ export default function ShowScreen() {
                             Page {sets[currentIndex].name}
                         </Text>
                         <Text variant="bodyLarge">
-                            Count {currentCount - sets[currentIndex-1].count}  of {sets[currentIndex].count - (currentIndex > 0 ? sets[currentIndex - 1].count : 0)}
+                            Count {currentCount - (sets[currentIndex-1]?.count || 0)}  of {sets[currentIndex].count - (currentIndex > 0 ? sets[currentIndex - 1].count : 0)}
                         </Text>
                     </View>
-                    <View>
+                    {showStepAndMidset && <View onLayout={(e) => setStepColWidth((prev) => Math.max(prev, e.nativeEvent.layout.width))}>
                         <Text variant="bodyLarge">
                             Step Size
                         </Text>
                         <Text variant="bodyLarge">
                             {stepSize ? `${stepSize} to 5` : '-'}
                         </Text>
-                    </View>
-                    <View>
+                    </View>}
+                    {showStepAndMidset && <View onLayout={(e) => setMidsetColWidth((prev) => Math.max(prev, e.nativeEvent.layout.width))}>
                         <Text variant="bodyLarge">
                             Midset
                         </Text>
@@ -220,8 +230,8 @@ export default function ShowScreen() {
                         ) : (
                             <Text variant="bodyLarge">-</Text>
                         )}
-                    </View>
-                    <View>
+                    </View>}
+                    <View onLayout={(e) => setDotColWidth((prev) => Math.max(prev, e.nativeEvent.layout.width))}>
                         <Text variant="bodyLarge">
                             Side {currentDot.side}:{' '}
                             {currentDot.sideToSide.stepOffset}{' '}
