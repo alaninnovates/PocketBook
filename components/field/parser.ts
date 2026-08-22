@@ -34,7 +34,7 @@ export const fieldCoordinateToDot = (
 
     if (x >= 0) {
         // right side
-        side = 1;
+        side = 2;
         sideToSideYardline = Math.round((50 - stepsToYards(x)) / 5) * 5;
         const offset = (x - (yardsToSteps(50 - sideToSideYardline)));
         if (offset >= 0) {
@@ -46,7 +46,7 @@ export const fieldCoordinateToDot = (
         }
     } else {
         // left side
-        side = 2;
+        side = 1;
         sideToSideYardline = Math.round((50 - stepsToYards(-x)) / 5) * 5;
         const offset = (-x - (yardsToSteps(50 - sideToSideYardline)));
         if (offset >= 0) {
