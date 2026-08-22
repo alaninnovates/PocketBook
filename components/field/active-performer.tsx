@@ -1,16 +1,14 @@
-import {Circle, Line, matchFont, Rect, Text, vec} from "@shopify/react-native-skia";
+import {Circle, Line, Rect, Text, vec} from "@shopify/react-native-skia";
 import {stepsToPixels} from "@/components/field/dimensions";
 import React from "react";
 import {useTheme} from "react-native-paper";
 import {clampMax} from "@/lib/utils";
 import {calculateMidset} from "@/components/field/parser";
-import {Platform} from "react-native";
 import {interpolatePosition} from "@/components/field/playback";
 import {FieldView, SettingsProperty, useProperty} from "@/lib/settings-manager";
 import {Coordinate, ShowData} from "@/lib/hooks/use-show-data";
 import {useShowContext} from "@/lib/hooks/use-show-context";
-
-const fontFamily = Platform.select({ios: "Arial", default: "arial"});
+import {measureTextHeight, useFieldFont} from "@/components/field/use-field-font";
 
 const CurrentPageDisplay = ({
                                 coord,
@@ -22,10 +20,8 @@ const CurrentPageDisplay = ({
     performer: string;
 }) => {
     const [fieldView] = useProperty<FieldView>(SettingsProperty.FieldView, FieldView.Performer);
-    const font = matchFont({
-        fontFamily,
-        fontSize: clampMax(6 * 6 / (zoom), 10),
-    });
+    // null on web until the bundled font finishes loading
+    const font = useFieldFont(clampMax(6 * 6 / (zoom), 10));
     const theme = useTheme();
 
     const cx = stepsToPixels(coord.x);
@@ -33,8 +29,8 @@ const CurrentPageDisplay = ({
     const r = clampMax(4 * 6 / (zoom), 6);
 
     const multiplier = fieldView === FieldView.Performer ? 1 : -1;
-    const textX = stepsToPixels(coord.x) + (font.getTextWidth(performer) / 2) * multiplier;
-    const textY = stepsToPixels(coord.y) + (-font.measureText(performer).height / 2 + 1.5) * multiplier;
+    const textX = font ? stepsToPixels(coord.x) + (font.getTextWidth(performer) / 2) * multiplier : 0;
+    const textY = font ? stepsToPixels(coord.y) + (-measureTextHeight(font, performer) / 2 + 1.5) * multiplier : 0;
     return (
         <>
             <Circle
@@ -54,16 +50,18 @@ const CurrentPageDisplay = ({
                 style={"stroke"}
                 strokeWidth={2}
             />
-            <Text
-                key={`text-${performer}`}
-                x={textX}
-                y={textY}
-                transform={[{rotate: fieldView === FieldView.Performer ? Math.PI : 0}]}
-                origin={vec(textX, textY)}
-                color={theme.colors.background}
-                font={font}
-                text={performer}
-            />
+            {font && (
+                <Text
+                    key={`text-${performer}`}
+                    x={textX}
+                    y={textY}
+                    transform={[{rotate: fieldView === FieldView.Performer ? Math.PI : 0}]}
+                    origin={vec(textX, textY)}
+                    color={theme.colors.background}
+                    font={font}
+                    text={performer}
+                />
+            )}
         </>
     );
 };

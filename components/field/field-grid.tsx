@@ -1,5 +1,6 @@
 import {Line, Skia, Text, useTypeface, vec} from "@shopify/react-native-skia";
 import {stepsToPixels, yardsToSteps} from "@/components/field/dimensions";
+import {measureTextWidth} from "@/components/field/use-field-font";
 import {MD3Theme} from "react-native-paper";
 import React from "react";
 import {GridLineType, MeasureDirection, ShowData, Unit} from "@/lib/hooks/use-show-data";
@@ -132,7 +133,7 @@ export const FieldGrid = ({theme, showGrid, showData}: { theme: MD3Theme, showGr
                     if (text === '0') return;
                     const font = getFont();
                     // for the back number
-                    const bottomX = stepsToPixels(selectedUnitToSteps(position)) - (font.measureText(text).width / 2);
+                    const bottomX = stepsToPixels(selectedUnitToSteps(position)) - (measureTextWidth(font, text) / 2);
                     const bottomY = stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.bottom)) - stepsToPixels(selectedUnitToSteps(fieldMetadata.markers.back.distance - fieldMetadata.markers.front.size / 2));
                     markers.push(
                         <Text
@@ -147,7 +148,7 @@ export const FieldGrid = ({theme, showGrid, showData}: { theme: MD3Theme, showGr
                         />
                     );
                     // for the front number
-                    const topX = stepsToPixels(selectedUnitToSteps(position)) + (font.measureText(text).width / 2);
+                    const topX = stepsToPixels(selectedUnitToSteps(position)) + (measureTextWidth(font, text) / 2);
                     const topY = stepsToPixels(selectedUnitToSteps(fieldMetadata.dimensions.top)) + stepsToPixels(selectedUnitToSteps(fieldMetadata.markers.front.distance - fieldMetadata.markers.front.size / 2));
                     markers.push(
                         <Text
