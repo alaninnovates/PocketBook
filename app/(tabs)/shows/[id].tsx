@@ -13,6 +13,8 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useShowData} from "@/lib/hooks/use-show-data";
 import {useShowContext} from "@/lib/hooks/use-show-context";
+import {PerformerInfo} from "@/lib/hooks/use-show-views";
+import {PerformerPopup} from "@/components/field/performer-popup";
 
 export default function ShowScreen() {
     const {id} = useLocalSearchParams();
@@ -39,6 +41,7 @@ export default function ShowScreen() {
     } = useShowContext();
 
     const [isPlaying, setIsPlaying] = useState(false);
+    const [popupPerformer, setPopupPerformer] = useState<PerformerInfo | null>(null);
     const [animationProgress, setAnimationProgress] = useState(0);
     const animationFrameRef = useRef<number | null>(null);
     const startTimeRef = useRef<number | null>(null);
@@ -164,6 +167,7 @@ export default function ShowScreen() {
         <View style={{width: '100%', height: '100%', backgroundColor: theme.colors.background}}>
             <FieldCanvas showData={showData}
                          animationProgress={animationProgress}
+                         onPerformerTap={setPopupPerformer}
             />
             <View
                 style={{
@@ -321,6 +325,12 @@ export default function ShowScreen() {
                     }}
                 />
             </View>
+            {popupPerformer && (
+                <PerformerPopup
+                    performer={popupPerformer}
+                    onDismiss={() => setPopupPerformer(null)}
+                />
+            )}
         </View>
     );
 }

@@ -12,6 +12,7 @@ import {ActivePerformer} from "@/components/field/active-performer";
 import {FieldView, SettingsProperty, useProperty} from "@/lib/settings-manager";
 import {ShowData} from "@/lib/hooks/use-show-data";
 import {ShowContext, useShowContext} from "@/lib/hooks/use-show-context";
+import {PerformerInfo} from "@/lib/hooks/use-show-views";
 
 const INITIAL_ZOOM = 0.4;
 const MIN_ZOOM = 0.1;
@@ -19,9 +20,10 @@ const MAX_ZOOM = 6;
 const GRID_ZOOM_THRESHOLD = 0.9;
 const TAP_HIT_RADIUS = 24;
 
-export const FieldCanvas = ({showData, animationProgress}: {
+export const FieldCanvas = ({showData, animationProgress, onPerformerTap}: {
     showData: ShowData;
     animationProgress: number;
+    onPerformerTap?: (performer: PerformerInfo) => void;
 }) => {
     const theme = useTheme();
     const [fieldView] = useProperty<FieldView>(SettingsProperty.FieldView, FieldView.Performer);
@@ -142,11 +144,18 @@ export const FieldCanvas = ({showData, animationProgress}: {
             }
         }
         if (hitPerformer) {
+            if (hitPerformer === selectedInstrument && hitPerformer !== defaultInstrument) {
+                const performerInfo = showData.getPerformers().find(p => p.performer === hitPerformer);
+                if (performerInfo) {
+                    onPerformerTap?.(performerInfo);
+                }
+                return;
+            }
             setSelectedInstrument(hitPerformer);
         } else if (defaultInstrument) {
             setSelectedInstrument(defaultInstrument);
         }
-    }, [showData, currentCount, animationProgress, setSelectedInstrument, defaultInstrument]);
+    }, [showData, currentCount, animationProgress, setSelectedInstrument, defaultInstrument, selectedInstrument, onPerformerTap]);
 
     const tapGesture = useMemo(() => Gesture.Tap()
         .maxDuration(250)
