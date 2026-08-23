@@ -1,7 +1,7 @@
 import {useLocalSearchParams, useRouter} from "expo-router";
 import {FieldCanvas} from "@/components/field/field-canvas";
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {Platform, View} from "react-native";
+import {View} from "react-native";
 import {IconButton, Text, useTheme} from "react-native-paper";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {
@@ -13,7 +13,6 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useShowData} from "@/lib/hooks/use-show-data";
 import {useShowContext} from "@/lib/hooks/use-show-context";
-import * as ScreenOrientation from 'expo-screen-orientation';
 
 export default function ShowScreen() {
     const {id} = useLocalSearchParams();
@@ -53,18 +52,6 @@ export default function ShowScreen() {
     useEffect(() => {
         console.log('currnet count is:', currentCount, 'current index is:', showData?.getSetIndexAtCount(currentCount));
     }, [currentCount]);
-
-    useEffect(() => {
-        if (Platform.OS === "web") return;
-        (async () => {
-            await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT);
-        })();
-        return () => {
-            (async () => {
-                await ScreenOrientation.unlockAsync();
-            })();
-        }
-    }, []);
 
     const animate = useCallback(
         (timestamp: number) => {

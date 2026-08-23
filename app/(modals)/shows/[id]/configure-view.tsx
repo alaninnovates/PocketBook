@@ -24,7 +24,7 @@ export default function ConfigureViewModalScreen() {
     if (loading || !showData || !selectedInstrument || !views) {
         return (
             <>
-                <Stack.Screen options={{title: 'Configure View'}}/>
+                <Stack.Screen options={{title: 'Configure View', orientation: 'all'}}/>
                 <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                     <Text>Loading...</Text>
                 </View>
@@ -44,6 +44,7 @@ export default function ConfigureViewModalScreen() {
             <Stack.Screen options={{
                 title: editingView ? 'Edit View: ' + displayName(editingView)
                     : 'Configure View',
+                orientation: 'all',
                 headerLeft: editingView ? () => (
                     <IconButton
                         icon="arrow-left"

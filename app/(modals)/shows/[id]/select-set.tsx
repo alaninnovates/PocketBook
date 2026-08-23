@@ -15,7 +15,7 @@ export default function SelectInstrumentModalScreen() {
     if (loading || !showData || !selectedInstrument) {
         return (
             <>
-                <Stack.Screen options={{title: 'Select Set'}}/>
+                <Stack.Screen options={{title: 'Select Set', orientation: 'all'}}/>
                 <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                     <Text>Loading...</Text>
                 </View>
@@ -37,7 +37,7 @@ export default function SelectInstrumentModalScreen() {
     return (
         <>
             <Stack.Screen options={{
-                title: 'Select Set', headerRight: () => (
+                title: 'Select Set', orientation: 'all', headerRight: () => (
                     <IconButton icon="close" onPress={() => router.back()} iconColor={theme.colors.onSurfaceVariant}/>
                 )
             }}/>

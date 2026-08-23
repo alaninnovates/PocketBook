@@ -26,7 +26,7 @@ export default function SelectInstrumentModalScreen() {
     if (loading || !showData) {
         return (
             <>
-                <Stack.Screen options={{title: 'Select Instrument'}}/>
+                <Stack.Screen options={{title: 'Select Instrument', orientation: 'all'}}/>
                 <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
                     <Text>Loading...</Text>
                 </View>
@@ -36,7 +36,7 @@ export default function SelectInstrumentModalScreen() {
 
     return (
         <>
-            <Stack.Screen options={{title: 'Select Instrument'}}/>
+            <Stack.Screen options={{title: 'Select Instrument', orientation: 'all'}}/>
             <ScrollView style={{padding: 16}} contentContainerStyle={{display: 'flex', flexDirection: 'column', gap: 12, padding: 16}}>
                 {showData.getPerformers()
                     .sort((a, b) => a.performer.localeCompare(b.performer))
