@@ -1,12 +1,14 @@
 import {Button, Dialog, Portal, Text, useTheme} from "react-native-paper";
 import {useEffect, useState} from "react";
-import {ScrollView, View} from "react-native";
+import {ScrollView, TouchableOpacity, View} from "react-native";
 import * as Application from "expo-application";
 import {FieldView, SettingsManager, SettingsProperty} from "@/lib/settings-manager";
 import Slider from '@react-native-community/slider';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {supabase} from "@/lib/supabase";
 import {useAuthContext} from "@/lib/hooks/use-auth-context";
+import {useStallionModal} from "react-native-stallion";
+import {useFocusEffect} from "expo-router";
 
 export default function SettingsScreen() {
     const theme = useTheme();
@@ -16,6 +18,13 @@ export default function SettingsScreen() {
     const [loading, setLoading] = useState(true);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [deleting, setDeleting] = useState(false);
+
+    const stallionModal = useStallionModal();
+    const [stallionCountdown, setStallionCountdown] = useState(4);
+
+    useFocusEffect(() => {
+        setStallionCountdown(4);
+    });
 
     useEffect(() => {
         (async () => {
@@ -121,9 +130,16 @@ export default function SettingsScreen() {
                     </Button>
                 </View>
                 <View style={{padding: 16, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8}}>
-                    <Text>
-                        Version {Application.nativeApplicationVersion} ({Application.nativeBuildVersion})
-                    </Text>
+                    <TouchableOpacity onPress={() => {
+                        if (stallionCountdown <= 0) {
+                            setStallionCountdown(4);
+                            stallionModal.showModal();
+                        } else setStallionCountdown(stallionCountdown - 1);
+                    }}>
+                        <Text>
+                            Version {Application.nativeApplicationVersion} ({Application.nativeBuildVersion})
+                        </Text>
+                    </TouchableOpacity>
                 </View>
             </ScrollView>
             <Portal>
