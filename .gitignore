@@ -3,6 +3,9 @@
 # dependencies
 node_modules/
 
+# Vercel
+/.vercel
+
 # Expo
 .expo/
 dist/
@@ -41,3 +44,7 @@ app-example
 # generated native folders
 /ios
 /android
+.vercel
+.env*
+
+build-ios/
