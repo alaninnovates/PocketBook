@@ -31,7 +31,13 @@ export default function ShowScreen() {
         headerWidth >= pageColWidth + dotColWidth + stepColWidth + midsetColWidth + 32;
     const {showData, loading} = useShowData(id as string);
     const [loadingInstrument, setLoadingInstrument] = useState(true);
-    const {currentCount, setCurrentCount, selectedInstrument, setSelectedInstrument, setDefaultInstrument} = useShowContext();
+    const {
+        currentCount,
+        setCurrentCount,
+        selectedInstrument,
+        setSelectedInstrument,
+        setDefaultInstrument
+    } = useShowContext();
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [animationProgress, setAnimationProgress] = useState(0);
@@ -189,49 +195,62 @@ export default function ShowScreen() {
                     justifyContent: 'space-between',
                     width: '90%'
                 }}
-                      onLayout={(e) => setHeaderWidth(e.nativeEvent.layout.width)}>
-                    <View onLayout={(e) => setPageColWidth((prev) => Math.max(prev, e.nativeEvent.layout.width))}>
-                        {/*<Text variant="bodyLarge">*/}
-                        {/*    Movement {coordinates[currentIndex].movement}*/}
-                        {/*</Text>*/}
+                      onLayout={(e) => {
+                          setHeaderWidth(e.nativeEvent.layout.width)
+                      }}>
+                    <View onLayout={(e) => {
+                        const width = e.nativeEvent.layout.width;
+                        setPageColWidth((prev) => Math.max(prev, width))
+                    }}>
                         <Text variant="bodyLarge">
                             Page {sets[currentIndex].name}
                         </Text>
                         <Text variant="bodyLarge">
-                            Count {currentCount - (sets[currentIndex-1]?.count || 0)}  of {sets[currentIndex].count - (currentIndex > 0 ? sets[currentIndex - 1].count : 0)}
+                            Count {currentCount - (sets[currentIndex - 1]?.count || 0)} of {sets[currentIndex].count - (currentIndex > 0 ? sets[currentIndex - 1].count : 0)}
                         </Text>
                     </View>
-                    {showStepAndMidset && <View onLayout={(e) => setStepColWidth((prev) => Math.max(prev, e.nativeEvent.layout.width))}>
+                    {showStepAndMidset &&
+                      <View onLayout={(e) => {
+                          const width = e.nativeEvent.layout.width;
+                          setStepColWidth((prev) => Math.max(prev, width))
+                      }}>
                         <Text variant="bodyLarge">
-                            Step Size
+                          Step Size
                         </Text>
                         <Text variant="bodyLarge">
                             {stepSize ? `${stepSize} to 5` : '-'}
                         </Text>
-                    </View>}
-                    {showStepAndMidset && <View onLayout={(e) => setMidsetColWidth((prev) => Math.max(prev, e.nativeEvent.layout.width))}>
+                      </View>}
+                    {showStepAndMidset &&
+                      <View onLayout={(e) => {
+                          const width = e.nativeEvent.layout.width;
+                          setMidsetColWidth((prev) => Math.max(prev, width))
+                      }}>
                         <Text variant="bodyLarge">
-                            Midset
+                          Midset
                         </Text>
-                        {midset ? (
-                            <>
-                                <Text variant="bodyLarge">
-                                    Side {midset.side}:{' '}
-                                    {midset.sideToSide.stepOffset}{' '}
-                                    {midset.sideToSide.stepOffsetDirection}{' '}
-                                    {midset.sideToSide.yardline} yd ln
-                                </Text>
-                                <Text variant="bodyLarge">
-                                    {midset.frontToBack.stepOffset}{' '}
-                                    {midset.frontToBack.stepOffsetDirection}{' '}
-                                    {midset.frontToBack.line}
-                                </Text>
-                            </>
-                        ) : (
-                            <Text variant="bodyLarge">-</Text>
-                        )}
-                    </View>}
-                    <View onLayout={(e) => setDotColWidth((prev) => Math.max(prev, e.nativeEvent.layout.width))}>
+                          {midset ? (
+                              <>
+                                  <Text variant="bodyLarge">
+                                      Side {midset.side}:{' '}
+                                      {midset.sideToSide.stepOffset}{' '}
+                                      {midset.sideToSide.stepOffsetDirection}{' '}
+                                      {midset.sideToSide.yardline} yd ln
+                                  </Text>
+                                  <Text variant="bodyLarge">
+                                      {midset.frontToBack.stepOffset}{' '}
+                                      {midset.frontToBack.stepOffsetDirection}{' '}
+                                      {midset.frontToBack.line}
+                                  </Text>
+                              </>
+                          ) : (
+                              <Text variant="bodyLarge">-</Text>
+                          )}
+                      </View>}
+                    <View onLayout={(e) => {
+                        const width = e.nativeEvent.layout.width;
+                        setDotColWidth((prev) => Math.max(prev, width))
+                    }}>
                         <Text variant="bodyLarge">
                             Side {currentDot.side}:{' '}
                             {currentDot.sideToSide.stepOffset}{' '}
@@ -251,7 +270,13 @@ export default function ShowScreen() {
                     </View>
                 </View>
             </View>
-            <View style={{position: "absolute", right: right, top: '45%'}}>
+            <View style={{position: "absolute", right: right, top: '35%'}}>
+                <IconButton
+                    icon={"eye"}
+                    mode="contained"
+                    size={32}
+                    onPress={() => router.push(`/(modals)/shows/${id}/configure-view`)}
+                />
                 <IconButton
                     icon={isPlaying ? "pause" : "play"}
                     mode="contained"

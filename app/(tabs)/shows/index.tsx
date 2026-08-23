@@ -181,6 +181,8 @@ export default function ShowsScreen() {
                                                 console.error('err fetching show data:', error);
                                             } else {
                                                 await AsyncStorage.setItem(`show_${show.id}`, JSON.stringify(data));
+                                                await AsyncStorage.removeItem(`show_${show.id}_views`);
+                                                await AsyncStorage.removeItem(`show_${show.id}_active_view`);
                                                 const newShows = shows.map((s) => {
                                                     if (s.id === show.id) {
                                                         return {...s, newVersionAvailable: false};
