@@ -25,7 +25,7 @@ export default function ShowsScreen() {
     }[]>([]);
     const [downloadingShowIds, setDownloadingShowIds] = useState<number[]>([]);
     const [updateingShowIds, setUpdatingShowIds] = useState<number[]>([]);
-    const [storedInstrument, setStoredInstrument] = useState<string | null>(null);
+    const [storedInstrumentMap, setStoredInstrumentMap] = useState<{[showId: string]: string} | null>({});
     const [offlineDialogVisible, setOfflineDialogVisible] = useState(false);
     const {isConnected} = useNetInfo();
 
@@ -54,7 +54,7 @@ export default function ShowsScreen() {
             sets: await (async () => {
                 const storedInstrument = await AsyncStorage.getItem(`show_${show.id}_selected_instrument`);
                 if (storedInstrument) {
-                    setStoredInstrument(storedInstrument);
+                    setStoredInstrumentMap((prev) => ({...prev, [show.id]: storedInstrument}));
                 }
                 const showDataString = await AsyncStorage.getItem(`show_${show.id}`);
                 if (showDataString) {
@@ -115,14 +115,14 @@ export default function ShowsScreen() {
                                 <Text>Date: {new Date(show.created_at).toDateString()}</Text>
                                 <Text>Sets: {show.sets !== undefined ? show.sets : '-'}</Text>
                             </View>
-                            {storedInstrument && (
+                            {storedInstrumentMap && storedInstrumentMap[show.id] && (
                                 <Button
                                     mode="elevated"
                                     onPress={() => {
                                         router.push(`/(modals)/shows/${show.id}/select-instrument`);
                                     }}
                                 >
-                                    {storedInstrument}
+                                    {storedInstrumentMap[show.id]}
                                 </Button>
                             )}
                         </View>
