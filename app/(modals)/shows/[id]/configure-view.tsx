@@ -1,11 +1,13 @@
 import {Stack, useLocalSearchParams, useRouter} from "expo-router";
 import {useShowData} from "@/lib/hooks/use-show-data";
 import {ScrollView, View} from "react-native";
-import {Chip, IconButton, List, Switch, Text, useTheme} from "react-native-paper";
+import {Chip, IconButton, List, Switch, Text, TextInput, useTheme} from "react-native-paper";
 import {useShowContext} from "@/lib/hooks/use-show-context";
 import {useState} from "react";
 import {SafeAreaView} from "react-native-safe-area-context";
-import {useShowViews} from "@/lib/hooks/use-show-views";
+import {DrillView, useShowViews} from "@/lib/hooks/use-show-views";
+
+const displayName = (view: DrillView) => view.name.trim() || 'Untitled view';
 
 export default function ConfigureViewModalScreen() {
     const theme = useTheme();
@@ -40,7 +42,7 @@ export default function ConfigureViewModalScreen() {
     return (
         <>
             <Stack.Screen options={{
-                title: editingView ? 'Edit View: ' + editingView.name
+                title: editingView ? 'Edit View: ' + displayName(editingView)
                     : 'Configure View',
                 headerLeft: editingView ? () => (
                     <IconButton
@@ -59,6 +61,13 @@ export default function ConfigureViewModalScreen() {
                 >
                     {editingView ? (
                         <>
+                            <TextInput
+                                label="View name"
+                                mode="outlined"
+                                value={editingView.name}
+                                onChangeText={name => updateView(editingView.id, view => ({...view, name}))}
+                                style={{marginHorizontal: 16, marginTop: 16}}
+                            />
                             <List.Item
                                 title="Show only your dot"
                                 right={() => (
@@ -108,7 +117,7 @@ export default function ConfigureViewModalScreen() {
                                             alignItems: 'center',
                                             gap: 8
                                         }}>
-                                            <Text>{view.name}</Text>
+                                            <Text>{displayName(view)}</Text>
                                             {view.id === activeViewId && (
                                                 <Chip compact>Active</Chip>
                                             )}
