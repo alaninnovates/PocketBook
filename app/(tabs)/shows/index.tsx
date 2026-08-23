@@ -7,6 +7,7 @@ import {useState} from "react";
 import {supabase} from "@/lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {ShowData} from "@/lib/hooks/use-show-data";
+import {clearShowViews} from "@/lib/hooks/use-show-views";
 import {useNetInfo} from '@react-native-community/netinfo'
 
 export default function ShowsScreen() {
@@ -181,8 +182,7 @@ export default function ShowsScreen() {
                                                 console.error('err fetching show data:', error);
                                             } else {
                                                 await AsyncStorage.setItem(`show_${show.id}`, JSON.stringify(data));
-                                                await AsyncStorage.removeItem(`show_${show.id}_views`);
-                                                await AsyncStorage.removeItem(`show_${show.id}_active_view`);
+                                                await clearShowViews(show.id);
                                                 const newShows = shows.map((s) => {
                                                     if (s.id === show.id) {
                                                         return {...s, newVersionAvailable: false};
