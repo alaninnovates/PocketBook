@@ -1,14 +1,15 @@
 import {ScrollView, View} from "react-native";
-import {Button, Dialog, Portal, Text, useTheme} from "react-native-paper";
+import {Banner, Button, Dialog, Portal, Text, useTheme} from "react-native-paper";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {useFocusEffect, useRouter} from "expo-router";
 import {EnsembleSwitcher} from "@/components/ensemble-switcher";
-import {useState} from "react";
+import {useCallback, useState} from "react";
 import {supabase} from "@/lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {ShowData} from "@/lib/hooks/use-show-data";
 import {clearShowViews} from "@/lib/hooks/use-show-views";
-import {useNetInfo} from '@react-native-community/netinfo'
+import {useNetworkStatus} from "@/lib/network-status";
+import {isNetworkError} from "@/lib/network-fetch";
 
 export default function ShowsScreen() {
     const theme = useTheme();
@@ -28,9 +29,18 @@ export default function ShowsScreen() {
     const [updateingShowIds, setUpdatingShowIds] = useState<number[]>([]);
     const [storedInstrumentMap, setStoredInstrumentMap] = useState<{[showId: string]: string} | null>({});
     const [offlineDialogVisible, setOfflineDialogVisible] = useState(false);
-    const {isConnected} = useNetInfo();
+    const {isOffline} = useNetworkStatus();
 
     const fetchShows = async () => {
+        if (isOffline) {
+            const storedShows = await AsyncStorage.getItem(`shows_ensemble_${selectedEnsemble}`);
+            if (storedShows) {
+                const showsData = JSON.parse(storedShows);
+                console.log('SETTING SHOWS DATA', selectedEnsemble, showsData);
+                setShows(showsData);
+            }
+            return;
+        }
         const {data, error} = await supabase
             .from('shows')
             .select('id, ensemble_id, name, created_at, updated_at')
@@ -38,7 +48,7 @@ export default function ShowsScreen() {
             .order('created_at', {ascending: false});
         if (error) {
             console.error('err fetching shows:', error);
-            if (error.message === 'TypeError: Network request failed') {
+            if (isNetworkError(error)) {
                 const storedShows = await AsyncStorage.getItem(`shows_ensemble_${selectedEnsemble}`);
                 if (storedShows) {
                     const showsData = JSON.parse(storedShows);
@@ -80,17 +90,18 @@ export default function ShowsScreen() {
         await AsyncStorage.setItem(`shows_ensemble_${selectedEnsemble}`, JSON.stringify(showsData));
     }
 
-    useFocusEffect(() => {
+    useFocusEffect(useCallback(() => {
         console.log('SELECTED ENSEMBLE CHANGED:', selectedEnsemble);
         if (!selectedEnsemble) {
             setShows([]);
             return;
         }
         fetchShows();
-    });
+    }, [selectedEnsemble, isOffline]));
 
     return (
         <SafeAreaView style={{padding: 16, flex: 1}}>
+            <Banner visible={isOffline}>Offline — showing cached data</Banner>
             <EnsembleSwitcher selectedEnsemble={selectedEnsemble} setSelectedEnsemble={setSelectedEnsemble}/>
             <ScrollView
                 style={{flex: 1}}
@@ -133,6 +144,10 @@ export default function ShowsScreen() {
                                         if (show.downloaded) {
                                             router.push(`/shows/${show.id}`)
                                         } else {
+                                            if (isOffline) {
+                                                setOfflineDialogVisible(true);
+                                                return;
+                                            }
                                             setDownloadingShowIds((prev) => [...prev, show.id]);
                                             const {data, error} = await supabase
                                                 .from('shows')
@@ -167,7 +182,7 @@ export default function ShowsScreen() {
                             {show.newVersionAvailable && (
                                 <Button mode="outlined"
                                         onPress={async () => {
-                                            if (!isConnected) {
+                                            if (isOffline) {
                                                 setOfflineDialogVisible(true);
                                                 return;
                                             }

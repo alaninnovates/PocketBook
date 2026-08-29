@@ -11,6 +11,7 @@ import {OnboardingStep, useAuthContext} from "@/lib/hooks/use-auth-context";
 import AuthProvider from "@/components/auth/auth-provider";
 import {CombinedDarkTheme, CombinedLightTheme} from "@/lib/theme";
 import ShowProvider from "@/lib/show-provider";
+import NetworkMonitor from "@/components/network-monitor";
 import {useEffect} from "react";
 
 export const unstable_settings = {
@@ -72,6 +73,7 @@ export default function RootLayout() {
                 <ThemeProvider value={colorScheme === 'dark' ? CombinedDarkTheme : CombinedLightTheme}>
                     <AuthProvider>
                         <ShowProvider>
+                            <NetworkMonitor/>
                             <WebPageBackground/>
                             <RootNavigator/>
                             <StatusBar style="auto"/>

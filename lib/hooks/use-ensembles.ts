@@ -1,11 +1,14 @@
-import {useState} from "react";
+import {useCallback, useState} from "react";
 import {useFocusEffect} from "expo-router";
 import {supabase} from "@/lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useAuthContext} from "@/lib/hooks/use-auth-context";
+import {useNetworkStatus} from "@/lib/network-status";
+import {isNetworkError} from "@/lib/network-fetch";
 
 export const useEnsembles = () => {
     const {profile} = useAuthContext();
+    const {isOffline} = useNetworkStatus();
 
     const [ensembles, setEnsembles] = useState<{
         ensembles: { id: number; name: string };
@@ -14,9 +17,16 @@ export const useEnsembles = () => {
         approved_at: string
     }[]>([]);
 
-    useFocusEffect(() => {
+    useFocusEffect(useCallback(() => {
         if (!profile) return;
         const fetchEnsembles = async () => {
+            if (isOffline) {
+                const storedEnsembles = await AsyncStorage.getItem('user_ensembles');
+                if (storedEnsembles) {
+                    setEnsembles(JSON.parse(storedEnsembles));
+                }
+                return;
+            }
             const {data, error} = await supabase
                 .from('ensemble_memberships')
                 .select('ensembles(id,name), role, requested_at, approved_at')
@@ -26,7 +36,7 @@ export const useEnsembles = () => {
             console.log(data);
             if (error) {
                 console.error('err fetching user ensembles:', error.message);
-                if (error.message === 'TypeError: Network request failed') {
+                if (isNetworkError(error)) {
                     const storedEnsembles = await AsyncStorage.getItem('user_ensembles');
                     if (storedEnsembles) {
                         const ensemblesData = JSON.parse(storedEnsembles);
@@ -49,7 +59,7 @@ export const useEnsembles = () => {
             }
         }
         fetchEnsembles();
-    });
+    }, [profile, isOffline]));
 
     return {ensembles, setEnsembles};
 }

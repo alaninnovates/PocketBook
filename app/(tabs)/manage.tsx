@@ -4,30 +4,53 @@ import {useEffect, useState} from "react";
 import {SegmentedButtons, Text, useTheme} from "react-native-paper";
 import {ScrollView, View} from "react-native";
 import {supabase} from "@/lib/supabase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {useNetworkStatus} from "@/lib/network-status";
+import {isNetworkError} from "@/lib/network-fetch";
 
 export default function ManageScreen() {
     const theme = useTheme();
     const [selectedEnsemble, setSelectedEnsemble] = useState<number | null>(null);
     const [members, setMembers] = useState([]);
+    const {isOffline} = useNetworkStatus();
 
     useEffect(() => {
         if (!selectedEnsemble) {
             setMembers([]);
             return;
         }
+        let cancelled = false;
         const fetchMembers = async () => {
+            if (isOffline) {
+                const storedMembers = await AsyncStorage.getItem(`manage_members_${selectedEnsemble}`);
+                if (storedMembers && !cancelled) {
+                    setMembers(JSON.parse(storedMembers));
+                }
+                return;
+            }
             const {data, error} = await supabase.from('ensemble_memberships')
                 .select('profiles(id, email, name), role, requested_at, approved_at')
                 .eq('ensemble_id', selectedEnsemble);
+            if (cancelled) return;
             if (error) {
                 console.error('err fetching ensemble members:', error);
+                if (isNetworkError(error)) {
+                    const storedMembers = await AsyncStorage.getItem(`manage_members_${selectedEnsemble}`);
+                    if (storedMembers && !cancelled) {
+                        setMembers(JSON.parse(storedMembers));
+                    }
+                }
             } else {
                 console.log(data);
                 setMembers(data);
+                await AsyncStorage.setItem(`manage_members_${selectedEnsemble}`, JSON.stringify(data));
             }
         }
         fetchMembers();
-    }, [selectedEnsemble]);
+        return () => {
+            cancelled = true;
+        };
+    }, [selectedEnsemble, isOffline]);
 
     return (
         <SafeAreaView style={{padding: 16, flex: 1}}>
@@ -74,14 +97,17 @@ export default function ManageScreen() {
                                 {
                                     value: 'awaiting_approval',
                                     label: 'Rejected',
+                                    disabled: isOffline,
                                 },
                                 {
                                     value: 'member',
                                     label: 'Member',
+                                    disabled: isOffline,
                                 },
                                 {
                                     value: 'admin',
                                     label: 'Admin',
+                                    disabled: isOffline,
                                 }
                             ]}
                         />
