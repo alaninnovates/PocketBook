@@ -11,6 +11,7 @@ import {OnboardingStep, useAuthContext} from "@/lib/hooks/use-auth-context";
 import AuthProvider from "@/components/auth/auth-provider";
 import {CombinedDarkTheme, CombinedLightTheme} from "@/lib/theme";
 import ShowProvider from "@/lib/show-provider";
+import UpdatePrompt from "@/components/update-prompt";
 import {useEffect} from "react";
 
 export const unstable_settings = {
@@ -74,6 +75,7 @@ export default function RootLayout() {
                         <ShowProvider>
                             <WebPageBackground/>
                             <RootNavigator/>
+                            {Platform.OS !== "web" && <UpdatePrompt/>}
                             <StatusBar style="auto"/>
                         </ShowProvider>
                     </AuthProvider>
