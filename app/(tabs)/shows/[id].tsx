@@ -1,7 +1,8 @@
 import {useLocalSearchParams, useRouter} from "expo-router";
 import {FieldCanvas} from "@/components/field/field-canvas";
 import {useCallback, useEffect, useMemo, useRef, useState} from "react";
-import {View} from "react-native";
+import {Platform, View} from "react-native";
+import {useAudioPlayer, useAudioPlayerStatus} from "expo-audio";
 import {IconButton, Text, useTheme} from "react-native-paper";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 import {
@@ -13,6 +14,7 @@ import {
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useShowData} from "@/lib/hooks/use-show-data";
 import {useShowContext} from "@/lib/hooks/use-show-context";
+import {getShowAudioFile} from "@/lib/show-audio";
 import {PerformerInfo} from "@/lib/hooks/use-show-views";
 import {PerformerPopup} from "@/components/field/performer-popup";
 
@@ -45,8 +47,36 @@ export default function ShowScreen() {
     const [animationProgress, setAnimationProgress] = useState(0);
     const animationFrameRef = useRef<number | null>(null);
     const startTimeRef = useRef<number | null>(null);
-    const startCountTimeInShowRef = useRef<number | null>(null);
+    const playStartCountRef = useRef<number | null>(null);
+    const playStartShowTimeRef = useRef<number | null>(null);
     const currentCountRef = useRef(currentCount);
+
+    // if the show's mp3 was downloaded to the device, it is the master clock
+    // for the animation; otherwise the animation runs on its own clock
+    const audioSource = useMemo(() => {
+        if (Platform.OS === "web") return null;
+        const audioFile = getShowAudioFile(id as string);
+        return audioFile.exists ? {uri: audioFile.uri} : null;
+    }, [id]);
+    const hasAudio = audioSource !== null;
+    const player = useAudioPlayer(audioSource, {updateInterval: 100});
+    const playerStatus = useAudioPlayerStatus(player);
+
+    // latest audio position stamped with the wall clock, so the animation can
+    // extrapolate smoothly between the player's status updates
+    const audioClockRef = useRef({time: 0, wall: 0, playing: false});
+    useEffect(() => {
+        audioClockRef.current = {
+            time: playerStatus.currentTime,
+            wall: Date.now(),
+            playing: playerStatus.playing,
+        };
+    }, [playerStatus.currentTime, playerStatus.playing]);
+
+    const isPlayingRef = useRef(isPlaying);
+    useEffect(() => {
+        isPlayingRef.current = isPlaying;
+    }, [isPlaying]);
 
     useEffect(() => {
         currentCountRef.current = currentCount;
@@ -56,48 +86,95 @@ export default function ShowScreen() {
         console.log('currnet count is:', currentCount, 'current index is:', showData?.getSetIndexAtCount(currentCount));
     }, [currentCount]);
 
+    const stopPlayback = useCallback(() => {
+        if (animationFrameRef.current) {
+            cancelAnimationFrame(animationFrameRef.current);
+            animationFrameRef.current = null;
+        }
+        if (hasAudio) player.pause();
+        setIsPlaying(false);
+        setAnimationProgress(0);
+        startTimeRef.current = null;
+        playStartCountRef.current = null;
+        playStartShowTimeRef.current = null;
+    }, [hasAudio, player]);
+
     const animate = useCallback(
         (timestamp: number) => {
             if (!showData) return null;
             if (startTimeRef.current === null) startTimeRef.current = timestamp;
-            const elapsed = timestamp - startTimeRef.current;
-            if (startCountTimeInShowRef.current === null) {
-                startCountTimeInShowRef.current = showData.getTimeForCount(currentCountRef.current);
+            if (playStartCountRef.current === null) playStartCountRef.current = currentCountRef.current;
+            if (playStartShowTimeRef.current === null) {
+                playStartShowTimeRef.current = showData.getTimeForCount(playStartCountRef.current);
             }
 
-            const currentCountTimestamp = showData.getTimeForCount(currentCountRef.current) - startCountTimeInShowRef.current;
-            const nextCountTimestamp = showData.getTimeForCount(currentCountRef.current + 1) - startCountTimeInShowRef.current;
+            let showTime: number;
+            if (hasAudio) {
+                const clock = audioClockRef.current;
+                // hold in place while the audio is paused (interruption, buffering)
+                showTime = clock.playing ? clock.time + (Date.now() - clock.wall) / 1000 : clock.time;
+            } else {
+                showTime = playStartShowTimeRef.current + (timestamp - startTimeRef.current) / 1000;
+            }
 
-            const progress = (elapsed / 1000 - currentCountTimestamp) / (nextCountTimestamp - currentCountTimestamp);
-            setAnimationProgress(progress);
-            // console.log('elapsed:', elapsed/1000, 'currentCount:', currentCountRef.current, 'progress:', progress);
+            // map the show time to a count and progress using the tempo data
+            const count = showData.getCurrentCountForTime(playStartCountRef.current, showTime - playStartShowTimeRef.current);
+            const countTime = showData.getTimeForCount(count);
+            const nextCountTime = showData.getTimeForCount(count + 1);
+            const progress = (showTime - countTime) / (nextCountTime - countTime);
+            console.log('progress:', progress, 'count:', count, 'showTime:', showTime, 'countTime:', countTime, 'nextCountTime:', nextCountTime);
 
-
-            if (progress >= 1) {
-                // increment count
-                const nextCount = currentCountRef.current + 1;
-                // console.log('incrementing count from', currentCountRef.current, 'to', nextCount);
-                // console.log('nextCount:', nextCount, 'totalCounts:', showData.getTotalCounts());
-                if (nextCount >= showData.getTotalCounts()) {
-                    setIsPlaying(false);
-                    setAnimationProgress(0);
-                    animationFrameRef.current = null;
-                    startTimeRef.current = null;
-                    startCountTimeInShowRef.current = null;
-                    return;
+            // the final count has no next count to move toward, so end the
+            // show (and pause the audio) when its timestamp is reached
+            const lastCountTime = showData.getTimeForCount(showData.getTotalCounts() - 1);
+            if (showTime >= lastCountTime) {
+                const lastCount = showData.getTotalCounts() - 1;
+                if (currentCountRef.current !== lastCount) {
+                    currentCountRef.current = lastCount;
+                    setCurrentCount(lastCount);
                 }
-                // update the ref synchronously so the next frame sees the new
-                // count even before React re-renders
-                currentCountRef.current = nextCount;
-                setCurrentCount(nextCount);
-                setAnimationProgress(0);
-                // startTimeRef.current = null;
+                stopPlayback();
+                return;
             }
+
+            // update the ref synchronously so the next frame sees the new
+            // count even before React re-renders
+            if (count !== currentCountRef.current) {
+                currentCountRef.current = count;
+                setCurrentCount(count);
+            }
+            setAnimationProgress(progress);
 
             animationFrameRef.current = requestAnimationFrame(animate);
         },
-        [showData, setCurrentCount]
+        [showData, hasAudio, setCurrentCount, stopPlayback]
     );
+
+    const startPlayback = useCallback(() => {
+        if (!showData) return;
+        playStartCountRef.current = currentCountRef.current;
+        playStartShowTimeRef.current = showData.getTimeForCount(currentCountRef.current);
+        startTimeRef.current = null;
+        if (hasAudio) {
+            // align the audio to the current count using the tempo data, then
+            // treat the audio position as the master clock
+            audioClockRef.current = {
+                time: playStartShowTimeRef.current,
+                wall: Date.now(),
+                playing: true,
+            };
+            player.seekTo(playStartShowTimeRef.current);
+            player.play();
+        }
+        setIsPlaying(true);
+        animationFrameRef.current = requestAnimationFrame(animate);
+    }, [showData, hasAudio, player, animate]);
+
+    useEffect(() => {
+        if (playerStatus.didJustFinish && isPlayingRef.current) {
+            stopPlayback();
+        }
+    }, [playerStatus.didJustFinish, stopPlayback]);
 
     useEffect(() => {
         const fetchSelectedInstrument = async () => {
@@ -274,19 +351,10 @@ export default function ShowScreen() {
                     size={32}
                     onPress={() => {
                         if (isPlaying) {
-                            if (animationFrameRef.current) {
-                                cancelAnimationFrame(animationFrameRef.current);
-                                animationFrameRef.current = null;
-                            }
-                            setIsPlaying(false);
-                            setAnimationProgress(0);
-                            startTimeRef.current = null;
-                            startCountTimeInShowRef.current = null;
-                            return;
+                            stopPlayback();
+                        } else {
+                            startPlayback();
                         }
-                        setIsPlaying(true);
-                        animationFrameRef.current =
-                            requestAnimationFrame(animate);
                     }}
                 />
                 <IconButton

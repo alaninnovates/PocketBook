@@ -8,6 +8,7 @@ import {supabase} from "@/lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {ShowData} from "@/lib/hooks/use-show-data";
 import {clearShowViews} from "@/lib/hooks/use-show-views";
+import {downloadShowAudio} from "@/lib/show-audio";
 import {useNetInfo} from '@react-native-community/netinfo'
 
 export default function ShowsScreen() {
@@ -149,6 +150,7 @@ export default function ShowsScreen() {
                                                 console.error('err fetching show data:', error);
                                             } else {
                                                 await AsyncStorage.setItem(`show_${show.id}`, JSON.stringify(data));
+                                                await downloadShowAudio(show.ensemble_id, show.id);
                                                 const newShows = shows.map((s) => {
                                                     if (s.id === show.id) {
                                                         return {...s, downloaded: true};
@@ -187,6 +189,7 @@ export default function ShowsScreen() {
                                                 console.error('err fetching show data:', error);
                                             } else {
                                                 await AsyncStorage.setItem(`show_${show.id}`, JSON.stringify(data));
+                                                await downloadShowAudio(show.ensemble_id, show.id);
                                                 await clearShowViews(show.id);
                                                 const newShows = shows.map((s) => {
                                                     if (s.id === show.id) {

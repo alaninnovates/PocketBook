@@ -321,6 +321,8 @@ export class ShowData {
                         return i;
                     }
                 }
+                // past the last tempo timestamp: clamp to the final count
+                return tempoData.timestamps.length - 1;
             }
         }
         return 0;

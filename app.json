@@ -1,79 +1,80 @@
 {
-    "expo": {
-        "name": "PocketBook",
-        "slug": "PocketBook",
-        "version": "1.0.2",
-        "orientation": "default",
-        "icon": "./assets/images/icon.png",
-        "scheme": "pocketbook",
-        "userInterfaceStyle": "automatic",
-        "newArchEnabled": true,
-        "ios": {
-            "supportsTablet": true,
-            "bundleIdentifier": "com.alaninnovates.pocketbook",
-            "usesAppleSignIn": true
-        },
-        "android": {
-            "adaptiveIcon": {
-                "backgroundColor": "#E6F4FE",
-                "foregroundImage": "./assets/images/android-icon-foreground.png",
-                "backgroundImage": "./assets/images/android-icon-background.png",
-                "monochromeImage": "./assets/images/android-icon-monochrome.png"
-            },
-            "edgeToEdgeEnabled": true,
-            "predictiveBackGestureEnabled": false,
-            "package": "com.alaninnovates.pocketbook"
-        },
-        "web": {
-            "output": "static",
-            "bundler": "metro",
-            "favicon": "./assets/images/favicon.png"
-        },
-        "plugins": [
-            "expo-apple-authentication",
-            "expo-router",
-            [
-                "expo-splash-screen",
-                {
-                    "image": "./assets/images/splash-icon.png",
-                    "imageWidth": 200,
-                    "resizeMode": "contain",
-                    "backgroundColor": "#4f378b",
-                    "dark": {
-                        "backgroundColor": "#4f378b"
-                    }
-                }
-            ],
-            [
-                "@react-native-google-signin/google-signin",
-                {
-                    "iosUrlScheme": "com.googleusercontent.apps.755065007888-1e7nkfilpb069q2m2383g8o8hbovqrca"
-                }
-            ],
-            [
-                "expo-stallion-plugin",
-                {
-                    "projectId": "6a043bf9c778625102ddf137",
-                    "appToken": "spb_ap_hGd5_QkUMRS3MLu0goYM4a7SI_8nAA8qVLnd7f53tW"
-                }
-            ]
-        ],
-        "experiments": {
-            "typedRoutes": true,
-            "reactCompiler": true
-        },
-        "build": {
-            "preview": {
-                "android": {
-                    "buildType": "apk"
-                }
-            }
-        },
-        "extra": {
-            "router": {},
-            "eas": {
-                "projectId": "769bbe41-ab5f-490e-8b8e-ce6a32087976"
-            }
+  "expo": {
+    "name": "PocketBook",
+    "slug": "PocketBook",
+    "version": "1.0.2",
+    "orientation": "default",
+    "icon": "./assets/images/icon.png",
+    "scheme": "pocketbook",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.alaninnovates.pocketbook",
+      "usesAppleSignIn": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/images/android-icon-foreground.png",
+        "backgroundImage": "./assets/images/android-icon-background.png",
+        "monochromeImage": "./assets/images/android-icon-monochrome.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.alaninnovates.pocketbook"
+    },
+    "web": {
+      "output": "static",
+      "bundler": "metro",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-apple-authentication",
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#4f378b",
+          "dark": {
+            "backgroundColor": "#4f378b"
+          }
         }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.755065007888-1e7nkfilpb069q2m2383g8o8hbovqrca"
+        }
+      ],
+      [
+        "expo-stallion-plugin",
+        {
+          "projectId": "6a043bf9c778625102ddf137",
+          "appToken": "spb_ap_hGd5_QkUMRS3MLu0goYM4a7SI_8nAA8qVLnd7f53tW"
+        }
+      ],
+      "expo-audio"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "build": {
+      "preview": {
+        "android": {
+          "buildType": "apk"
+        }
+      }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "769bbe41-ab5f-490e-8b8e-ce6a32087976"
+      }
     }
+  }
 }
