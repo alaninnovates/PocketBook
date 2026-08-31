@@ -1,9 +1,5 @@
 import {DotbookEntry} from "@/lib/types";
-import {
-    FIELD_BACK_HASH_STEPS,
-    FIELD_FRONT_HASH_STEPS, FIELD_HEIGHT_STEPS, stepsToYards,
-    yardsToSteps
-} from "@/components/field/dimensions";
+import {stepsToYards, yardsToSteps} from "@/components/field/dimensions";
 import {Coordinate} from "@/lib/hooks/use-show-data";
 
 const roundToDecimal = (num: number, decimalPlaces: number): number => {
@@ -63,8 +59,11 @@ export const fieldCoordinateToDot = (
     let frontToBackStepOffsetDirection: 'In Front Of' | 'Behind';
 
     const distanceFromFrontHash = 14 - y;
-    const distanceFromBackHash = y - 14;
+    const distanceFromBackHash = y + 14;
     const distanceFromFrontSideline = 42 - y;
+    const distanceFromBackSideline = y + 42;
+    // console.log('coord:', coord, 'x:', x, 'y:', y);
+    // console.log('distanceFromFrontHash:', distanceFromFrontHash, 'distanceFromBackHash:', distanceFromBackHash, 'distanceFromFrontSideline:', distanceFromFrontSideline, 'distanceFromBackSideline:', distanceFromBackSideline);
 
     if (
         Math.abs(distanceFromFrontSideline) <=
@@ -92,14 +91,26 @@ export const fieldCoordinateToDot = (
             frontToBackStepOffset = roundToDecimal(offset, 2);
             frontToBackStepOffsetDirection = 'Behind';
         }
-    } else {
+    } else if (
+        Math.abs(distanceFromBackHash) <= Math.abs(distanceFromBackSideline)
+    ) {
         frontToBackLine = 'Back Hash (HS)';
         const offset = distanceFromBackHash;
-        if (offset <= 0) {
-            frontToBackStepOffset = roundToDecimal(-offset, 2);
+        if (offset >= 0) {
+            frontToBackStepOffset = roundToDecimal(offset, 2);
             frontToBackStepOffsetDirection = 'In Front Of';
         } else {
+            frontToBackStepOffset = roundToDecimal(-offset, 2);
+            frontToBackStepOffsetDirection = 'Behind';
+        }
+    } else {
+        frontToBackLine = 'Back Side Line';
+        const offset = distanceFromBackSideline;
+        if (offset >= 0) {
             frontToBackStepOffset = roundToDecimal(offset, 2);
+            frontToBackStepOffsetDirection = 'In Front Of';
+        } else {
+            frontToBackStepOffset = roundToDecimal(-offset, 2);
             frontToBackStepOffsetDirection = 'Behind';
         }
     }
