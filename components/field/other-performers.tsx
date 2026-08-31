@@ -16,6 +16,7 @@ export const OtherPerformers = ({showData, zoom, animationProgress}: {
     zoom: number;
     animationProgress: number;
 }) => {
+    const [dotScale] = useProperty<number>(SettingsProperty.DotScale, 1);
     // console.log('RE-RENDERING OTHER PERF')
     const theme = useTheme();
     const [fieldView] = useProperty<FieldView>(SettingsProperty.FieldView, FieldView.Performer);
@@ -58,7 +59,7 @@ export const OtherPerformers = ({showData, zoom, animationProgress}: {
                     key={performer}
                     cx={stepsToPixels(coord.x)}
                     cy={stepsToPixels(coord.y)}
-                    r={clampMax(4 * 6 / (zoom), 6)}
+                    r={clampMax(4 * 6 / (zoom), 6) * dotScale}
                     color={instrumentToColor(performer, theme.dark)}
                     opacity={1}
                 />
