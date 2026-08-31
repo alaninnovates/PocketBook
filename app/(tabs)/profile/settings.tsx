@@ -10,6 +10,8 @@ import {useAuthContext} from "@/lib/hooks/use-auth-context";
 import {useStallionModal} from "react-native-stallion";
 import {useFocusEffect} from "expo-router";
 
+const OTA_VERSION = 1;
+
 export default function SettingsScreen() {
     const theme = useTheme();
     const {signOut} = useAuthContext();
@@ -137,7 +139,7 @@ export default function SettingsScreen() {
                         } else setStallionCountdown(stallionCountdown - 1);
                     }}>
                         <Text>
-                            Version {Application.nativeApplicationVersion} ({Application.nativeBuildVersion})
+                            Version {Application.nativeApplicationVersion} ({Application.nativeBuildVersion}) {OTA_VERSION > 0 ? `- OTA ${OTA_VERSION}` : ''}
                         </Text>
                     </TouchableOpacity>
                 </View>
