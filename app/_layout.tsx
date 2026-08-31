@@ -70,6 +70,7 @@ function WebPageBackground() {
 
 function ThemedApp() {
     const {scheme} = useThemePreference();
+    console.log('Current theme scheme:', scheme);
     const theme = scheme === 'dark' ? CombinedDarkTheme : CombinedLightTheme;
 
     return (

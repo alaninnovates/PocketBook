@@ -10,7 +10,8 @@ export default function UpdatePrompt() {
     const visible = Boolean(
         isRestartRequired &&
         newReleaseBundle &&
-        (isMandatory || dismissedBundleId !== newReleaseBundle.id)
+        (isMandatory || dismissedBundleId !== newReleaseBundle.id) &&
+        process.env.NODE_ENV !== "development"
     );
 
     const dismiss = () => setDismissedBundleId(newReleaseBundle?.id ?? null);

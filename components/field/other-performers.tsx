@@ -1,6 +1,6 @@
 import React from "react";
 import {Circle, Text, vec} from "@shopify/react-native-skia";
-import {instrumentToColor} from "@/components/field/color";
+import {colorToHex, instrumentToColor} from "@/components/field/color";
 import {stepsToPixels} from "@/components/field/dimensions";
 import {useTheme} from "react-native-paper";
 import {clampMax} from "@/lib/utils";
@@ -10,6 +10,7 @@ import {ShowData} from "@/lib/hooks/use-show-data";
 import {useShowContext} from "@/lib/hooks/use-show-context";
 import {measureTextHeight, useFieldFont} from "@/components/field/use-field-font";
 import {useShowViews} from "@/lib/hooks/use-show-views";
+import {useThemePreference} from "@/lib/hooks/use-theme-preference";
 
 export const OtherPerformers = ({showData, zoom, animationProgress}: {
     showData: ShowData;
@@ -19,6 +20,7 @@ export const OtherPerformers = ({showData, zoom, animationProgress}: {
     const [dotScale] = useProperty<number>(SettingsProperty.DotScale, 1);
     // console.log('RE-RENDERING OTHER PERF')
     const theme = useTheme();
+    const {scheme} = useThemePreference();
     const [fieldView] = useProperty<FieldView>(SettingsProperty.FieldView, FieldView.Performer);
     const {currentCount} = useShowContext();
     // null on web until the bundled font finishes loading
@@ -60,7 +62,7 @@ export const OtherPerformers = ({showData, zoom, animationProgress}: {
                     cx={stepsToPixels(coord.x)}
                     cy={stepsToPixels(coord.y)}
                     r={clampMax(4 * 6 / (zoom), 6) * dotScale}
-                    color={instrumentToColor(performer, theme.dark)}
+                    color={colorToHex(coord.color!, scheme === 'dark')}
                     opacity={1}
                 />
                 {font && (

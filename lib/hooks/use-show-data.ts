@@ -198,7 +198,9 @@ export class ShowData {
     }
 
     // count: zero-indexed
-    public getCoordAtCount(count: number, label: string): Coordinate {
+    public getCoordAtCount(count: number, label: string): Coordinate & {
+        color?: {r: number; g: number; b: number};
+    } {
         if (this.upload_type === '3da') {
             // console.log('total counts:', this.getTotalCounts());
             // console.log('count:', count, 'label:', label);
@@ -208,6 +210,7 @@ export class ShowData {
             return {
                 x: position?.x!,
                 y: position?.y!,
+                color: position?.color,
             }
         }
         return {x: 0, y: 0};
@@ -338,6 +341,15 @@ export class ShowData {
             return this.dot_data.generalInfo.animationFixedTempoBPM;
         }
         return 120;
+    }
+
+    public getPerformerColor(label: string): {r: number; g: number; b: number} | null {
+        if (this.upload_type === '3da') {
+            const performerId = this.getPywarePerformerIdForLabel(label);
+            const position = (this.dot_data as Pyware3DAFile).pages.pages[0].performerPositionList.positions.find(p => p.id === performerId);
+            return position?.color || null;
+        }
+        return null;
     }
 }
 
