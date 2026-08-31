@@ -28,6 +28,7 @@ export default function ShowsScreen() {
     const [updateingShowIds, setUpdatingShowIds] = useState<number[]>([]);
     const [storedInstrumentMap, setStoredInstrumentMap] = useState<{[showId: string]: string} | null>({});
     const [offlineDialogVisible, setOfflineDialogVisible] = useState(false);
+    const [outdatedShowId, setOutdatedShowId] = useState<number | null>(null);
     const {isConnected} = useNetInfo();
 
     const fetchShows = async () => {
@@ -131,7 +132,11 @@ export default function ShowsScreen() {
                             <Button mode="contained" style={{flex: 1}}
                                     onPress={async () => {
                                         if (show.downloaded) {
-                                            router.push(`/shows/${show.id}`)
+                                            if (show.newVersionAvailable) {
+                                                setOutdatedShowId(show.id);
+                                            } else {
+                                                router.push(`/shows/${show.id}`)
+                                            }
                                         } else {
                                             setDownloadingShowIds((prev) => [...prev, show.id]);
                                             const {data, error} = await supabase
@@ -221,6 +226,30 @@ export default function ShowsScreen() {
                             setOfflineDialogVisible(false);
                         }}>
                             OK
+                        </Button>
+                    </Dialog.Actions>
+                </Dialog>
+                <Dialog visible={outdatedShowId !== null} onDismiss={() => setOutdatedShowId(null)}>
+                    <Dialog.Title>
+                        Outdated Drill
+                    </Dialog.Title>
+                    <Dialog.Content>
+                        <Text variant="bodyMedium">
+                            A newer version of this drill is available to download.
+                        </Text>
+                    </Dialog.Content>
+                    <Dialog.Actions>
+                        <Button onPress={() => {
+                            const showId = outdatedShowId;
+                            setOutdatedShowId(null);
+                            if (showId !== null) {
+                                router.push(`/shows/${showId}`)
+                            }
+                        }}>
+                            Open Anyway
+                        </Button>
+                        <Button onPress={() => setOutdatedShowId(null)} mode="contained">
+                            Cancel
                         </Button>
                     </Dialog.Actions>
                 </Dialog>
