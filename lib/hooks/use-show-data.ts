@@ -158,7 +158,7 @@ export class ShowData {
 
     public getTotalCounts(): number {
         if (this.upload_type === '3da') {
-            return (this.dot_data as Pyware3DAFile).pages.arrayLength;
+            return (this.tempo_data as PywareSNCFile).arrLength;
         }
         return 0;
     }
@@ -172,6 +172,7 @@ export class ShowData {
                     return i;
                 }
             }
+            return pTabEntries.length - 1;
         }
         return null;
     }

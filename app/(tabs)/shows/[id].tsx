@@ -141,8 +141,8 @@ export default function ShowScreen() {
     const coordinates = showData.getCoordsForPerformer(selectedInstrument);
     const sets = showData.getSets();
     const currentIndex = showData.getSetIndexAtCount(currentCount)!;
+    // console.log('set index:', currentIndex, 'current count:', currentCount, coordinates);
     const currentDot = fieldCoordinateToDot(coordinates[currentIndex].coord);
-    // console.log('set index:', currentIndex, 'current count:', currentCount, 'current dot:', currentDot);
 
     const midset =
         currentIndex > 0 && !dotCoordinatesEqual(coordinates[currentIndex - 1].coord, coordinates[currentIndex].coord)
