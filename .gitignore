@@ -48,3 +48,4 @@ app-example
 .env*
 
 build-ios/
+build-android/
