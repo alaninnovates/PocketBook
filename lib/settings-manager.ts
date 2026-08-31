@@ -4,11 +4,18 @@ import {useEffect, useState} from "react";
 export enum SettingsProperty {
     FieldView = 'fieldView',
     DotScale = 'dotScale',
+    Theme = 'theme',
 }
 
 export enum FieldView {
     Director = 'director',
     Performer = 'performer',
+}
+
+export enum ThemePreference {
+    System = 'system',
+    Light = 'light',
+    Dark = 'dark',
 }
 
 export class SettingsManager {

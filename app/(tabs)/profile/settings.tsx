@@ -2,11 +2,12 @@ import {Button, Dialog, Portal, Text, useTheme} from "react-native-paper";
 import {useEffect, useState} from "react";
 import {ScrollView, TouchableOpacity, View} from "react-native";
 import * as Application from "expo-application";
-import {FieldView, SettingsManager, SettingsProperty} from "@/lib/settings-manager";
+import {FieldView, SettingsManager, SettingsProperty, ThemePreference} from "@/lib/settings-manager";
 import Slider from '@react-native-community/slider';
 import {SafeAreaView} from "react-native-safe-area-context";
 import {supabase} from "@/lib/supabase";
 import {useAuthContext} from "@/lib/hooks/use-auth-context";
+import {useThemePreference} from "@/lib/hooks/use-theme-preference";
 import {useStallionModal} from "react-native-stallion";
 import {useFocusEffect} from "expo-router";
 
@@ -15,6 +16,7 @@ const OTA_VERSION = 1;
 export default function SettingsScreen() {
     const theme = useTheme();
     const {signOut} = useAuthContext();
+    const {preference: themePreference, isReady: isThemeReady, setPreference: setThemePreference} = useThemePreference();
     const [fieldView, setFieldView] = useState<FieldView>(FieldView.Performer);
     const [dotScale, setDotScale] = useState<number>(1);
     const [loading, setLoading] = useState(true);
@@ -66,6 +68,37 @@ export default function SettingsScreen() {
     return (
         <SafeAreaView style={{flex: 1, marginHorizontal: 16}} edges={['bottom', 'left', 'right']}>
             <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{gap: 16, paddingBottom: 16}}>
+                <View style={{padding: 16, display: 'flex', flexDirection: 'column', gap: 16}}>
+                    <Text variant="headlineMedium" style={{color: theme.colors.primary}}>
+                        Appearance
+                    </Text>
+                    <View style={{flexDirection: "row", gap: 12}}>
+                        <Button
+                            mode={themePreference === ThemePreference.System ? "contained" : "outlined"}
+                            onPress={() => setThemePreference(ThemePreference.System)}
+                            disabled={!isThemeReady}
+                        >
+                            System
+                        </Button>
+                        <Button
+                            mode={themePreference === ThemePreference.Light ? "contained" : "outlined"}
+                            onPress={() => setThemePreference(ThemePreference.Light)}
+                            disabled={!isThemeReady}
+                        >
+                            Light
+                        </Button>
+                        <Button
+                            mode={themePreference === ThemePreference.Dark ? "contained" : "outlined"}
+                            onPress={() => setThemePreference(ThemePreference.Dark)}
+                            disabled={!isThemeReady}
+                        >
+                            Dark
+                        </Button>
+                    </View>
+                    <Text>
+                        Choose whether the app follows your device theme or always uses light or dark mode.
+                    </Text>
+                </View>
                 <View style={{padding: 16, display: 'flex', flexDirection: 'column', gap: 16}}>
                     <Text variant="headlineMedium" style={{color: theme.colors.primary}}>
                         Field View
