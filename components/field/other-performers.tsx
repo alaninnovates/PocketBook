@@ -41,11 +41,14 @@ export const OtherPerformers = ({showData, zoom, animationProgress}: {
 
         if (animationProgress > 0 && currentCount <= showData.getTotalCounts()) {
             const nextCoord = showData.getCoordAtCount(currentCount + 1, performer);
-            coord = interpolatePosition(
-                coord,
-                nextCoord,
-                animationProgress,
-            );
+            coord = {
+                ...interpolatePosition(
+                    coord,
+                    nextCoord,
+                    animationProgress,
+                ),
+                color: coord.color,
+            };
         }
 
         const multiplier = fieldView === FieldView.Performer ? 1 : -1;
@@ -54,6 +57,7 @@ export const OtherPerformers = ({showData, zoom, animationProgress}: {
         const textX = font ? stepsToPixels(coord.x) + (font.getTextWidth(performer) / 2) * multiplier : 0;
         const textY = font ? stepsToPixels(coord.y) + (-measureTextHeight(font, performer) / 2 + 1.5) * multiplier : 0;
         // console.log(coord.x, coord.y);
+        // console.log(coord.color);
 
         return (
             <React.Fragment key={indx}>
