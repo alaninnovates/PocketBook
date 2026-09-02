@@ -139,7 +139,7 @@ export const calculateStepSize = (
     coord2: Coordinate,
     counts: number,
 ): number => {
-    console.log('coord1:', coord1, 'coord2:', coord2);
+    // console.log('coord1:', coord1, 'coord2:', coord2);
     const stepsDelta = Math.sqrt(
         Math.pow(coord2.x - coord1.x, 2) +
         Math.pow(coord2.y - coord1.y, 2),

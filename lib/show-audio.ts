@@ -14,9 +14,6 @@ const getShowAudioDir = (): Directory => {
 export const getShowAudioFile = (showId: string | number): File =>
     new File(getShowAudioDir(), `${showId}.mp3`);
 
-// Downloads `audio/<orgId>/<showId>.mp3` from the audio storage bucket to the
-// app's document directory so it can be played offline alongside the drill.
-// Best-effort: returns null when the bucket has no audio for this show.
 export const downloadShowAudio = async (orgId: string | number, showId: string | number): Promise<File | null> => {
     if (Platform.OS === "web") return null;
     try {

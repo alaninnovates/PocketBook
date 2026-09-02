@@ -51,8 +51,6 @@ export default function ShowScreen() {
     const playStartShowTimeRef = useRef<number | null>(null);
     const currentCountRef = useRef(currentCount);
 
-    // if the show's mp3 was downloaded to the device, it is the master clock
-    // for the animation; otherwise the animation runs on its own clock
     const audioSource = useMemo(() => {
         if (Platform.OS === "web") return null;
         const audioFile = getShowAudioFile(id as string);
@@ -62,8 +60,6 @@ export default function ShowScreen() {
     const player = useAudioPlayer(audioSource, {updateInterval: 100});
     const playerStatus = useAudioPlayerStatus(player);
 
-    // latest audio position stamped with the wall clock, so the animation can
-    // extrapolate smoothly between the player's status updates
     const audioClockRef = useRef({time: 0, wall: 0, playing: false});
     useEffect(() => {
         audioClockRef.current = {
@@ -111,21 +107,17 @@ export default function ShowScreen() {
             let showTime: number;
             if (hasAudio) {
                 const clock = audioClockRef.current;
-                // hold in place while the audio is paused (interruption, buffering)
                 showTime = clock.playing ? clock.time + (Date.now() - clock.wall) / 1000 : clock.time;
             } else {
                 showTime = playStartShowTimeRef.current + (timestamp - startTimeRef.current) / 1000;
             }
 
-            // map the show time to a count and progress using the tempo data
             const count = showData.getCurrentCountForTime(playStartCountRef.current, showTime - playStartShowTimeRef.current);
-            const countTime = showData.getTimeForCount(count);
-            const nextCountTime = showData.getTimeForCount(count + 1);
+            const countTime = showData.getTimeForCount(count-1);
+            const nextCountTime = showData.getTimeForCount(count);
             const progress = (showTime - countTime) / (nextCountTime - countTime);
-            console.log('progress:', progress, 'count:', count, 'showTime:', showTime, 'countTime:', countTime, 'nextCountTime:', nextCountTime);
+            // console.log('progress:', progress, 'count:', count, 'showTime:', showTime, 'countTime:', countTime, 'nextCountTime:', nextCountTime);
 
-            // the final count has no next count to move toward, so end the
-            // show (and pause the audio) when its timestamp is reached
             const lastCountTime = showData.getTimeForCount(showData.getTotalCounts() - 1);
             if (showTime >= lastCountTime) {
                 const lastCount = showData.getTotalCounts() - 1;
@@ -137,8 +129,6 @@ export default function ShowScreen() {
                 return;
             }
 
-            // update the ref synchronously so the next frame sees the new
-            // count even before React re-renders
             if (count !== currentCountRef.current) {
                 currentCountRef.current = count;
                 setCurrentCount(count);
@@ -156,8 +146,6 @@ export default function ShowScreen() {
         playStartShowTimeRef.current = showData.getTimeForCount(currentCountRef.current);
         startTimeRef.current = null;
         if (hasAudio) {
-            // align the audio to the current count using the tempo data, then
-            // treat the audio position as the master clock
             audioClockRef.current = {
                 time: playStartShowTimeRef.current,
                 wall: Date.now(),
