@@ -11,7 +11,7 @@ import {useThemePreference} from "@/lib/hooks/use-theme-preference";
 import {useStallionModal} from "react-native-stallion";
 import {useFocusEffect} from "expo-router";
 
-const OTA_VERSION = 1;
+const OTA_VERSION = 0;
 
 export default function SettingsScreen() {
     const theme = useTheme();
