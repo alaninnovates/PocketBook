@@ -3,6 +3,8 @@ import {supabase} from "@/lib/supabase";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {useRouter} from "expo-router";
 import {parsePyware3DAFile, parsePywareSNCFile} from "pyware.js";
+import {useNetworkStatus} from "@/lib/network-status";
+import {isNetworkError} from "@/lib/network-fetch";
 
 type Pyware3DAFile = ReturnType<typeof parsePyware3DAFile>;
 type PywareSNCFile = ReturnType<typeof parsePywareSNCFile>;
@@ -372,16 +374,16 @@ export const useShowData = (id: string, useCached = false) => {
     const router = useRouter();
     const [showData, setShowData] = useState<ShowData | null>(null);
     const [loading, setLoading] = useState(true);
+    const {isOffline} = useNetworkStatus();
 
     useEffect(() => {
+        let cancelled = false;
         const fetchDataFromAsyncStorage = async () => {
             const storedShow = await AsyncStorage.getItem(`show_${id}`);
-            if (storedShow) {
+            if (storedShow && !cancelled) {
                 setShowData(new ShowData(JSON.parse(storedShow)));
-                return true;
-            } else {
-                return false;
             }
+            return !!storedShow;
         }
 
         const fetchShowData = async () => {
@@ -391,9 +393,10 @@ export const useShowData = (id: string, useCached = false) => {
                 .eq('id', id)
                 .single();
 
+            if (cancelled) return;
             if (error) {
                 console.error('err fetching show data:', error);
-                if (error.message === 'TypeError: Network request failed') {
+                if (isNetworkError(error)) {
                     if (!(await fetchDataFromAsyncStorage())) {
                         router.push('/shows');
                     }
@@ -403,13 +406,20 @@ export const useShowData = (id: string, useCached = false) => {
             }
             setLoading(false);
         }
-        if (useCached) {
-            fetchDataFromAsyncStorage();
-            setLoading(false);
+        if (useCached || isOffline) {
+            fetchDataFromAsyncStorage().then((found) => {
+                if (!found && isOffline && !useCached) {
+                    router.push('/shows');
+                }
+                if (!cancelled) setLoading(false);
+            });
         } else {
             fetchShowData();
         }
-    }, [id]);
+        return () => {
+            cancelled = true;
+        };
+    }, [id, useCached, isOffline]);
 
     return {showData, loading};
 }

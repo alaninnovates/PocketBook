@@ -14,6 +14,7 @@ import ShowProvider from "@/lib/show-provider";
 import ThemePreferenceProvider from "@/lib/theme-preference-provider";
 import {useThemePreference} from "@/lib/hooks/use-theme-preference";
 import UpdatePrompt from "@/components/update-prompt";
+import NetworkMonitor from "@/components/network-monitor";
 import {useEffect} from "react";
 
 export const unstable_settings = {
@@ -78,6 +79,7 @@ function ThemedApp() {
             <ThemeProvider value={theme}>
                 <AuthProvider>
                     <ShowProvider>
+                        <NetworkMonitor/>
                         <WebPageBackground/>
                         <RootNavigator/>
                         {Platform.OS !== "web" && <UpdatePrompt/>}

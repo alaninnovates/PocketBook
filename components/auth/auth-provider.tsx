@@ -3,12 +3,14 @@ import {supabase} from '@/lib/supabase'
 import type {Session} from '@supabase/supabase-js'
 import {PropsWithChildren, useCallback, useEffect, useState} from 'react'
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import {useNetworkStatus} from "@/lib/network-status";
 
 export default function AuthProvider({children}: PropsWithChildren) {
     const [session, setSession] = useState<Session | undefined | null>();
     const [profile, setProfile] = useState<any>();
     const [isLoadingSession, setIsLoadingSession] = useState<boolean>(true);
     const [isLoadingProfile, setIsLoadingProfile] = useState<boolean>(true);
+    const {isOffline} = useNetworkStatus();
 
     useEffect(() => {
         const fetchSession = async () => {
@@ -46,6 +48,16 @@ export default function AuthProvider({children}: PropsWithChildren) {
             setIsLoadingProfile(true);
 
             if (session) {
+                // offline (or poor wifi): skip the doomed request and read the
+                // cached profile so cold starts on bad networks stay fast
+                if (isOffline) {
+                    const storedProfile = await AsyncStorage.getItem('user_profile');
+                    if (storedProfile) {
+                        setProfile(JSON.parse(storedProfile));
+                    }
+                    setIsLoadingProfile(false);
+                    return;
+                }
                 const {data, error} = await supabase
                     .from('profiles')
                     .select('*')
@@ -72,7 +84,7 @@ export default function AuthProvider({children}: PropsWithChildren) {
         }
 
         fetchProfile()
-    }, [session])
+    }, [session, isOffline])
 
 
     const updateOnboardingStep = useCallback(async (newStep: OnboardingStep) => {
